@@ -6,12 +6,13 @@ import androidx.compose.foundation.Text
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.setContent
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.ui.tooling.preview.Preview
 import com.gradysbooch.restaurant.ui.RestaurantmobileTheme
-import kotlinx.coroutines.flow.*
+import com.gradysbooch.restaurant.viewmodel.MainViewModel
+import androidx.compose.runtime.getValue
 
 class MainActivity : AppCompatActivity()
 {
@@ -32,7 +33,10 @@ class MainActivity : AppCompatActivity()
 @Composable
 fun Greeting(name: String)
 {
-    Text(text = "Hello $name!")
+    val viewModel = viewModel<MainViewModel>()
+    val online by viewModel.onlineStatus.collectAsState(initial = false)
+
+    Text(text = "Hello $name! Is the device online? $online")
 }
 
 @Preview(showBackground = true)

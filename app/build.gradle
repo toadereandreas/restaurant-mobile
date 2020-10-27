@@ -1,7 +1,10 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id("com.apollographql.apollo").version("2.4.1")
 }
+
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -26,6 +29,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        kotlinOptions.freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -53,4 +57,25 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // The core runtime dependencies
+    implementation("com.apollographql.apollo:apollo-runtime:$graphql_version")
+    // Coroutines extensions for easier asynchronicity handling
+    implementation("com.apollographql.apollo:apollo-coroutines-support:$graphql_version")
+    // optional: if you want to use the normalized cache
+    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:$graphql_version")
+
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+
+    // optional - Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
+}
+
+apollo {
+    // instruct the compiler to generate Kotlin models
+    generateKotlinModels.set(true)
 }
