@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.ui
+package com.gradysbooch.restaurant.ui.values
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
@@ -8,11 +8,15 @@ import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
 val typography = Typography(
+    /*
+    Default Android Studio values
         body1 = TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
         )
+    */
+
         /* Other default text styles to override
     button = TextStyle(
         fontFamily = FontFamily.Default,

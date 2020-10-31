@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.ui
+package com.gradysbooch.restaurant.ui.values
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

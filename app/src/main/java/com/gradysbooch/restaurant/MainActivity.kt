@@ -2,17 +2,14 @@ package com.gradysbooch.restaurant
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Text
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.setContent
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.ui.tooling.preview.Preview
-import com.gradysbooch.restaurant.ui.RestaurantmobileTheme
-import com.gradysbooch.restaurant.viewmodel.MainViewModel
-import androidx.compose.runtime.getValue
+import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
+import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
+import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 
 class MainActivity : AppCompatActivity()
 {
@@ -20,30 +17,21 @@ class MainActivity : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
         setContent {
-            RestaurantmobileTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
-                }
-            }
+            App()
         }
     }
 }
 
-@Composable
-fun Greeting(name: String)
-{
-    val viewModel = viewModel<MainViewModel>()
-    val online by viewModel.onlineStatus.collectAsState(initial = false)
-
-    Text(text = "Hello $name! Is the device online? $online")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview()
-{
+@Preview @Composable
+fun App() {
     RestaurantmobileTheme {
-        Greeting("Android")
+        // A surface container using the 'background' color from the theme
+        Surface(color = MaterialTheme.colors.background) {
+            // todo Change String to Table Object from Domain
+            val selectedTable = remember { mutableStateOf("") }
+            if (selectedTable.value == "") TablesScreen(selectedTable)
+            else OrderScreen(selectedTable)
+        }
     }
 }
+
