@@ -23,20 +23,23 @@ import com.gradysbooch.restaurant.ui.values.*
 fun OrderScreenAppBar(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
     TopAppBar(
             backgroundColor = selectedCustomer.value,
+            modifier = Modifier.height(120.dp),
             title = {
-                Column {
+                Column{
                     OrderScreenTopRow(selectedTable)
                     CustomerNavigationRow(selectedTable, selectedCustomer)
                 }
             })
 }
 
-
 @Composable
 fun OrderScreenTopRow(selectedTable: MutableState<String>) {
-    RoundedRowCard {
+    RoundedRowCard (
+            color = Color.Transparent,
+            modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth()
+    ){
         RoundedIconButton(
-                color = MaterialTheme.colors.surface,
+                color = Color.Transparent,
                 tint = MaterialTheme.colors.secondary,
                 asset = Icons.Filled.ArrowBack,
                 onClick = {
@@ -50,7 +53,7 @@ fun OrderScreenTopRow(selectedTable: MutableState<String>) {
         // todo Remove Hardcoding
         val isChecked = remember { mutableStateOf(true) }
         RoundedIconButton(
-                color = MaterialTheme.colors.surface,
+                color = Color.Transparent,
                 tint = MaterialTheme.colors.secondary,
                 asset = if (isChecked.value) Icons.Filled.CheckCircle else Icons.Filled.Check,
                 onClick = {
@@ -63,11 +66,11 @@ fun OrderScreenTopRow(selectedTable: MutableState<String>) {
 @Composable
 fun CustomerNavigationRow(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
     Surface(
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
+            modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth(),
             shape = RoundedCornerShape(20)
     ) {
         Row(
-                modifier = Modifier.padding(2.dp).fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start
         ) {
             WholeOrderNavigationButton(selectedCustomer)
@@ -81,6 +84,7 @@ fun CustomerNavigationRow(selectedTable: MutableState<String>, selectedCustomer:
 @Composable
 fun WholeOrderNavigationButton(selectedCustomer: MutableState<Color>) {
     RoundedIconButton(
+            modifier = Modifier.padding(4.dp, 0.dp),
             asset = Icons.Filled.Check,
             onClick = {
                 // todo Remove Hardcoding
@@ -91,6 +95,7 @@ fun WholeOrderNavigationButton(selectedCustomer: MutableState<Color>) {
 @Composable
 fun AddCustomerButton(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
     RoundedIconButton(
+            modifier = Modifier.padding(4.dp, 0.dp),
             asset = Icons.Filled.Add,
             onClick = {
                 // todo Add New Empty Customer to Table
@@ -110,6 +115,7 @@ fun AllCustomersNavigationButtons(selectedCustomer: MutableState<Color>) {
 @Composable
 fun CustomerNavigationButton(customer: Color, selectedCustomer: MutableState<Color>) {
     RoundedIconButton(
+            modifier = Modifier.padding(4.dp, 0.dp),
             color = customer,
             tint = MaterialTheme.colors.primary,
             asset = Icons.Filled.Lock,

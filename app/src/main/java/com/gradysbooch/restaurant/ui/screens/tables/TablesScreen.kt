@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.gradysbooch.restaurant.ui.values.RoundedButtonCard
+import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
 
 @Composable
 fun TablesScreen(selectedTable: MutableState<String>) {
@@ -49,7 +49,7 @@ fun TablesList(selectedTable: MutableState<String>) {
 
 @Composable
 fun TableEntry(table: String, selectedTable: MutableState<String>) {
-    RoundedButtonCard(
+    RoundedButtonRowCard(
             border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
             onClick = { selectedTable.value = table }
     ) {

@@ -2,9 +2,11 @@ package com.gradysbooch.restaurant
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.ui.tooling.preview.Preview
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
@@ -26,7 +28,10 @@ class MainActivity : AppCompatActivity()
 fun App() {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
-        Surface(color = MaterialTheme.colors.background) {
+        Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+        ) {
             // todo Change String to Table Object from Domain
             val selectedTable = remember { mutableStateOf("") }
             if (selectedTable.value == "") TablesScreen(selectedTable)
