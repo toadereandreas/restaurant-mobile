@@ -5,10 +5,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-open class NetworkRepository(val context: Context)
+class NetworkRepository(context: Context) : NetworkRepositoryInterface
 {
     @OptIn(ExperimentalCoroutinesApi::class)
     val internalOnlineStatus = MutableStateFlow(false)
 
-    val onlineStatus: Flow<Boolean> = internalOnlineStatus
+    override val onlineStatus: Flow<Boolean> = internalOnlineStatus
 }

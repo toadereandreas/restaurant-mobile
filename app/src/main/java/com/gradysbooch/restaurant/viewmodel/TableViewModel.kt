@@ -2,12 +2,11 @@ package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.repository.Repository
 import kotlinx.coroutines.flow.Flow
 
-class MainViewModel(application: Application) : AndroidViewModel(application)
+class TableViewModel(application: Application) : BaseViewModel(application), TableViewModelInterface
 {
-    private val repository = Repository(application)
-
-    val onlineStatus: Flow<Boolean> = repository.onlineStatus
+    override val tables: Flow<List<Table>> = TODO()
 }
