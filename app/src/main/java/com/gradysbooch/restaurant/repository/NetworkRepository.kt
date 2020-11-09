@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import com.apollographql.apollo.ApolloClient
 
 val apolloClient = ApolloClient.builder()
-    .serverUrl("https://apollo-fullstack-tutorial.herokuapp.com")
+    .serverUrl("http://restaurant-env.eba-prznaj7v.eu-west-3.elasticbeanstalk.com/graphql/") //todo take a look at this URL, it's unlikely that this is the right one
     .build()
 
 class NetworkRepository(context: Context) : NetworkRepositoryInterface
