@@ -3,5 +3,4 @@
     <string name="channel_id">ANNOUNCEMENT_CHANNEL</string>
     <string name="channel_name">Announcements channel</string>
     <string name="channel_description">Notification channel for announcements</string>
-    <string name="notification_title">New Announcement</string>
 </resources>
