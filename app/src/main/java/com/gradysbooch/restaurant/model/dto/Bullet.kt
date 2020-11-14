@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.model
+package com.gradysbooch.restaurant.model.dto
 
 import androidx.compose.ui.graphics.Color
 

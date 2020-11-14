@@ -4,7 +4,4 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Table(
-        @PrimaryKey val id: Int,
-        val name: String
-)
+data class Order(@PrimaryKey val orderId: Int, val note: String)
