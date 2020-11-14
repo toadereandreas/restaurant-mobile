@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.gradysbooch.restaurant.GetMenuItemDetailsQuery
+import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.Table
 
 val apolloClient = ApolloClient.builder()
     .serverUrl("http://restaurant-env.eba-prznaj7v.eu-west-3.elasticbeanstalk.com/graphql/")
@@ -18,6 +20,14 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     val internalOnlineStatus = MutableStateFlow(false)
 
     override val onlineStatus: Flow<Boolean> = internalOnlineStatus
+
+    override suspend fun getMenuItems(): Set<MenuItem> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getTables(): Set<Table> {
+        TODO("Not yet implemented")
+    }
 
     /**
      * This is a test function
