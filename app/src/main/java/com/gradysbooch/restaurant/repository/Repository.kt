@@ -5,6 +5,7 @@ import android.content.Context
 class Repository private constructor(context: Context)
 {
     private val networkRepository = NetworkRepository(context)
+
     val onlineStatus get() = networkRepository.onlineStatus
 
     companion object

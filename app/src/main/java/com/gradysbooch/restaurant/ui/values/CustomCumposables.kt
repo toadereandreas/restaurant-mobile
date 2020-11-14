@@ -1,7 +1,7 @@
 package com.gradysbooch.restaurant.ui.values
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Icon
+import androidx.compose.material.Icon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +34,7 @@ fun RoundedButtonRowCard(
     ) {
         Button(
                 onClick = onClick,
-                backgroundColor = color
+//                backgroundColor = color
         ) {
             Row(
                 modifier = Modifier.padding(2.dp).fillMaxWidth(),
@@ -63,7 +63,7 @@ fun RoundedButtonColumnCard(
     ) {
         Button(
                 onClick = onClick,
-                backgroundColor = color
+//                backgroundColor = color
         ) {
             Column(
                     modifier = Modifier.padding(2.dp).fillMaxWidth()
