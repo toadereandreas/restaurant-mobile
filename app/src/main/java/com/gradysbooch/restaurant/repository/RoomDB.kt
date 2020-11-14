@@ -6,7 +6,7 @@ import com.gradysbooch.restaurant.model.*
 
 @Database(
     entities = [MenuItem::class, Order::class, OrderItem::class, Table::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class RoomDB : RoomDatabase() {
