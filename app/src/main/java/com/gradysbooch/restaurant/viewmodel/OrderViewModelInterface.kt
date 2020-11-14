@@ -17,13 +17,13 @@ interface OrderViewModelInterface
 
     val menu: Flow<List<MenuItemDTO>>
 
-    val note: Flow<String>
-
     val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>>
 
     val allScreenMenuItems: Flow<AllScreenItem>
 
     val allScreenNotes: Flow<List<Pair<Color, String>>>
+
+    suspend fun getNote(): String
 
     fun setTable(tableId: Int)
 
