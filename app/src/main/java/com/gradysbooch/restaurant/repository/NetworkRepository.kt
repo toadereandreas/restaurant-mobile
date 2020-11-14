@@ -21,7 +21,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
 
     /**
      * This is a test function
-     * Murderize it when you don't need it anymore
+     * todo Test and murderize it when you don't need it anymore
      *
      * This might return null, watch out
      */
