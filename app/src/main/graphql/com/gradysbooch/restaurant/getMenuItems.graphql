@@ -1,0 +1,12 @@
+query getMenuItems{
+    menuItems{
+        data{
+            gid
+            internalName
+            price
+            category{
+                internalName
+            }
+        }
+    }
+}
