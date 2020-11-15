@@ -17,7 +17,7 @@ import kotlin.math.log
 import kotlin.math.roundToInt
 
 val apolloClient = ApolloClient.builder()
-    .serverUrl("https://restaurant.playgroundev.com/graphql")
+    .serverUrl("https://restaurant.playgroundev.com/graphql/")
     .build()
 
 class NetworkRepository(context: Context) : NetworkRepositoryInterface
@@ -35,8 +35,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
 
             var badId = 0;//todo Fix this badId thing. it should be received from the backend
             list?.forEach {
-                if (it != null)
-                    set.add(MenuItem(badId++, it.internalName, it.category.internalName, it.price.roundToInt()))
+                //if (it != null)
+                    //set.add(MenuItem(badId++, it.internalName, it.category.internalName, it.price.roundToInt()))
             }
 
             internalOnlineStatus.emit(true);
@@ -61,9 +61,9 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
      *
      * This might return null, watch out
      */
-    suspend fun getMenuItem(id: Int) : GetMenuItemDetailsQuery.MenuItem?{
+    suspend fun getMenuItem(id: String) : GetMenuItemDetailsQuery.MenuItem?{
 
-        return apolloClient.query(GetMenuItemDetailsQuery(id.toString())).await().data?.menuItem
+        return apolloClient.query(GetMenuItemDetailsQuery(id)).await().data?.menuItem
 
     }
 }
