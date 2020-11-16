@@ -8,8 +8,8 @@ data class OrderWithMenuItems(
     @Embedded
     val order: Order,
     @Relation(
-        parentColumn = "orderId",
-        entityColumn = "menuItemId",
+        parentColumn = "orderColor",
+        entityColumn = "menuItemUID",
         associateBy = Junction(OrderItem::class)
     )
     var menuItems: List<MenuItem>

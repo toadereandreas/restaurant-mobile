@@ -3,18 +3,11 @@ package com.gradysbooch.restaurant.repository
 import android.content.Context
 import androidx.room.Room
 
-class Repository private constructor(context: Context)
+fun buildRoomDB(context: Context) = Room.databaseBuilder(context, RoomDB::class.java, "roomDB").build()
+
+class Repository private constructor(context: Context) : DataAccess by buildRoomDB(context)
 {
-    private val networkRepository = NetworkRepository(context)
-
-    val onlineStatus get() = networkRepository.onlineStatus
-
-    val roomDB = Room.databaseBuilder(
-        context,
-        RoomDB::class.java, "roomDB"
-    ).build()
-
-    val dao = roomDB.dao()
+    val networkRepository: NetworkRepositoryInterface = NetworkRepository(context)
 
     companion object
     {

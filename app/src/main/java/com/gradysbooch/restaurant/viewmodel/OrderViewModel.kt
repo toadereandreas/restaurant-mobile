@@ -11,27 +11,26 @@ import kotlinx.coroutines.flow.*
 class OrderViewModel(application: Application) : BaseViewModel(application), OrderViewModelInterface
 {
 
-    private val tableId = MutableStateFlow<Int?>(null)
-    private val menuItems = repository.dao.getMenuFlow()
-    private val tables = repository.dao.getTableFlow()
+    private val tableUID = MutableStateFlow<String?>(null)
 
-    //TODO use this for all of the flows in order to depend on the tableId or choose ViewModelFactory approach to set the tableId in the constructor
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val orders = tableId.flatMapLatest {
-        it?.let { repository.dao.getOrdersWithMenuItemsForTable(it).cancellable() } ?: emptyFlow()
+    val tableWithOrders = tableUID.flatMapLatest {
+        it?.let { repository.tableDao().getTableWithOrdersFlow(it) } ?: emptyFlow()
     }
 
-    override val tableCode: Flow<Int>
-        get() = TODO("Not yet implemented")
-    override val allScreen: Flow<Boolean>
-        get() = TODO("Not yet implemented")
+    override val tableCode: Flow<Int> = tableWithOrders.map { it.table.code }
+
+    private val _allScreen = MutableStateFlow(true)
+    override val allScreen: Flow<Boolean> = _allScreen
+
     override val bulletList: Flow<List<Bullet>>
         get() = TODO("Not yet implemented")
-    override val requiresAttention: Flow<Boolean>
-        get() = TODO("Not yet implemented")
-    override val menu: Flow<List<MenuItemDTO>> = menuItems.map { it.map { menuItem -> menuItem.toDTO() } }
-    override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>>
-        get() = TODO("Not yet implemented")
+
+    override val requiresAttention: Flow<Boolean> = tableWithOrders.map { it.table.call }
+
+    override val menu: Flow<List<MenuItemDTO>> = repository.menuItemDAO().getMenuFlow().map { it.map { menuItem -> menuItem.toDTO() } }
+
+    override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> = tableUID.value?.let{ repository.orderDao().getOrderWithMenuItems().map { it.menuItems }} ?: emptyFlow()
     override val allScreenMenuItems: Flow<OrderViewModelInterface.AllScreenItem>
         get() = TODO("Not yet implemented")
     override val allScreenNotes: Flow<List<Pair<Color, String>>>
@@ -42,9 +41,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
         TODO("Not yet implemented")
     }
 
-    override fun setTable(tableId: Int)
+    override fun setTable(tableId: String)
     {
-        this.tableId.value = tableId
+        this.tableUID.value = tableId
     }
 
     override fun selectAllScreen()

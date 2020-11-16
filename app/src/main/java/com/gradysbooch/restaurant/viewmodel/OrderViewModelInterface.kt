@@ -25,7 +25,7 @@ interface OrderViewModelInterface
 
     suspend fun getNote(): String
 
-    fun setTable(tableId: Int)
+    fun setTable(tableId: String)
 
     fun selectAllScreen()
 
