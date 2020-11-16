@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
@@ -31,23 +32,22 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     /**
      * This function does an apollo call and checks for apollo failure and null return.
      * @param T
-     * The return type. It is up to the caller to make sure that the query returns the propper return type
+     * The return type, must be Operation.Data. It is up to the caller to make sure that the query returns the propper return type
      * @param GQLQuery
      *  Instance of the query to be run
      */
-    private suspend fun <T : Any>runQuerySafely(GQLQuery : Query<*, *, *>): T{
-
+    private suspend fun <T : Operation.Data>runQuerySafely(GQLQuery : Query<*, *, *>): T {
         try{
-            val result : T = ((apolloClient.query(GQLQuery).await().data
-                    ?: throw NullPointerException("list was null")) as T)
-            internalOnlineStatus.emit(true);
+            val result = (apolloClient.query(GQLQuery).await().data
+                    ?: throw NullPointerException("got null")) as T
 
+            internalOnlineStatus.emit(true);
             return result;
 
         }catch (e : ApolloException){
             Log.d("NetworkError", e.stackTraceToString());
 
-            internalOnlineStatus.emit(true);
+            internalOnlineStatus.emit(false);
             throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}");
         }
         catch (e : NullPointerException){
@@ -58,9 +58,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     }
 
     override suspend fun getMenuItems(): Set<MenuItem> {
-        val list = runQuerySafely<List<GetMenuItemsQuery.Data1?>>(GetMenuItemsQuery())
+        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
 
-        internalOnlineStatus.emit(true);
+        if(list == null)
+            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
 
         return list.map{
             MenuItem(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
@@ -68,20 +69,20 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
                     it.category.internalName,
                     it.price.roundToInt()
             )
-        }.toSet();
+        }.toSet()
     }
 
     override suspend fun getTables(): Set<Table> {
-        val list = runQuerySafely<List<GetTablesQuery.Data1?>>(GetTablesQuery())
+        val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
 
-        internalOnlineStatus.emit(true);
+        if(list == null)
+            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
 
         return list.map{
             Table(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
                     it.name,
-                    false, //todo Ask for a call to be sent over the network
-                    it.code,
-            )
-        }.toSet();
+                    false,
+                    it.code)
+        }.toSet()
     }
 }
