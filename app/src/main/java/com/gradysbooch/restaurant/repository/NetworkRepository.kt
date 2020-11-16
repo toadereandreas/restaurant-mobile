@@ -10,6 +10,7 @@ import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
+import com.gradysbooch.restaurant.GetTablesQuery
 import com.gradysbooch.restaurant.model.MenuItem
 import com.gradysbooch.restaurant.model.Table
 import java.io.IOException
@@ -30,9 +31,9 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     /**
      * This function does an apollo call and checks for apollo failure and null return.
      * @param T
-     *  The return type,
+     * The return type. It is up to the caller to make sure that the query returns the propper return type
      * @param GQLQuery
-     *  Instance of the query to be returned
+     *  Instance of the query to be run
      */
     private suspend fun <T : Any>runQuerySafely(GQLQuery : Query<*, *, *>): T{
 
@@ -62,7 +63,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
         internalOnlineStatus.emit(true);
 
         return list.map{
-            MenuItem(it!!.gid,
+            MenuItem(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
                     it.internalName,
                     it.category.internalName,
                     it.price.roundToInt()
@@ -71,6 +72,16 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     }
 
     override suspend fun getTables(): Set<Table> {
-        TODO("Not yet implemented")
+        val list = runQuerySafely<List<GetTablesQuery.Data1?>>(GetTablesQuery())
+
+        internalOnlineStatus.emit(true);
+
+        return list.map{
+            Table(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
+                    it.name,
+                    false, //todo Ask for a call to be sent over the network
+                    it.code,
+            )
+        }.toSet();
     }
 }
