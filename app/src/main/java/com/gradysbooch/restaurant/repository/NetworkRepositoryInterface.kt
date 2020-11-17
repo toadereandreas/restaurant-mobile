@@ -1,11 +1,14 @@
 package com.gradysbooch.restaurant.repository
 
-import android.content.Context
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.Table
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 interface NetworkRepositoryInterface
 {
     val onlineStatus: Flow<Boolean>
+
+    suspend fun getMenuItems(): Set<MenuItem>
+
+    suspend fun getTables(): Set<Table>
 }

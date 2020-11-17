@@ -18,14 +18,17 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
         get() = TODO("Not yet implemented")
     override val menu: Flow<List<MenuItem>>
         get() = TODO("Not yet implemented")
-    override val note: Flow<String>
-        get() = TODO("Not yet implemented")
     override val chosenItems: Flow<List<Pair<MenuItem, Int>>>
         get() = TODO("Not yet implemented")
     override val allScreenMenuItems: Flow<OrderViewModelInterface.AllScreenItem>
         get() = TODO("Not yet implemented")
     override val allScreenNotes: Flow<List<Pair<Color, String>>>
         get() = TODO("Not yet implemented")
+
+    override suspend fun getNote(): String
+    {
+        TODO("Not yet implemented")
+    }
 
     override fun setTable(tableId: Int)
     {
