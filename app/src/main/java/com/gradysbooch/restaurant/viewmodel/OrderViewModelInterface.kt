@@ -1,8 +1,8 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import androidx.compose.ui.graphics.Color
-import com.gradysbooch.restaurant.model.Bullet
-import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.dto.Bullet
+import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import kotlinx.coroutines.flow.Flow
 
 interface OrderViewModelInterface
@@ -15,9 +15,9 @@ interface OrderViewModelInterface
 
     val requiresAttention: Flow<Boolean>
 
-    val menu: Flow<List<MenuItem>>
+    val menu: Flow<List<MenuItemDTO>>
 
-    val chosenItems: Flow<List<Pair<MenuItem, Int>>>
+    val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>>
 
     val allScreenMenuItems: Flow<AllScreenItem>
 
@@ -39,7 +39,7 @@ interface OrderViewModelInterface
 
     fun changeNote(note: String)
 
-    fun changeNumber(menuItem: MenuItem, number: Int)
+    fun changeNumber(menuItem: MenuItemDTO, number: Int)
 
-    data class AllScreenItem(val menuItem: MenuItem, val number: Int, val orders: List<Pair<Color, Int>>)
+    data class AllScreenItem(val menuItem: MenuItemDTO, val number: Int, val orders: List<Pair<Color, Int>>)
 }

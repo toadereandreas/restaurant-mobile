@@ -1,12 +1,10 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.gradysbooch.restaurant.model.Table
-import com.gradysbooch.restaurant.repository.Repository
+import com.gradysbooch.restaurant.model.dto.TableDTO
 import kotlinx.coroutines.flow.Flow
 
 class TableViewModel(application: Application) : BaseViewModel(application), TableViewModelInterface
 {
-    override val tables: Flow<List<Table>> = TODO()
+    override val tables: Flow<List<TableDTO>> = TODO()
 }

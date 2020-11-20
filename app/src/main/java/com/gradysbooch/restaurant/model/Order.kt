@@ -3,9 +3,6 @@ package com.gradysbooch.restaurant.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+//TODO add foreign key for table `Table`
 @Entity
-data class Table(
-        @PrimaryKey val id: Int,
-        val name: String,
-        val code: Int
-)
+data class Order(@PrimaryKey val orderId: Int, val note: String)
