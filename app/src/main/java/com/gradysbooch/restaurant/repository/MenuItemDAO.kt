@@ -1,11 +1,13 @@
 package com.gradysbooch.restaurant.repository
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.gradysbooch.restaurant.model.MenuItem
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface MenuItemDAO
 {
     @Transaction

@@ -1,9 +1,9 @@
 package com.gradysbooch.restaurant.viewmodel
 
-import androidx.compose.ui.graphics.Color
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import kotlinx.coroutines.flow.Flow
+typealias Color = String
 
 interface OrderViewModelInterface
 {
@@ -33,13 +33,15 @@ interface OrderViewModelInterface
 
     fun clearAttention()
 
-    fun selectBullet(bullet: Bullet)
+    fun selectColor(color: Color)
 
     fun search(searchString: String)
 
     fun changeNote(note: String)
 
-    fun changeNumber(menuItem: MenuItemDTO, number: Int)
+    fun changeNumber(menuItemId: String, number: Int)
 
     data class AllScreenItem(val menuItem: MenuItemDTO, val number: Int, val orders: List<Pair<Color, Int>>)
+
+    fun clearTable()
 }
