@@ -13,16 +13,15 @@ import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.GetTablesQuery
 import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.Table
 import java.io.IOException
 import java.lang.NullPointerException
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.emptyFlow
 
 val apolloClient = ApolloClient.builder()
-    .serverUrl("https://restaurant.playgroundev.com/graphql/")
-    .build()
-
+        .serverUrl("https://restaurant.playgroundev.com/graphql/")
+        .build()
 
 class NetworkRepository(context: Context) : NetworkRepositoryInterface
 {
@@ -88,7 +87,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
         }.toSet()
     }
 
-    override fun clientOrders(): Flow<List<Order>> {
-        return emptyFlow()
+    override fun clientOrders(): Flow<List<Order>>
+    {
+        TODO("Not yet implemented")
     }
 }
