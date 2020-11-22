@@ -1,0 +1,9 @@
+query getTables{
+    tables{
+        data{
+            gid
+            name
+            code
+        }
+    }
+}

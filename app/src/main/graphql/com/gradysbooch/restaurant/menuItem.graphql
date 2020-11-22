@@ -1,0 +1,10 @@
+query getMenuItemDetails($id : ID!){
+    menuItem(id: $id){
+        internalName
+        gid
+        picture
+        price
+        quantity
+    }
+
+}
