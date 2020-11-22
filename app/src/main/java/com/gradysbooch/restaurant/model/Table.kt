@@ -1,3 +1,14 @@
 package com.gradysbooch.restaurant.model
 
-data class Table(val id: Int, val name: String, val call: Boolean, val code: Int)
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity
+data class Table(
+        @PrimaryKey
+        val tableUID: String,
+        val name: String,
+        val code: Int?,
+        val call: Boolean
+)

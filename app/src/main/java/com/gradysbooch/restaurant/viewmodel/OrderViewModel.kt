@@ -1,74 +1,179 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
-import androidx.compose.ui.graphics.Color
-import com.gradysbooch.restaurant.model.Bullet
-import com.gradysbooch.restaurant.model.MenuItem
-import kotlinx.coroutines.flow.Flow
+import androidx.lifecycle.viewModelScope
+import com.gradysbooch.restaurant.model.Order
+import com.gradysbooch.restaurant.model.dto.AllScreenItem
+import com.gradysbooch.restaurant.model.dto.Bullet
+import com.gradysbooch.restaurant.model.dto.MenuItemDTO
+import com.gradysbooch.restaurant.model.dto.toDTO
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-class OrderViewModel(application: Application) : BaseViewModel(application), OrderViewModelInterface
+@OptIn(ExperimentalCoroutinesApi::class)
+class OrderViewModel(application: Application) : BaseViewModel(application),
+        OrderViewModelInterface
 {
-    override val tableCode: Flow<Int>
-        get() = TODO("Not yet implemented")
-    override val allScreen: Flow<Boolean>
-        get() = TODO("Not yet implemented")
-    override val bulletList: Flow<List<Bullet>>
-        get() = TODO("Not yet implemented")
-    override val requiresAttention: Flow<Boolean>
-        get() = TODO("Not yet implemented")
-    override val menu: Flow<List<MenuItem>>
-        get() = TODO("Not yet implemented")
-    override val chosenItems: Flow<List<Pair<MenuItem, Int>>>
-        get() = TODO("Not yet implemented")
-    override val allScreenMenuItems: Flow<OrderViewModelInterface.AllScreenItem>
-        get() = TODO("Not yet implemented")
-    override val allScreenNotes: Flow<List<Pair<Color, String>>>
-        get() = TODO("Not yet implemented")
+
+    private val tableUID = MutableStateFlow<String?>(null)
+    private val activeColor = MutableStateFlow<String?>(null)
+    private val searchQuery = MutableStateFlow("")
+
+    val table = tableUID.flatMapLatest {
+        it?.let { repository.tableDao().getTable(it).filterNotNull() } ?: emptyFlow()
+    }
+
+    override val tableCode: Flow<Int?> = table.map { it.code }
+
+    private val _allScreen = MutableStateFlow(true)
+    override val allScreen: Flow<Boolean> = _allScreen
+
+    override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
+        val clientOrders = repository.networkRepository.clientOrders().map { orders ->
+            orders.map {
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
+            }
+        }
+        return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
+            orders.map {
+                Bullet(it.orderColor, true, it.orderColor == activeColor)
+            }
+        }.combine(clientOrders) { lockedBullets, unlockedBullets ->
+            lockedBullets + unlockedBullets
+        }
+    }
+
+    private inline fun <T> forCurrentOrder(crossinline block: (tableUID: String, color: String) -> Flow<T>): Flow<T>
+    {
+        return tableUID.flatMapLatest { tableUID ->
+            tableUID ?: return@flatMapLatest emptyFlow()
+
+            activeColor.flatMapLatest colorMap@{ activeColor ->
+                activeColor ?: return@colorMap emptyFlow()
+                block(tableUID, activeColor)
+            }
+        }
+    }
+
+    override val requiresAttention: Flow<Boolean> = table.map { it.call }
+
+    override val menu: Flow<List<MenuItemDTO>> = repository.menuItemDAO()
+            .getMenuFlow()
+            .map {
+                it.map { menuItem -> menuItem.toDTO() }
+            }
+
+    override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
+            forCurrentOrder { tableUID, activeColor ->
+                repository
+                        .orderDao()
+                        .getOrderWithMenuItems(tableUID, activeColor)
+                        .map { orderWithMenuItems ->
+                            orderWithMenuItems
+                                    ?.orderItems
+                                    ?.map { it.menuItem.toDTO() to it.orderItem.quantity }
+                                    ?: emptyList()
+                        }
+            }
+
+    override val allScreenMenuItems: Flow<List<AllScreenItem>> = run {
+        return@run tableUID.flatMapLatest { tableUID ->
+            tableUID ?: return@flatMapLatest emptyFlow()
+            repository.menuItemDAO()
+                    .getMenuItemsForTable(tableUID)
+                    .map { menuItemsWithOrderItems ->
+                        menuItemsWithOrderItems.map {
+                            val orders = it.orderItems.map { orderItem -> orderItem.orderColor to orderItem.quantity }
+                            AllScreenItem(it.menuItem.toDTO(), orders.sumOf { order -> order.second }, orders)
+                        }
+                    }
+        }
+    }
+
+    override val allScreenNotes: Flow<List<Pair<String, String>>> = run {
+        return@run tableUID.flatMapLatest { tableUID ->
+            tableUID ?: return@flatMapLatest emptyFlow()
+            repository.orderDao()
+                    .getOrdersForTable(tableUID)
+                    .map { orders -> orders.map { it.orderColor to it.note } }
+        }
+    }
 
     override suspend fun getNote(): String
     {
-        TODO("Not yet implemented")
+        val tableUID = tableUID.value ?: return ""
+        val activeColor = activeColor.value ?: return ""
+        return repository.orderDao().getOrder(tableUID, activeColor)?.note ?: ""
     }
 
-    override fun setTable(tableId: Int)
+    override fun setTable(tableId: String)
     {
-        TODO("Not yet implemented")
+        this.tableUID.value = tableId
     }
 
     override fun selectAllScreen()
     {
-        TODO("Not yet implemented")
+        activeColor.value = null
     }
 
     override fun addBullet()
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            tableUID.value?.let { tableUID ->
+                repository.orderDao().addOrder(
+                        Order(
+                                tableUID,
+                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                                ""
+                        )
+                )
+            }
+        }
     }
 
     override fun clearAttention()
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            tableUID.value?.let {
+                repository.tableDao().updateTableCall(it, false)
+            }
+        }
     }
 
-    override fun selectBullet(bullet: Bullet)
+    override fun selectColor(color: String)
     {
-        TODO("Not yet implemented")
+        activeColor.value = color
     }
 
     override fun search(searchString: String)
     {
-        TODO("Not yet implemented")
+        searchQuery.value = searchString
     }
 
     override fun changeNote(note: String)
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            val tableUID = tableUID.value ?: return@launch
+            val activeColor = activeColor.value ?: return@launch
+            repository.orderDao().updateNote(tableUID, activeColor, note)
+        }
     }
 
-    override fun changeNumber(menuItem: MenuItem, number: Int)
+    override fun changeNumber(menuItemId: String, number: Int)
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            val tableUID = tableUID.value ?: return@launch
+            val activeColor = activeColor.value ?: return@launch
+            repository.orderDao().changeNumber(tableUID, activeColor, menuItemId, number)
+        }
     }
 
-
+    override fun clearTable()
+    {
+        val tableUID = tableUID.value ?: return
+        viewModelScope.launch {
+            repository.clearTable(tableUID)
+        }
+    }
 }

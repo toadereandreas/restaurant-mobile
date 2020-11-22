@@ -1,13 +1,14 @@
 package com.gradysbooch.restaurant.viewmodel
 
-import androidx.compose.ui.graphics.Color
-import com.gradysbooch.restaurant.model.Bullet
-import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.dto.AllScreenItem
+import com.gradysbooch.restaurant.model.dto.Bullet
+import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import kotlinx.coroutines.flow.Flow
+typealias Color = String
 
 interface OrderViewModelInterface
 {
-    val tableCode: Flow<Int>
+    val tableCode: Flow<Int?>
 
     val allScreen: Flow<Boolean>
 
@@ -15,17 +16,17 @@ interface OrderViewModelInterface
 
     val requiresAttention: Flow<Boolean>
 
-    val menu: Flow<List<MenuItem>>
+    val menu: Flow<List<MenuItemDTO>>
 
-    val chosenItems: Flow<List<Pair<MenuItem, Int>>>
+    val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>>
 
-    val allScreenMenuItems: Flow<AllScreenItem>
+    val allScreenMenuItems: Flow<List<AllScreenItem>>
 
     val allScreenNotes: Flow<List<Pair<Color, String>>>
 
     suspend fun getNote(): String
 
-    fun setTable(tableId: Int)
+    fun setTable(tableId: String)
 
     fun selectAllScreen()
 
@@ -33,13 +34,13 @@ interface OrderViewModelInterface
 
     fun clearAttention()
 
-    fun selectBullet(bullet: Bullet)
+    fun selectColor(color: Color)
 
     fun search(searchString: String)
 
     fun changeNote(note: String)
 
-    fun changeNumber(menuItem: MenuItem, number: Int)
+    fun changeNumber(menuItemId: String, number: Int)
 
-    data class AllScreenItem(val menuItem: MenuItem, val number: Int, val orders: List<Pair<Color, Int>>)
+    fun clearTable()
 }
