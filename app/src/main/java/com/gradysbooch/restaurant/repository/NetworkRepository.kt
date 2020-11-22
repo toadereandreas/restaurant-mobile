@@ -59,7 +59,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     }
 
     override suspend fun getMenuItems(): Set<MenuItem> {
-        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
+        /*val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
 
         if(list == null)
             throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
@@ -70,11 +70,12 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
                     it.category.internalName,
                     it.price.roundToInt()
             )
-        }.toSet()
+        }.toSet()*/
+        TODO("Not implemented")
     }
 
     override suspend fun getTables(): Set<Table> {
-        val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
+        /*val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
 
         if(list == null)
             throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
@@ -84,7 +85,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
                     it.name,
                     false,
                     it.code)
-        }.toSet()
+        }.toSet()*/
+        TODO("Not implemented")
     }
 
     override fun clientOrders(): Flow<List<Order>>
