@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">restaurant-mobile</string>
+    <string name="channel_id">ANNOUNCEMENT_CHANNEL</string>
+    <string name="channel_name">Announcements channel</string>
+    <string name="channel_description">Notification channel for announcements</string>
 </resources>
