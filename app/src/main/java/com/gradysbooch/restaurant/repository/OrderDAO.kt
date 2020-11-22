@@ -34,4 +34,7 @@ interface OrderDAO
 
     @Query("UPDATE OrderItem SET quantity=:quantity WHERE tableUID=:tableUID AND orderColor=:color AND menuItemUID=:menuItemId")
     suspend fun changeNumber(tableUID: String, color: String, menuItemId: String, quantity: Int)
+
+    @Query("DELETE FROM `Order` WHERE tableUID=:tableUID")
+    suspend fun clearTable(tableUID: String)
 }

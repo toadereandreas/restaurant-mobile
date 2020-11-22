@@ -3,6 +3,7 @@ package com.gradysbooch.restaurant.viewmodel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
+import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OrderViewModel(application: Application) : BaseViewModel(application), OrderViewModelInterface
+class OrderViewModel(application: Application) : BaseViewModel(application),
+        OrderViewModelInterface
 {
 
     private val tableUID = MutableStateFlow<String?>(null)
@@ -22,7 +24,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
         it?.let { repository.tableDao().getTable(it).filterNotNull() } ?: emptyFlow()
     }
 
-    override val tableCode: Flow<Int> = table.map { it.code }
+    override val tableCode: Flow<Int?> = table.map { it.code }
 
     private val _allScreen = MutableStateFlow(true)
     override val allScreen: Flow<Boolean> = _allScreen
@@ -56,22 +58,38 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
 
     override val requiresAttention: Flow<Boolean> = table.map { it.call }
 
-    override val menu: Flow<List<MenuItemDTO>> = repository.menuItemDAO().getMenuFlow().map { it.map { menuItem -> menuItem.toDTO() } }
+    override val menu: Flow<List<MenuItemDTO>> = repository.menuItemDAO()
+            .getMenuFlow()
+            .map {
+                it.map { menuItem -> menuItem.toDTO() }
+            }
 
-    override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> = forCurrentOrder { tableUID, activeColor ->
-        repository
-                .orderDao()
-                .getOrderWithMenuItems(tableUID, activeColor)
-                .map { orderWithMenuItems ->
-                    orderWithMenuItems
-                            ?.orderItems
-                            ?.map { it.menuItem.toDTO() to it.orderItem.quantity }
-                            ?: emptyList()
-                }
+    override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
+            forCurrentOrder { tableUID, activeColor ->
+                repository
+                        .orderDao()
+                        .getOrderWithMenuItems(tableUID, activeColor)
+                        .map { orderWithMenuItems ->
+                            orderWithMenuItems
+                                    ?.orderItems
+                                    ?.map { it.menuItem.toDTO() to it.orderItem.quantity }
+                                    ?: emptyList()
+                        }
+            }
+
+    override val allScreenMenuItems: Flow<List<AllScreenItem>> = run {
+        return@run tableUID.flatMapLatest { tableUID ->
+            tableUID ?: return@flatMapLatest emptyFlow()
+            repository.menuItemDAO()
+                    .getMenuItemsForTable(tableUID)
+                    .map { menuItemsWithOrderItems ->
+                        menuItemsWithOrderItems.map {
+                            val orders = it.orderItems.map { orderItem -> orderItem.orderColor to orderItem.quantity }
+                            AllScreenItem(it.menuItem.toDTO(), orders.sumOf { order -> order.second }, orders)
+                        }
+                    }
+        }
     }
-
-    override val allScreenMenuItems: Flow<OrderViewModelInterface.AllScreenItem>
-        get() = TODO("Not yet implemented")
 
     override val allScreenNotes: Flow<List<Pair<String, String>>> = run {
         return@run tableUID.flatMapLatest { tableUID ->
@@ -103,7 +121,13 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
     {
         viewModelScope.launch {
             tableUID.value?.let { tableUID ->
-                repository.orderDao().addOrder(Order(tableUID, ColorManager.randomColor(bulletList.first().map { it.color }.toSet()), ""))
+                repository.orderDao().addOrder(
+                        Order(
+                                tableUID,
+                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                                ""
+                        )
+                )
             }
         }
     }
@@ -148,6 +172,8 @@ class OrderViewModel(application: Application) : BaseViewModel(application), Ord
     override fun clearTable()
     {
         val tableUID = tableUID.value ?: return
-        TODO("Not implemented")
+        viewModelScope.launch {
+            repository.clearTable(tableUID)
+        }
     }
 }

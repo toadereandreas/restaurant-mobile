@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class Table(
         @PrimaryKey
-        val UID: String,
+        val tableUID: String,
         val name: String,
-        val code: Int,
+        val code: Int?,
         val call: Boolean
 )

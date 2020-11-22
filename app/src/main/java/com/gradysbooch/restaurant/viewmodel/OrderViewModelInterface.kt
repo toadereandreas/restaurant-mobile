@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.viewmodel
 
+import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import kotlinx.coroutines.flow.Flow
@@ -7,7 +8,7 @@ typealias Color = String
 
 interface OrderViewModelInterface
 {
-    val tableCode: Flow<Int>
+    val tableCode: Flow<Int?>
 
     val allScreen: Flow<Boolean>
 
@@ -19,7 +20,7 @@ interface OrderViewModelInterface
 
     val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>>
 
-    val allScreenMenuItems: Flow<AllScreenItem>
+    val allScreenMenuItems: Flow<List<AllScreenItem>>
 
     val allScreenNotes: Flow<List<Pair<Color, String>>>
 
@@ -40,8 +41,6 @@ interface OrderViewModelInterface
     fun changeNote(note: String)
 
     fun changeNumber(menuItemId: String, number: Int)
-
-    data class AllScreenItem(val menuItem: MenuItemDTO, val number: Int, val orders: List<Pair<Color, Int>>)
 
     fun clearTable()
 }

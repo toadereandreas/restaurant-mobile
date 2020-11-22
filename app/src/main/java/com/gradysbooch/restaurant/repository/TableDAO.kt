@@ -10,9 +10,12 @@ interface TableDAO
     @Query("SELECT * FROM `Table`")
     fun getTables(): Flow<List<Table>>
 
-    @Query("SELECT * FROM `Table` WHERE UID=:tableUID")
+    @Query("SELECT * FROM `Table` WHERE tableUID=:tableUID")
     fun getTable(tableUID: String): Flow<Table?>
 
-    @Query("UPDATE `Table` SET call=:call WHERE UID=:tableUID")
+    @Query("UPDATE `Table` SET call=:call WHERE tableUID=:tableUID")
     suspend fun updateTableCall(tableUID: String, call: Boolean)
+
+    @Query("UPDATE `Table` SET code=null WHERE tableUID=:tableUID")
+    suspend fun clearTable(tableUID: String)
 }
