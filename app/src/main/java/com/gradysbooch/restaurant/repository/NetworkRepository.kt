@@ -64,7 +64,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
             ?: throw IOException("ApolloFailure: menu items returned null.")
 
         return list.map{
-            MenuItem(it!!.id!!.toInt(), it.internalName, it.price.roundToInt())// todo ask for alternative to !! (I don't think I can add a default)
+            MenuItem(it!!.id!!, it.internalName, it.price.roundToInt())// todo ask for alternative to !! (I don't think I can add a default)
         }.toSet()
     }
 
@@ -74,7 +74,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
                 ?: throw IOException("ApolloFailure: menu items returned null.")
 
         return list.map{
-            Table(it!!.id!!.toInt(), it.name, it.code)// todo ask for alternative to !! (I don't think I can add a default)
+            Table(it!!.id!!, it.name, it.code, false)// todo ask for alternative to !! (I don't think I can add a default)
         }.toSet()
     }
 
