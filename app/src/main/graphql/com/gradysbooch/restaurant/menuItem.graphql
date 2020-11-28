@@ -6,5 +6,4 @@ query getMenuItemDetails($id : ID!){
         price
         quantity
     }
-
 }

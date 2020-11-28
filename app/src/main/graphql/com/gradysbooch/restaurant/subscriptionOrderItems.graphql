@@ -1,0 +1,11 @@
+subscription subscribeToOrderItems{
+    orderMenuItems{
+        data{
+            id
+            menuItemId
+            servingId
+            color
+            quantity
+        }
+    }
+}

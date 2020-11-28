@@ -1,0 +1,9 @@
+subscription subscribeToOrders{
+    orders{
+        data{
+            id
+            note
+            locked
+        }
+    }
+}

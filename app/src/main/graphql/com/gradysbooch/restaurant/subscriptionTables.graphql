@@ -1,0 +1,10 @@
+subscription subscribeToTables{
+    servings{
+        data{
+            id
+            code
+            userId
+            called
+        }
+    }
+}
