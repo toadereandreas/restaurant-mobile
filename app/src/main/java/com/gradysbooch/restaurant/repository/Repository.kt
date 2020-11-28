@@ -2,29 +2,20 @@ package com.gradysbooch.restaurant.repository
 
 import android.content.Context
 import androidx.room.Room
-import com.gradysbooch.restaurant.model.MenuItem
-import com.gradysbooch.restaurant.model.Table
 
-class Repository private constructor(context: Context)
+fun buildRoomDB(context: Context) = Room.databaseBuilder(context, RoomDB::class.java, "roomDB").build()
+
+class Repository private constructor(context: Context) : DataAccess by buildRoomDB(context)
 {
-    private val networkRepository = NetworkRepository(context)
+    //TODO think about coroutines being cancelled because application is closed (sgould we create a background service?)
 
-    val onlineStatus get() = networkRepository.onlineStatus
-
-    val roomDB = Room.databaseBuilder(
-        context,
-        RoomDB::class.java, "roomDB"
-    ).build()
-
-    val dao = roomDB.dao()
-
-    suspend fun getMenuItems () : Set<MenuItem> {
-        return networkRepository.getMenuItems();
+    suspend fun clearTable(tableUID: String)
+    {
+        tableDao().clearTable(tableUID)
+        orderDao().clearTable(tableUID)
     }
 
-    suspend fun getTables () : Set<Table> {
-        return networkRepository.getTables();
-    }
+    val networkRepository: NetworkRepositoryInterface = NetworkRepository(context)
 
     companion object
     {

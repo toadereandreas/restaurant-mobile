@@ -13,6 +13,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.GetTablesQuery
 import com.gradysbooch.restaurant.model.MenuItem
+import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.Table
 import java.io.IOException
 import java.lang.NullPointerException
@@ -32,7 +33,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     /**
      * This function does an apollo call and checks for apollo failure and null return.
      * @param T
-     * The return type, must be Operation.Data. It is up to the caller to make sure that the query returns the proper return type
+     * The return type, must be Operation.Data. It is up to the caller to make sure that the query returns the propper return type
      * @param GQLQuery
      *  Instance of the query to be run
      */
@@ -48,11 +49,11 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
             Log.d("NetworkError", e.stackTraceToString())
 
             internalOnlineStatus.emit(false)
-            throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}") 
+            throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}")
         }
         catch (e : NullPointerException){
-            Log.d("NetworkError", e.stackTraceToString()) 
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}") 
+            Log.d("NetworkError", e.stackTraceToString())
+            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}")
         }
 
     }
@@ -75,5 +76,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
         return list.map{
             Table(it!!.id!!.toInt(), it.name, it.code)// todo ask for alternative to !! (I don't think I can add a default)
         }.toSet()
+    }
+
+    override fun clientOrders(): Flow<List<Order>>
+    {
+        TODO("Not yet implemented")
     }
 }

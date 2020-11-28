@@ -9,5 +9,5 @@ open class BaseViewModel(application: Application) : AndroidViewModel(applicatio
 {
     protected val repository = Repository(application)
 
-    val onlineStatus: Flow<Boolean> = repository.onlineStatus
+    val onlineStatus: Flow<Boolean> = repository.networkRepository.onlineStatus
 }

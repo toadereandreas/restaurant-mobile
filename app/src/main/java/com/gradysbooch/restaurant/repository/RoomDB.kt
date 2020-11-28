@@ -6,9 +6,11 @@ import com.gradysbooch.restaurant.model.*
 
 @Database(
     entities = [MenuItem::class, Order::class, OrderItem::class, Table::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
-abstract class RoomDB : RoomDatabase() {
-    abstract fun dao(): DAO
+abstract class RoomDB : RoomDatabase(), DataAccess {
+    abstract override fun tableDao(): TableDAO
+    abstract override fun orderDao(): OrderDAO
+    abstract override fun menuItemDAO(): MenuItemDAO
 }
