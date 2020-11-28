@@ -32,7 +32,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
     /**
      * This function does an apollo call and checks for apollo failure and null return.
      * @param T
-     * The return type, must be Operation.Data. It is up to the caller to make sure that the query returns the propper return type
+     * The return type, must be Operation.Data. It is up to the caller to make sure that the query returns the proper return type
      * @param GQLQuery
      *  Instance of the query to be run
      */
@@ -41,48 +41,39 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
             val result = (apolloClient.query(GQLQuery).await().data
                     ?: throw NullPointerException("got null")) as T
 
-            internalOnlineStatus.emit(true);
-            return result;
+            internalOnlineStatus.emit(true)
+            return result
 
         }catch (e : ApolloException){
-            Log.d("NetworkError", e.stackTraceToString());
+            Log.d("NetworkError", e.stackTraceToString())
 
-            internalOnlineStatus.emit(false);
-            throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}");
+            internalOnlineStatus.emit(false)
+            throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}") 
         }
         catch (e : NullPointerException){
-            Log.d("NetworkError", e.stackTraceToString());
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
+            Log.d("NetworkError", e.stackTraceToString()) 
+            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}") 
         }
 
     }
 
     override suspend fun getMenuItems(): Set<MenuItem> {
-        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
 
-        if(list == null)
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
+        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
+            ?: throw IOException("ApolloFailure: menu items returned null.")
 
         return list.map{
-            MenuItem(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
-                    it.internalName,
-                    it.category.internalName,
-                    it.price.roundToInt()
-            )
+            MenuItem(it!!.id!!.toInt(), it.internalName, it.price.roundToInt())// todo ask for alternative to !! (I don't think I can add a default)
         }.toSet()
     }
 
     override suspend fun getTables(): Set<Table> {
-        val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
 
-        if(list == null)
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
+        val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
+                ?: throw IOException("ApolloFailure: menu items returned null.")
 
         return list.map{
-            Table(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
-                    it.name,
-                    false,
-                    it.code)
+            Table(it!!.id!!.toInt(), it.name, it.code)// todo ask for alternative to !! (I don't think I can add a default)
         }.toSet()
     }
 }

@@ -39,6 +39,6 @@ interface DAO
     fun getTableFlow(): Flow<List<Table>>
 
     @Transaction
-    @Query("SELECT * FROM `Order` WHERE tableId=:tableId")
+    @Query("SELECT * FROM `Order` WHERE orderId=:tableId") //todo Andu a schimbat tableId in orderId, deoarece nu putea sa dea build. Must fix after foreign key is added
     fun getOrdersWithMenuItemsForTable(tableId: Int): Flow<List<OrderWithMenuItems>>
 }
