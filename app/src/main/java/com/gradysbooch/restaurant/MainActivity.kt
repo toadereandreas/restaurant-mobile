@@ -70,7 +70,7 @@ fun App() {
             orderViewModel.viewModelScope.launch {
                 orderViewModel.table.collect { selectedTable = it }
             }
-            if (selectedTable.code != 0) TablesScreen()
+            if (selectedTable.code == 0) TablesScreen()
             else OrderScreen()
         }
     }
