@@ -1,8 +1,6 @@
 package com.gradysbooch.restaurant.repository
 
-import com.gradysbooch.restaurant.model.MenuItem
-import com.gradysbooch.restaurant.model.Order
-import com.gradysbooch.restaurant.model.Table
+import com.gradysbooch.restaurant.model.*
 import kotlinx.coroutines.flow.Flow
 
 interface NetworkRepositoryInterface
@@ -11,7 +9,15 @@ interface NetworkRepositoryInterface
 
     suspend fun getMenuItems(): Set<MenuItem>
 
-    suspend fun getTables(): Set<Table>
+    fun getTables(): Flow<Set<Table>>
 
     fun clientOrders(): Flow<List<Order>>
+
+    fun orderItems(): Flow<List<OrderItem>>
+
+    suspend fun clearCall(taleUID: String)
+
+    suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
+
+    suspend fun unlock(order: Order)
 }
