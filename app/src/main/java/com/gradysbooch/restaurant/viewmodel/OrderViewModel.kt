@@ -60,8 +60,11 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override val menu: Flow<List<MenuItemDTO>> = repository.menuItemDAO()
             .getMenuFlow()
-            .map {
-                it.map { menuItem -> menuItem.toDTO() }
+            .flatMapLatest { menuItems ->
+                searchQuery.mapLatest { searchCriteria ->
+                    menuItems.filter { it.name.contains(searchCriteria, ignoreCase = true) }
+                            .map { menuItem -> menuItem.toDTO() }
+                }
             }
 
     override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
