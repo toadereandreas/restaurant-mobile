@@ -12,9 +12,7 @@ import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.GetTablesQuery
-import com.gradysbooch.restaurant.model.MenuItem
-import com.gradysbooch.restaurant.model.Order
-import com.gradysbooch.restaurant.model.Table
+import com.gradysbooch.restaurant.model.*
 import java.io.IOException
 import java.lang.NullPointerException
 import kotlin.math.roundToInt
@@ -74,8 +72,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
         TODO("Not implemented")
     }
 
-    override suspend fun getTables(): Set<Table> {
-        /*val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
+    /*override suspend fun getTables(): Set<Table> {
+        *//*val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
+
+
 
         if(list == null)
             throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
@@ -85,11 +85,36 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
                     it.name,
                     false,
                     it.code)
-        }.toSet()*/
+        }.toSet()*//*
         TODO("Not implemented")
+    }*/
+
+    override fun getTables(): Flow<Set<Table>>
+    {
+        TODO("Not yet implemented")
     }
 
     override fun clientOrders(): Flow<List<Order>>
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun orderItems(): Flow<List<OrderItem>>
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun clearCall(taleUID: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unlock(order: Order)
     {
         TODO("Not yet implemented")
     }
