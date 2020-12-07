@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TableDAO
 {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTable(table: Table)
+
     @Query("SELECT * FROM `Table`")
     fun getTables(): Flow<List<Table>>
 
