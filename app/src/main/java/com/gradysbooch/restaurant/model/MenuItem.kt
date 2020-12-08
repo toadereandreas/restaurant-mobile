@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.model
 
+import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

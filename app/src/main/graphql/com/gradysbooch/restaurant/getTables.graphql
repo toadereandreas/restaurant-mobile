@@ -1,7 +1,7 @@
 query getTables{
     tables{
         data{
-            gid
+            id
             name
             code
         }

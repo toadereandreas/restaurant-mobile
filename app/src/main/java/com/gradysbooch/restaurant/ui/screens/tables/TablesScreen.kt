@@ -59,7 +59,7 @@ fun TableEntry(table: TableDTO) {
             border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
             onClick = { orderViewModel.setTable(table.id) }
     ) {
-        Text(text = table.name)
+        Text(table.name)
     }
 }
 

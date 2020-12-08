@@ -65,7 +65,7 @@ fun App() {
             val orderViewModel = viewModel<OrderViewModel>()
             val selectedTable by orderViewModel.table
                     .collectAsState(initial = Table("-1", "name", 0, false))
-            if (selectedTable.code != 0) TablesScreen()
+            if (selectedTable.code == 0) TablesScreen()
             else OrderScreen()
         }
     }

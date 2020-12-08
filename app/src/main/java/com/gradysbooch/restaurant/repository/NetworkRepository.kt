@@ -3,26 +3,26 @@ package com.gradysbooch.restaurant.repository
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
-import com.gradysbooch.restaurant.GetTablesQuery
+import com.gradysbooch.restaurant.SubscribeToOrderItemsSubscription
+import com.gradysbooch.restaurant.SubscribeToOrdersSubscription
+import com.gradysbooch.restaurant.SubscribeToTablesSubscription
 import com.gradysbooch.restaurant.model.*
+import kotlinx.coroutines.flow.*
 import java.io.IOException
-import java.lang.NullPointerException
 import kotlin.math.roundToInt
 
 val apolloClient = ApolloClient.builder()
         .serverUrl("https://restaurant.playgroundev.com/graphql/")
         .build()
 
-class NetworkRepository(context: Context) : NetworkRepositoryInterface
-{
+class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
     @OptIn(ExperimentalCoroutinesApi::class)
     val internalOnlineStatus = MutableStateFlow(false)
 
@@ -35,87 +35,101 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
      * @param GQLQuery
      *  Instance of the query to be run
      */
-    private suspend fun <T : Operation.Data>runQuerySafely(GQLQuery : Query<*, *, *>): T {
-        try{
-            val result = (apolloClient.query(GQLQuery).await().data
-                    ?: throw NullPointerException("got null")) as T
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
+        try {
+            val result = (apolloClient.query(GQLQuery).await().data as? T
+                    ?: throw IOException("ApolloFailure: menu items returned null."))
 
-            internalOnlineStatus.emit(true);
-            return result;
+            internalOnlineStatus.emit(true)
+            return result
 
-        }catch (e : ApolloException){
-            Log.d("NetworkError", e.stackTraceToString());
+        } catch (e: ApolloException) {
+            Log.d("NetworkError", e.stackTraceToString())
 
-            internalOnlineStatus.emit(false);
-            throw IOException("ApolloFailure: failed to get menu items. Exception is: ${e.stackTraceToString()}");
+            internalOnlineStatus.emit(false)
+            throw IOException("ApolloFailure: failed to get menu items.", e)
         }
-        catch (e : NullPointerException){
-            Log.d("NetworkError", e.stackTraceToString());
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
-        }
-
     }
 
     override suspend fun getMenuItems(): Set<MenuItem> {
-        /*val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
+        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
+                ?: throw IOException("ApolloFailure: menu items returned null.")
 
-        if(list == null)
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
-
-        return list.map{
-            MenuItem(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
+        return list.filterNotNull().map {
+            MenuItem(it.id
+                    ?: error("Id null."),
                     it.internalName,
-                    it.category.internalName,
-                    it.price.roundToInt()
+                    it.price.roundToInt())
+        }.toSet()
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun getTables(): Flow<Set<Table>> {
+//        return apolloClient.subscribe(SubscribeToTablesSubscription())
+//                .toFlow()
+//                .map { value ->
+//                    value.data?.servings?.data?.map { it ->
+//                        it ?: error("Item null");
+//                        Table(
+//                                it.userId ?: error("UserId null"),
+//                                "PLACEHOLDER",
+//                                it.code?.toInt(),
+//                                it.called ?: false
+//                        )
+//                    }?.toSet() ?: error("Set null")
+//                }
+//
+        return flowOf(
+                setOf(
+                    Table("table1", "name1", 1, false),
+                    Table("table2", "name2", 2, false),
             )
-        }.toSet()*/
-        TODO("Not implemented")
+        )
     }
 
-    /*override suspend fun getTables(): Set<Table> {
-        *//*val list = runQuerySafely<GetTablesQuery.Data>(GetMenuItemsQuery()).tables?.data
+    @ExperimentalCoroutinesApi
+    override fun clientOrders(): Flow<List<Order>> {
+        /*return apolloClient.subscribe(SubscribeToOrdersSubscription())
+                .toFlow()
+                .map { value ->
+                    value.data?.orders?.data?.map { it ->
+                        it ?: error("Item null");
+                        Order(
+                                it.id ?: error("Id null"),
+                                "PLACEHOLDER",
+                                it.note ?: error("Note null")
+                        )
+                    }?.toList() ?: error("List null")
+                }*/
+        return flowOf(listOf(Order("table1", "green", "")))
+    }
 
+    @ExperimentalCoroutinesApi
+    override fun orderItems(): Flow<List<OrderItem>> {
+        return apolloClient.subscribe(SubscribeToOrderItemsSubscription())
+                .toFlow()
+                .map { value ->
+                    value.data?.orderMenuItems?.data?.map { it ->
+                        it ?: error("Item null")
+                        OrderItem(
+                                it.color ?: error("Color null"),
+                                it.servingId ?: error("ServingId null"),
+                                it.menuItemId ?: error("MenuItemId null"),
+                                it.quantity ?: error("Quality null")
+                        )
+                    }?.toList() ?: error("List null")
+                }
+    }
 
-
-        if(list == null)
-            throw IOException("ApolloFailure: menu items returned null. Exception is: ${e.stackTraceToString()}");
-
-        return list.map{
-            Table(it!!.gid, // todo ask for alternative to !! (I don't think I can add a default)
-                    it.name,
-                    false,
-                    it.code)
-        }.toSet()*//*
-        TODO("Not implemented")
-    }*/
-
-    override fun getTables(): Flow<Set<Table>>
-    {
+    override suspend fun clearCall(tableUID: String) {
         TODO("Not yet implemented")
     }
 
-    override fun clientOrders(): Flow<List<Order>>
-    {
+    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
         TODO("Not yet implemented")
     }
 
-    override fun orderItems(): Flow<List<OrderItem>>
-    {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun clearCall(taleUID: String)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun unlock(order: Order)
-    {
+    override suspend fun unlock(order: Order) {
         TODO("Not yet implemented")
     }
 }
