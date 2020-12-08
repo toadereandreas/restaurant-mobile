@@ -1,7 +1,7 @@
 package com.gradysbooch.restaurant.ui.screens.tables
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Text
+import androidx.compose.material.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

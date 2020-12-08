@@ -1,6 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
-import androidx.compose.foundation.Text
+import androidx.compose.material.Text
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -11,15 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.RoundedRowCard
 import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
 import com.gradysbooch.restaurant.ui.values.getColor
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.flow.map
 

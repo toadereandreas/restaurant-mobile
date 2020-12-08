@@ -3,10 +3,8 @@ package com.gradysbooch.restaurant.ui.screens.order
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.viewModel
-import com.gradysbooch.restaurant.model.dto.TableDTO
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 
