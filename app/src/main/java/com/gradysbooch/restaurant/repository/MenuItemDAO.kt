@@ -14,9 +14,6 @@ interface MenuItemDAO
     @Query("DELETE FROM MenuItem")
     suspend fun deleteMenu()
 
-    /*@Query("SELECT * FROM MenuItem")
-    suspend fun getMenu(): List<MenuItem>*/
-
     @Query("SELECT * FROM MenuItem")
     fun getMenuFlow(): Flow<List<MenuItem>>
 

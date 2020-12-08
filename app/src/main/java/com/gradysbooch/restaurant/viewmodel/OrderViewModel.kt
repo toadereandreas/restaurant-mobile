@@ -1,7 +1,6 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
@@ -129,18 +128,15 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun addBullet()
     {
-        Log.d("OrderViewModel", "Even More before")
         viewModelScope.launch {
-            Log.d("OrderViewModel", "More before ${tableUID.value}")
             tableUID.value?.let { tableUID ->
-                val order = Order(
-                    tableUID,
-                    ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
-                    ""
+                repository.orderDao().addOrder(
+                        Order(
+                                tableUID,
+                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                                ""
+                        )
                 )
-                Log.d("OrderViewModel", "Before")
-                repository.orderDao().addOrder(order)
-                Log.d("OrderViewModel", order.toString())
             }
         }
     }
