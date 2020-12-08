@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
@@ -40,23 +41,22 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             orders.map {
                 Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
-        }
+        }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
                 Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
-        }.combine(clientOrders) { lockedBullets, unlockedBullets ->
+        }/*.combine(clientOrders) { lockedBullets, unlockedBullets ->
             lockedBullets + unlockedBullets
-        }
+        }*/
     }
 
-    private inline fun <T> forCurrentOrder(crossinline block: (tableUID: String, color: String) -> Flow<T>): Flow<T>
+    private inline fun <T> forCurrentOrder(crossinline block: (tableUID: String, color: String?) -> Flow<T>): Flow<T>
     {
         return tableUID.flatMapLatest { tableUID ->
             tableUID ?: return@flatMapLatest emptyFlow()
 
             activeColor.flatMapLatest colorMap@{ activeColor ->
-                activeColor ?: return@colorMap emptyFlow()
                 block(tableUID, activeColor)
             }
         }
@@ -75,6 +75,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
             forCurrentOrder { tableUID, activeColor ->
+                activeColor ?: return@forCurrentOrder emptyFlow()
                 repository
                         .orderDao()
                         .getOrderWithMenuItems(tableUID, activeColor)
@@ -128,15 +129,18 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun addBullet()
     {
+        Log.d("OrderViewModel", "Even More before")
         viewModelScope.launch {
+            Log.d("OrderViewModel", "More before ${tableUID.value}")
             tableUID.value?.let { tableUID ->
-                repository.orderDao().addOrder(
-                        Order(
-                                tableUID,
-                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
-                                ""
-                        )
+                val order = Order(
+                    tableUID,
+                    ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                    ""
                 )
+                Log.d("OrderViewModel", "Before")
+                repository.orderDao().addOrder(order)
+                Log.d("OrderViewModel", order.toString())
             }
         }
     }
