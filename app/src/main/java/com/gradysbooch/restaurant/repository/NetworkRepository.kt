@@ -60,7 +60,9 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
 
         return list.filterNotNull().map {
             MenuItem(it.id
-                    ?: error("Got null id."), it.internalName, it.price.roundToInt())// todo ask for alternative to !! (I don't think I can add a default)
+                    ?: error("Id null."),
+                    it.internalName,
+                    it.price.roundToInt())
         }.toSet()
     }
 
@@ -70,14 +72,14 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
                 .toFlow()
                 .map { value ->
                     value.data?.servings?.data?.map { it ->
-                        it ?: error("IT BLEW UP");
+                        it ?: error("Item null");
                         Table(
-                                it.userId ?: error("IT BLEW UP TWICE"),
-                                "placeholder",
+                                it.userId ?: error("UserId null"),
+                                "PLACEHOLDER",
                                 it.code?.toInt(),
                                 it.called ?: false
                         )
-                    }?.toSet() ?: error("damn")
+                    }?.toSet() ?: error("Set null")
                 }
         //theoretically, I'm transforming the values of this flow in the following manner:
         // grab the innermost relevant data and map every instance of dto item
@@ -91,13 +93,13 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
                 .toFlow()
                 .map { value ->
                     value.data?.orders?.data?.map { it ->
-                        it ?: error("IT BLEW UP");
+                        it ?: error("Item null");
                         Order(
-                                it.id ?: error("IT BLEW UP TWICE"),
+                                it.id ?: error("Id null"),
                                 "PLACEHOLDER",
-                                it.note ?: error("I'm going to bed..")
+                                it.note ?: error("Note null")
                         )
-                    }?.toList() ?: error("damn")
+                    }?.toList() ?: error("List null")
                 }
     }
 
@@ -107,14 +109,14 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
                 .toFlow()
                 .map { value ->
                     value.data?.orderMenuItems?.data?.map { it ->
-                        it ?: error("IT BLEW UP")
+                        it ?: error("Item null")
                         OrderItem(
-                                it.color ?: error("no more.."),
-                                it.servingId ?: error("please"),
-                                it.menuItemId ?: error("ffs"),
-                                it.quantity ?: error("CURSES!")
+                                it.color ?: error("Color null"),
+                                it.servingId ?: error("ServingId null"),
+                                it.menuItemId ?: error("MenuItemId null"),
+                                it.quantity ?: error("Quality null")
                         )
-                    }?.toList() ?: error("fuck")
+                    }?.toList() ?: error("List null")
                 }
     }
 

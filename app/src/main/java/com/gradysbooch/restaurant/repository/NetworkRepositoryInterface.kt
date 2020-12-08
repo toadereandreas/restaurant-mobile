@@ -20,5 +20,4 @@ interface NetworkRepositoryInterface
     suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
 
     suspend fun unlock(order: Order)
-
 }
