@@ -89,7 +89,7 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
 
     @ExperimentalCoroutinesApi
     override fun clientOrders(): Flow<List<Order>> {
-        return apolloClient.subscribe(SubscribeToOrdersSubscription())
+        /*return apolloClient.subscribe(SubscribeToOrdersSubscription())
                 .toFlow()
                 .map { value ->
                     value.data?.orders?.data?.map { it ->
@@ -100,7 +100,8 @@ class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
                                 it.note ?: error("Note null")
                         )
                     }?.toList() ?: error("List null")
-                }
+                }*/
+        return flowOf(listOf(Order("table1", "green", "")))
     }
 
     @ExperimentalCoroutinesApi
