@@ -1,12 +1,9 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
-import androidx.compose.material.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
@@ -57,6 +54,7 @@ fun OrderScreenTopRow() {
                 asset = Icons.Filled.ArrowBack,
                 onClick = {
                     // Go back
+                    // fixme At least in theory this should work
                     orderViewModel.setTable("-1");
                 })
 
@@ -133,11 +131,13 @@ fun AllCustomersNavigationButtons() {
 fun CustomerNavigationButton(bullet: Bullet) {
     val orderViewModel = viewModel<OrderViewModel>()
 
+    // todo long press functionality to toggle `bullet.locked`
     RoundedIconButton(
             modifier = Modifier.padding(4.dp, 0.dp),
             color = getColor(bullet.color),
             tint = MaterialTheme.colors.primary,
-            asset = Icons.Filled.Lock,
+            // fixme I think when bullets are added, they are by default locked
+            asset = if (bullet.locked) Icons.Filled.Lock else Icons.Filled.Clear,
             onClick = {
                 orderViewModel.selectColor(bullet.color)
             })
