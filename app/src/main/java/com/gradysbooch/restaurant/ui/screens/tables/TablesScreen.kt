@@ -13,6 +13,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -23,6 +24,7 @@ import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.viewmodel.TableViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
 
 @Composable
 fun TablesScreen() {
@@ -48,11 +50,7 @@ fun TablesScreenAppBar() {
 @Composable
 fun TablesList() {
     val tableViewModel = viewModel<TableViewModel>()
-    var tables : List<TableDTO> = ArrayList()
-    tableViewModel.viewModelScope.launch {
-        tableViewModel.tables
-                .collect { tables = it }
-    }
+    val tables by tableViewModel.tables.collectAsState(initial = emptyList())
 
     LazyColumnFor(items = tables) {
         TableEntry(table = it)
