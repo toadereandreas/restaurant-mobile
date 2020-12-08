@@ -10,30 +10,49 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewModelScope
+import com.gradysbooch.restaurant.model.Table
+import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.ui.values.*
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun OrderScreenAppBar(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
+fun OrderScreenAppBar() {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var selectedBullet = Bullet("", false, false)
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.bulletList.collect { bullets ->
+            val foundBullet = bullets.find { it.pressed }
+            if (foundBullet != null) selectedBullet = foundBullet
+        }
+    }
+
     TopAppBar(
-            backgroundColor = selectedCustomer.value,
+            backgroundColor = getColor(selectedBullet.color),
             modifier = Modifier.height(120.dp),
             title = {
                 Column{
-                    OrderScreenTopRow(selectedTable)
-                    CustomerNavigationRow(selectedTable, selectedCustomer)
+                    OrderScreenTopRow()
+                    CustomerNavigationRow()
                 }
             })
 }
 
 @Composable
-fun OrderScreenTopRow(selectedTable: MutableState<String>) {
+fun OrderScreenTopRow() {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var selectedTable: Table = Table("-1", "name", 0, false)
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.table.collect { selectedTable = it }
+    }
+
     RoundedRowCard (
             color = Color.Transparent,
             modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth()
@@ -43,28 +62,31 @@ fun OrderScreenTopRow(selectedTable: MutableState<String>) {
                 tint = MaterialTheme.colors.secondary,
                 asset = Icons.Filled.ArrowBack,
                 onClick = {
-                    // Load TablesScreen by triggering recomposition
-                    selectedTable.value = ""
+                    // Go back
+                    orderViewModel.setTable("-1");
                 })
 
-        // todo Remove Hardcoding
-        Text(text = "${selectedTable.value} (#123)")
+        Text(text = "${selectedTable.name} (#${selectedTable.code})")
 
-        // todo Remove Hardcoding
-        val isChecked = remember { mutableStateOf(true) }
+        var isChecked: Boolean = false
+        orderViewModel.viewModelScope.launch {
+            orderViewModel.requiresAttention.collect {
+                isChecked = it
+            }
+        }
         RoundedIconButton(
                 color = Color.Transparent,
                 tint = MaterialTheme.colors.secondary,
-                asset = if (isChecked.value) Icons.Filled.CheckCircle else Icons.Filled.Check,
+                asset = if (isChecked) Icons.Filled.CheckCircle else Icons.Filled.Check,
                 onClick = {
                     // Check or Uncheck Table
-                    isChecked.value = ! isChecked.value
+                    orderViewModel.clearAttention()
                 })
     }
 }
 
 @Composable
-fun CustomerNavigationRow(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
+fun CustomerNavigationRow() {
     Surface(
             modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth(),
             shape = RoundedCornerShape(20)
@@ -73,53 +95,62 @@ fun CustomerNavigationRow(selectedTable: MutableState<String>, selectedCustomer:
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start
         ) {
-            WholeOrderNavigationButton(selectedCustomer)
-            AddCustomerButton(selectedTable, selectedCustomer)
-            AllCustomersNavigationButtons(selectedCustomer)
+            WholeOrderNavigationButton()
+            AddCustomerButton()
+            AllCustomersNavigationButtons()
         }
     }
 }
 
 
 @Composable
-fun WholeOrderNavigationButton(selectedCustomer: MutableState<Color>) {
+fun WholeOrderNavigationButton() {
+    val orderViewModel = viewModel<OrderViewModel>()
+
     RoundedIconButton(
             modifier = Modifier.padding(4.dp, 0.dp),
             asset = Icons.Filled.Check,
             onClick = {
-                // todo Remove Hardcoding
-                selectedCustomer.value = Color.Unspecified
+                orderViewModel.selectAllScreen()
             })
 }
 
 @Composable
-fun AddCustomerButton(selectedTable: MutableState<String>, selectedCustomer: MutableState<Color>) {
+fun AddCustomerButton() {
+    val orderViewModel = viewModel<OrderViewModel>()
+
     RoundedIconButton(
             modifier = Modifier.padding(4.dp, 0.dp),
             asset = Icons.Filled.Add,
             onClick = {
-                // todo Add New Empty Customer to Table
-                // todo Select Newly added Customer
+                // todo Maybe select added customer?
+                orderViewModel.addBullet()
             })
 }
 
 @Composable
-fun AllCustomersNavigationButtons(selectedCustomer: MutableState<Color>) {
-    // todo Remove Hardcoding
-    val colors = listOf(red, green, blue, yellow, cyan, magenta)
-    LazyRowFor(items = colors) {
-        customer -> CustomerNavigationButton(customer, selectedCustomer)
+fun AllCustomersNavigationButtons() {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var bullets : List<Bullet> = ArrayList()
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.bulletList.collect { bullets = it }
+    }
+
+    LazyRowFor(items = bullets) {
+        CustomerNavigationButton(bullet = it)
     }
 }
 
 @Composable
-fun CustomerNavigationButton(customer: Color, selectedCustomer: MutableState<Color>) {
+fun CustomerNavigationButton(bullet: Bullet) {
+    val orderViewModel = viewModel<OrderViewModel>()
+
     RoundedIconButton(
             modifier = Modifier.padding(4.dp, 0.dp),
-            color = customer,
+            color = getColor(bullet.color),
             tint = MaterialTheme.colors.primary,
             asset = Icons.Filled.Lock,
             onClick = {
-                selectedCustomer.value = customer
+                orderViewModel.selectColor(bullet.color)
             })
 }

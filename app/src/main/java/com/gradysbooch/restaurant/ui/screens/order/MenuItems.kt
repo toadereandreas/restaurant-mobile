@@ -4,48 +4,68 @@ import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumnFor
-import androidx.compose.foundation.lazy.LazyRowFor
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewModelScope
+import com.gradysbooch.restaurant.model.dto.Bullet
+import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.RoundedRowCard
 import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
+import com.gradysbooch.restaurant.ui.values.getColor
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun MenuSubScreen(selectedCustomer: Color) {
-    if (selectedCustomer == Color.Unspecified) return
+fun MenuSubScreen() {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var isAllScreenSelected : Boolean = true
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.allScreen.collect { isAllScreenSelected = it }
+    }
+
+    if (isAllScreenSelected) return
     val text = remember { mutableStateOf("search ...") }
     RoundedSearchBar(text)
     Spacer(modifier = Modifier.height(16.dp))
-    FilteredMenuItems(selectedCustomer, text.value)
+    FilteredMenuItems(text.value)
 }
 
 @Composable
-fun FilteredMenuItems(selectedCustomer: Color, searchText: String) {
-    // todo Remove Hardcoding
-    val allItems = listOf(Pair("Item-1", 5), Pair("Item-2", 4), Pair("Item-3", 3),
-            Pair("Item-4", 2), Pair("Item-5", 1))
-    LazyColumnFor(items = allItems.filter { item -> item.first.contains(searchText) }) { item ->
-        if (item.second % 2 == 0) MenuItemEntry(item, selectedCustomer)
-        else MenuItemEntry(item)
+fun FilteredMenuItems(searchText: String) {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var allMenuItems : List<MenuItemDTO> = ArrayList()
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.menu.collect { allMenuItems = it }
+    }
+
+    LazyColumnFor(items = allMenuItems
+            .filter { it.name.contains(searchText) }) {
+        MenuItemEntry(it)
     }
 }
 
 @Composable
-fun MenuItemEntry(
-        item: Pair<String, Int>,
-        color: Color = MaterialTheme.colors.surface
-) {
+fun MenuItemEntry(item: MenuItemDTO) {
+    val orderViewModel = viewModel<OrderViewModel>()
+    var selectedBullet = Bullet("", false, false)
+    orderViewModel.viewModelScope.launch {
+        orderViewModel.bulletList.collect { bullets ->
+            val foundBullet = bullets.find { it.pressed }
+            if (foundBullet != null) selectedBullet = foundBullet
+        }
+    }
+
     RoundedRowCard(
-            color = color
+            color = getColor(selectedBullet.color)
     ) {
-        Text(text = item.first)
-        Text(text = "${item.second} RON")
+        Text(text = item.name)
+        Text(text = "${item.price} RON")
     }
 }
 

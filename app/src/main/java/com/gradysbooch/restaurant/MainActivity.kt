@@ -1,6 +1,5 @@
 package com.gradysbooch.restaurant
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
@@ -12,11 +11,17 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewModelScope
 import androidx.ui.tooling.preview.Preview
+import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
@@ -45,7 +50,8 @@ class MainActivity : AppCompatActivity()
     }
 }
 
-@Preview @Composable
+@Preview
+@Composable
 fun App() {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
@@ -53,10 +59,19 @@ fun App() {
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
         ) {
-            // todo Change String to Table Object from Domain
-            val selectedTable = remember { mutableStateOf("") }
-            if (selectedTable.value == "") TablesScreen(selectedTable)
-            else OrderScreen(selectedTable)
+            /**
+             *  The Selected Table ID will control what screen is displayed
+             *      main -> TablesScreen
+             *      anything else -> OrderScreen
+             * todo error -> ErrorScreen
+             */
+            val orderViewModel = viewModel<OrderViewModel>()
+            var selectedTable: Table = Table("-1", "name", 0, false)
+            orderViewModel.viewModelScope.launch {
+                orderViewModel.table.collect { selectedTable = it }
+            }
+            if (selectedTable.code == 0) TablesScreen()
+            else OrderScreen()
         }
     }
 }
