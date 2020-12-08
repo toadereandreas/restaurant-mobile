@@ -24,11 +24,11 @@ import androidx.compose.runtime.getValue
 fun OrderScreenAppBar() {
     val orderViewModel = viewModel<OrderViewModel>()
     val selectedBullet by orderViewModel.bulletList
-            .map { bullets -> bullets.firstOrNull { it.pressed } }
+            .map { bullets -> bullets.first { it.pressed } }
             .collectAsState(initial = Bullet("#000", false, false))
 
     TopAppBar(
-            backgroundColor = getColor(selectedBullet?.color),
+            backgroundColor = getColor(selectedBullet.color),
             modifier = Modifier.height(120.dp),
             title = {
                 Column{

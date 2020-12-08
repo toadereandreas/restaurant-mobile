@@ -1,7 +1,7 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.Text
+import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

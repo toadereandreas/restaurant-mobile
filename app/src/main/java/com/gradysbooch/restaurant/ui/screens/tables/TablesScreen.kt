@@ -1,13 +1,13 @@
 package com.gradysbooch.restaurant.ui.screens.tables
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -59,7 +59,7 @@ fun TableEntry(table: TableDTO) {
             border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
             onClick = { orderViewModel.setTable(table.id) }
     ) {
-        Text(table.name)
+        Text(text = table.name)
     }
 }
 

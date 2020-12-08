@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.lifecycle.viewModelScope
 import androidx.ui.tooling.preview.Preview
 import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
@@ -19,6 +20,8 @@ import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
@@ -65,7 +68,7 @@ fun App() {
             val orderViewModel = viewModel<OrderViewModel>()
             val selectedTable by orderViewModel.table
                     .collectAsState(initial = Table("-1", "name", 0, false))
-            if (selectedTable.code == 0) TablesScreen()
+            if (selectedTable.code != 0) TablesScreen()
             else OrderScreen()
         }
     }

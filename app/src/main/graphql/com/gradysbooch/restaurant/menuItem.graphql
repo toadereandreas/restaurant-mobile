@@ -1,9 +1,10 @@
 query getMenuItemDetails($id : ID!){
     menuItem(id: $id){
         internalName
-        id
+        gid
         picture
         price
         quantity
     }
+
 }
