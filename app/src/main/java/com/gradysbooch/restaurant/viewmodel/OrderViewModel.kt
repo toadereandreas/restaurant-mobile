@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
@@ -15,7 +16,12 @@ import kotlinx.coroutines.launch
 class OrderViewModel(application: Application) : BaseViewModel(application),
         OrderViewModelInterface
 {
-
+    init
+    {
+        viewModelScope.launch {
+            repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
+        }
+    }
     private val tableUID = MutableStateFlow<String?>(null)
     private val activeColor = MutableStateFlow<String?>(null)
     private val searchQuery = MutableStateFlow("")

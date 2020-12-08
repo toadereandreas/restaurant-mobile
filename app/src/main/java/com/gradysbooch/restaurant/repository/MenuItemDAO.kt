@@ -1,9 +1,6 @@
 package com.gradysbooch.restaurant.repository
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.gradysbooch.restaurant.model.MenuItem
 import com.gradysbooch.restaurant.model.MenuItemWithOrderItem
 import kotlinx.coroutines.flow.Flow
@@ -11,21 +8,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MenuItemDAO
 {
-    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateMenu(menuItems: Set<MenuItem>)
-    {
-        if (getMenu().toSet() != menuItems)
-        {
-            deleteMenu()
-            insertMenu(menuItems.toList())
-        }
-    }
 
     @Query("DELETE FROM MenuItem")
     suspend fun deleteMenu()
 
-    @Query("SELECT * FROM MenuItem")
-    suspend fun getMenu(): List<MenuItem>
+    /*@Query("SELECT * FROM MenuItem")
+    suspend fun getMenu(): List<MenuItem>*/
 
     @Query("SELECT * FROM MenuItem")
     fun getMenuFlow(): Flow<List<MenuItem>>
