@@ -20,5 +20,5 @@ interface TableDAO
     suspend fun clearTable(tableUID: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun updateTables(vararg tables: Set<Table>)
+    suspend fun updateTables(tables: Set<Table>)
 }
