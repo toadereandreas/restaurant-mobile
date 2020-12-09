@@ -11,6 +11,8 @@ import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.SubscribeToOrderItemsSubscription
 import com.gradysbooch.restaurant.SubscribeToOrdersSubscription
@@ -18,14 +20,36 @@ import com.gradysbooch.restaurant.SubscribeToTablesSubscription
 import com.gradysbooch.restaurant.model.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Response
 import java.io.IOException
 import kotlin.math.roundToInt
 
-val apolloClient = ApolloClient.builder()
-        .serverUrl("https://restaurant.playgroundev.com/graphql/")
+private class BlankInterceptor(val context: Context): Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request().newBuilder()
+            .build()
+
+        return chain.proceed(request)
+    }
+}
+
+class NetworkRepository(context: Context) : NetworkRepositoryInterface {
+
+    val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(BlankInterceptor(context))
         .build()
 
-class NetworkRepository(context: Context? = null) : NetworkRepositoryInterface {
+    val apolloClient = ApolloClient.builder()
+        .serverUrl(
+            //"https://restaurant.playgroundev.com/graphql/"
+            "http://halex193.go.ro:8000/graphql/"
+        )
+        .subscriptionTransportFactory(WebSocketSubscriptionTransport.Factory("ws://halex193.go.ro:8000/graphql/", okHttpClient))
+        .okHttpClient(okHttpClient)
+        .build()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val internalOnlineStatus = MutableStateFlow(false)
 
