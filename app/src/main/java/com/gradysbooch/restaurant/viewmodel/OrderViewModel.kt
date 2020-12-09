@@ -18,6 +18,10 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 {
     init
     {
+        repository.networkRepository.orderItems()
+                .onEach { repository.orderDao().saveOrderItems(it) }
+                .launchIn(viewModelScope)
+
         viewModelScope.launch {
             repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
         }
@@ -146,6 +150,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             tableUID.value?.let {
                 repository.tableDao().updateTableCall(it, false)
+                repository.networkRepository.clearCall(it)
             }
         }
     }
@@ -184,5 +189,15 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             repository.clearTable(tableUID)
         }
+    }
+
+    override fun lockOrder(tableUID: String, color: Color)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun unlockOrder(tableUID: String, color: Color)
+    {
+        TODO("Not yet implemented")
     }
 }

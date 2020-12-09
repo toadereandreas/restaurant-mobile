@@ -19,5 +19,7 @@ interface NetworkRepositoryInterface
 
     suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
 
-    suspend fun unlock(order: Order)
+    suspend fun unlockOrder(tableUID: String, color: String)
+
+    suspend fun lockOrder(tableUID: String, color: String)
 }

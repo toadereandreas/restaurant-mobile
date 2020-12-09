@@ -100,4 +100,14 @@ interface OrderViewModelInterface
      * Clear everything regarding table orders
      */
     fun clearTable()
+
+    /**
+     * Locks order
+     */
+    fun lockOrder(tableUID: String, color: Color)
+
+    /**
+     * Unlocks order
+     */
+    fun unlockOrder(tableUID: String, color: Color)
 }

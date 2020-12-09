@@ -114,7 +114,12 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface
         TODO("Not yet implemented")
     }
 
-    override suspend fun unlock(order: Order)
+    override suspend fun unlockOrder(tableUID: String, color: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lockOrder(tableUID: String, color: String)
     {
         TODO("Not yet implemented")
     }
