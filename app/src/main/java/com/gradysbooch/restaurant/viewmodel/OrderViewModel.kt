@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
@@ -23,7 +24,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                 .launchIn(viewModelScope)
 
         viewModelScope.launch {
-            repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
+            val menuItems = repository.networkRepository.getMenuItems()
+            Log.d("OrderViewModel", menuItems.toString())
+            repository.menuItemDAO().updateMenu(menuItems)
         }
     }
     private val tableUID = MutableStateFlow<String?>(null)
