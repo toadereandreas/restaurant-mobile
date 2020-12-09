@@ -15,9 +15,11 @@ interface NetworkRepositoryInterface
 
     fun orderItems(): Flow<List<OrderItem>>
 
-    suspend fun clearCall(tableUID: String)
+    suspend fun clearCall(taleUID: String)
 
     suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
 
-    suspend fun unlock(order: Order)
+    suspend fun unlockOrder(tableUID: String, color: String)
+
+    suspend fun lockOrder(tableUID: String, color: String)
 }

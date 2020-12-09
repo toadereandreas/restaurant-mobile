@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
+import java.lang.Exception
 
 
 @Composable
@@ -156,4 +157,9 @@ fun RoundedSearchBar(
                 })
         Icon(asset = Icons.Filled.Search, modifier = Modifier.padding(24.dp))
     }
+}
+
+fun getColor(color: String?) : Color {
+    return try { Color(android.graphics.Color.parseColor(color ?: "#f00"))
+    } catch (e: Exception) { Color.Red }
 }

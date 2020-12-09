@@ -1,7 +1,7 @@
 query getMenuItems{
     menuItems{
         data{
-            id
+            gid
             internalName
             price
             category{

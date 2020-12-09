@@ -4,24 +4,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.viewinterop.viewModel
+import com.gradysbooch.restaurant.model.dto.TableDTO
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 
 @Composable
-fun OrderScreen(selectedTable: MutableState<String>) {
+fun OrderScreen() {
+    val orderViewModel = viewModel<OrderViewModel>()
+
     Column (
             modifier = Modifier.fillMaxSize()
     ){
-        // todo Remove Hardcoding
-        val selectedCustomer = remember { mutableStateOf(Color.Unspecified) }
-        OrderScreenAppBar(selectedTable, selectedCustomer)
-        // todo Should be ScrollableColumn, but that's not allowed
+        orderViewModel.selectAllScreen()
+        OrderScreenAppBar()
         Column {
-            OrdersList(selectedTable, selectedCustomer)
-            MenuSubScreen(selectedCustomer.value)
+            OrdersList()
+            MenuSubScreen()
         }
     }
 }
