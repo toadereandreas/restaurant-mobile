@@ -2,24 +2,22 @@ package com.gradysbooch.restaurant.repository
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.exception.ApolloException
-import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.SubscribeToOrderItemsSubscription
 import com.gradysbooch.restaurant.SubscribeToOrdersSubscription
 import com.gradysbooch.restaurant.SubscribeToTablesSubscription
 import com.gradysbooch.restaurant.model.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -152,7 +150,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         TODO("Not yet implemented")
     }
 
-    override suspend fun unlock(order: Order) {
+    override suspend fun unlockOrder(tableUID: String, color: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lockOrder(tableUID: String, color: String)
+    {
         TODO("Not yet implemented")
     }
 }
