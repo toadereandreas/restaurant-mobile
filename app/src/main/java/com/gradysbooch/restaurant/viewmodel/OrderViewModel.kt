@@ -30,11 +30,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val allScreen: Flow<Boolean> = _allScreen
 
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
-        val clientOrders = repository.networkRepository.clientOrders().map { orders ->
-            orders.map {
-                Bullet(it.orderColor, false, it.orderColor == activeColor)
-            }
-        }
+        val clientOrders = flowOf(ArrayList<Bullet>()) //todo change network call
+//                repository.networkRepository.clientOrders().map { orders ->
+//            orders.map {
+//                Bullet(it.orderColor, false, it.orderColor == activeColor)
+//            }
+//        }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
                 Bullet(it.orderColor, true, it.orderColor == activeColor)

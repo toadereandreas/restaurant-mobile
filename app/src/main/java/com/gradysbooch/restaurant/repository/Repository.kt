@@ -3,7 +3,7 @@ package com.gradysbooch.restaurant.repository
 import android.content.Context
 import androidx.room.Room
 
-fun buildRoomDB(context: Context) = Room.databaseBuilder(context, RoomDB::class.java, "roomDB").build()
+fun buildRoomDB(context: Context) = Room.databaseBuilder(context, RoomDB::class.java, "roomDB").allowMainThreadQueries().build()
 
 class Repository private constructor(context: Context) : DataAccess by buildRoomDB(context)
 {

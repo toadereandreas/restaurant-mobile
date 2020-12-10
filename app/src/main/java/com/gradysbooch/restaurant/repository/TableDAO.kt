@@ -21,4 +21,7 @@ interface TableDAO
 
     @Query("UPDATE `Table` SET code=null WHERE tableUID=:tableUID")
     suspend fun clearTable(tableUID: String)
+
+    @Delete
+    suspend fun deleteTable(table: Table)
 }

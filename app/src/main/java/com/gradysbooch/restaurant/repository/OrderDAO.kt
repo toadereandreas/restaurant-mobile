@@ -1,9 +1,6 @@
 package com.gradysbooch.restaurant.repository
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.OrderWithMenuItems
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +23,7 @@ interface OrderDAO
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID AND orderColor=:color")
     suspend fun getOrder(tableUID: String, color: String): Order?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addOrder(order: Order)
 
     @Query("UPDATE `Order` SET note=:note WHERE tableUID=:tableUID AND orderColor=:color")
