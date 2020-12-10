@@ -129,9 +129,11 @@ class OrderViewModelTest {
     @Test
     fun checkAddBullet() = runBlockingTest {
         insertTable()
+        repository.orderDao().addOrder(orders[0])
         orderViewModel.setTable(table.tableUID)
         val colors = repository.orderDao().getOrdersForTable(table.tableUID).asLiveData().getOrAwaitValue().map { it.orderColor }.toSet()
         orderViewModel.addBullet()
+        orderViewModel.selectColor("red")
         val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
         val newColors = bullets.map { it.color }.toSet()
         assertEquals(1, newColors.size - colors.size)
