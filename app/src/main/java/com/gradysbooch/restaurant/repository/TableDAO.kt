@@ -22,6 +22,9 @@ interface TableDAO
     @Query("UPDATE `Table` SET code=null WHERE tableUID=:tableUID")
     suspend fun clearTable(tableUID: String)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateTables(tables: Set<Table>)
+
     @Delete
     suspend fun deleteTable(table: Table)
 }

@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
@@ -15,7 +16,16 @@ import kotlinx.coroutines.launch
 class OrderViewModel(application: Application) : BaseViewModel(application),
         OrderViewModelInterface
 {
+    init
+    {
+        repository.networkRepository.orderItems()
+                .onEach { repository.orderDao().saveOrderItems(it) }
+                .launchIn(viewModelScope)
 
+        viewModelScope.launch {
+            repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
+        }
+    }
     private val tableUID = MutableStateFlow<String?>(null)
     private val activeColor = MutableStateFlow<String?>(null)
     private val searchQuery = MutableStateFlow("")
@@ -30,12 +40,11 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val allScreen: Flow<Boolean> = _allScreen
 
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
-        val clientOrders = flowOf(ArrayList<Bullet>()) //todo change network call
-//                repository.networkRepository.clientOrders().map { orders ->
-//            orders.map {
-//                Bullet(it.orderColor, false, it.orderColor == activeColor)
-//            }
-//        }
+        val clientOrders = repository.networkRepository.clientOrders().map { orders ->
+            orders.filter { it.tableUID == tableUID }.map {
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
+            }
+        }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
                 Bullet(it.orderColor, true, it.orderColor == activeColor)
@@ -45,13 +54,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         }
     }
 
-    private inline fun <T> forCurrentOrder(crossinline block: (tableUID: String, color: String) -> Flow<T>): Flow<T>
+    private inline fun <T> forCurrentOrder(crossinline block: (tableUID: String, color: String?) -> Flow<T>): Flow<T>
     {
         return tableUID.flatMapLatest { tableUID ->
             tableUID ?: return@flatMapLatest emptyFlow()
 
             activeColor.flatMapLatest colorMap@{ activeColor ->
-                activeColor ?: return@colorMap emptyFlow()
                 block(tableUID, activeColor)
             }
         }
@@ -70,6 +78,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
             forCurrentOrder { tableUID, activeColor ->
+                activeColor ?: return@forCurrentOrder emptyFlow()
                 repository
                         .orderDao()
                         .getOrderWithMenuItems(tableUID, activeColor)
@@ -141,6 +150,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             tableUID.value?.let {
                 repository.tableDao().updateTableCall(it, false)
+                repository.networkRepository.clearCall(it)
             }
         }
     }
@@ -179,5 +189,15 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             repository.clearTable(tableUID)
         }
+    }
+
+    override fun lockOrder(tableUID: String, color: Color)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun unlockOrder(tableUID: String, color: Color)
+    {
+        TODO("Not yet implemented")
     }
 }

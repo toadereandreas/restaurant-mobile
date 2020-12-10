@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -19,15 +20,15 @@ import com.gradysbooch.restaurant.ui.values.getColor
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.flow.map
 
 
 @Composable
 fun MenuSubScreen() {
     val orderViewModel = viewModel<OrderViewModel>()
-    var isAllScreenSelected : Boolean = true
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.allScreen.collect { isAllScreenSelected = it }
-    }
+    val isAllScreenSelected by orderViewModel.allScreen
+            .collectAsState(initial = true)
 
     if (isAllScreenSelected) return
     val text = remember { mutableStateOf("search ...") }
@@ -39,10 +40,8 @@ fun MenuSubScreen() {
 @Composable
 fun FilteredMenuItems(searchText: String) {
     val orderViewModel = viewModel<OrderViewModel>()
-    var allMenuItems : List<MenuItemDTO> = ArrayList()
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.menu.collect { allMenuItems = it }
-    }
+    val allMenuItems by orderViewModel.menu
+            .collectAsState(initial = emptyList())
 
     LazyColumnFor(items = allMenuItems
             .filter { it.name.contains(searchText) }) {
@@ -53,13 +52,9 @@ fun FilteredMenuItems(searchText: String) {
 @Composable
 fun MenuItemEntry(item: MenuItemDTO) {
     val orderViewModel = viewModel<OrderViewModel>()
-    var selectedBullet = Bullet("", false, false)
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.bulletList.collect { bullets ->
-            val foundBullet = bullets.find { it.pressed }
-            if (foundBullet != null) selectedBullet = foundBullet
-        }
-    }
+    val selectedBullet by orderViewModel.bulletList
+            .map { bullets -> bullets.first { it.pressed } }
+            .collectAsState(initial = Bullet("#000", false, false))
 
     RoundedRowCard(
             color = getColor(selectedBullet.color)

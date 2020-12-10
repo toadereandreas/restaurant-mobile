@@ -2,6 +2,7 @@ package com.gradysbooch.restaurant.repository
 
 import androidx.room.*
 import com.gradysbooch.restaurant.model.Order
+import com.gradysbooch.restaurant.model.OrderItem
 import com.gradysbooch.restaurant.model.OrderWithMenuItems
 import kotlinx.coroutines.flow.Flow
 
@@ -34,4 +35,8 @@ interface OrderDAO
 
     @Query("DELETE FROM `Order` WHERE tableUID=:tableUID")
     suspend fun clearTable(tableUID: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveOrderItems(orderItems: List<OrderItem>)
+
 }

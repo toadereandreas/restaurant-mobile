@@ -66,11 +66,9 @@ fun App() {
              * todo error -> ErrorScreen
              */
             val orderViewModel = viewModel<OrderViewModel>()
-            var selectedTable: Table = Table("-1", "name", 0, false)
-            orderViewModel.viewModelScope.launch {
-                orderViewModel.table.collect { selectedTable = it }
-            }
-            if (selectedTable.code == 0) TablesScreen()
+            val selectedTable by orderViewModel.table
+                    .collectAsState(initial = Table("-1", "name", 0, false))
+            if (selectedTable.code != 0) TablesScreen()
             else OrderScreen()
         }
     }

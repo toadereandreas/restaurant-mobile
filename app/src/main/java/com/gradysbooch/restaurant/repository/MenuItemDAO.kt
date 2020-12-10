@@ -8,21 +8,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MenuItemDAO
 {
-    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateMenu(menuItems: Set<MenuItem>)
-    {
-        if (getMenu().toSet() != menuItems)
-        {
-            deleteMenu()
-            insertMenu(menuItems.toList())
-        }
-    }
 
     @Query("DELETE FROM MenuItem")
     suspend fun deleteMenu()
-
-    @Query("SELECT * FROM MenuItem")
-    suspend fun getMenu(): List<MenuItem>
 
     @Query("SELECT * FROM MenuItem")
     fun getMenuFlow(): Flow<List<MenuItem>>

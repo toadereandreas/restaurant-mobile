@@ -1,38 +1,31 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import androidx.compose.runtime.getValue
 
 
 @Composable
 fun OrderScreenAppBar() {
     val orderViewModel = viewModel<OrderViewModel>()
-    var selectedBullet = Bullet("", false, false)
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.bulletList.collect { bullets ->
-            val foundBullet = bullets.find { it.pressed }
-            if (foundBullet != null) selectedBullet = foundBullet
-        }
-    }
+    val selectedBullet by orderViewModel.bulletList
+            .map { bullets -> bullets.first { it.pressed } }
+            .collectAsState(initial = Bullet("#000", false, false))
 
     TopAppBar(
             backgroundColor = getColor(selectedBullet.color),
@@ -48,10 +41,8 @@ fun OrderScreenAppBar() {
 @Composable
 fun OrderScreenTopRow() {
     val orderViewModel = viewModel<OrderViewModel>()
-    var selectedTable: Table = Table("-1", "name", 0, false)
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.table.collect { selectedTable = it }
-    }
+    val selectedTable by orderViewModel.table
+            .collectAsState(initial = Table("-1", "name", 0, false))
 
     RoundedRowCard (
             color = Color.Transparent,
@@ -63,17 +54,14 @@ fun OrderScreenTopRow() {
                 asset = Icons.Filled.ArrowBack,
                 onClick = {
                     // Go back
+                    // fixme At least in theory this should work
                     orderViewModel.setTable("-1");
                 })
 
         Text(text = "${selectedTable.name} (#${selectedTable.code})")
 
-        var isChecked: Boolean = false
-        orderViewModel.viewModelScope.launch {
-            orderViewModel.requiresAttention.collect {
-                isChecked = it
-            }
-        }
+        val isChecked by orderViewModel.requiresAttention
+                .collectAsState(initial = false)
         RoundedIconButton(
                 color = Color.Transparent,
                 tint = MaterialTheme.colors.secondary,
@@ -131,10 +119,8 @@ fun AddCustomerButton() {
 @Composable
 fun AllCustomersNavigationButtons() {
     val orderViewModel = viewModel<OrderViewModel>()
-    var bullets : List<Bullet> = ArrayList()
-    orderViewModel.viewModelScope.launch {
-        orderViewModel.bulletList.collect { bullets = it }
-    }
+    val bullets by orderViewModel.bulletList
+            .collectAsState(initial = emptyList())
 
     LazyRowFor(items = bullets) {
         CustomerNavigationButton(bullet = it)
@@ -145,11 +131,13 @@ fun AllCustomersNavigationButtons() {
 fun CustomerNavigationButton(bullet: Bullet) {
     val orderViewModel = viewModel<OrderViewModel>()
 
+    // todo long press functionality to toggle `bullet.locked`
     RoundedIconButton(
             modifier = Modifier.padding(4.dp, 0.dp),
             color = getColor(bullet.color),
             tint = MaterialTheme.colors.primary,
-            asset = Icons.Filled.Lock,
+            // fixme I think when bullets are added, they are by default locked
+            asset = if (bullet.locked) Icons.Filled.Lock else Icons.Filled.Clear,
             onClick = {
                 orderViewModel.selectColor(bullet.color)
             })
