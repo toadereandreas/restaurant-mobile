@@ -150,7 +150,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             tableUID.value?.let {
                 repository.tableDao().updateTableCall(it, false)
-                repository.networkRepository.clearCall(it)
+                //repository.networkRepository.clearCall(it)
             }
         }
     }
