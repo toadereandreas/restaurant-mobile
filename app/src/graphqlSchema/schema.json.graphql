@@ -3,7 +3,6 @@
 schema {
     query: Query
     mutation: Mutation
-    subscription: Subscription
 }
 
 interface Node {
@@ -27,7 +26,6 @@ type AllergenTranslationList {
 type AllergenTranslationNode {
     allergen: AllergenNode!
     gid: UUID!
-    id: ID
     language: LanguageNode!
     name: String!
 }
@@ -44,7 +42,6 @@ type BookingList {
 type BookingNode {
     dateTime: DateTime!
     gid: UUID!
-    id: ID
     numberOfPersons: Int!
     phoneNumber: String!
     table: TableNode!
@@ -56,7 +53,6 @@ type CategoryList {
 
 type CategoryNode {
     gid: UUID!
-    id: ID
     internalName: String!
 }
 
@@ -67,7 +63,6 @@ type CategoryTranslationList {
 type CategoryTranslationNode {
     category: CategoryNode!
     gid: UUID!
-    id: ID
     language: LanguageNode!
     name: String!
 }
@@ -103,7 +98,6 @@ type DummyList {
 
 type DummyNode {
     gid: UUID!
-    id: ID
     testAge: Int!
     testName: String!
 }
@@ -121,7 +115,6 @@ type LanguageList {
 type LanguageNode {
     code: String!
     gid: UUID!
-    id: ID
     name: String!
 }
 
@@ -133,7 +126,6 @@ type MenuItemNode {
     allergens: [AllergenNode!]!
     category: CategoryNode!
     gid: UUID!
-    id: ID
     internalName: String!
     picture: String!
     price: Float!
@@ -147,7 +139,6 @@ type MenuItemTranslationList {
 type MenuItemTranslationNode {
     description: String!
     gid: UUID!
-    id: ID
     language: LanguageNode!
     menuItem: MenuItemNode!
     name: String!
@@ -183,31 +174,6 @@ type ObtainJSONWebToken {
     token: String
     unarchiving: Boolean
     user: UserNode
-}
-
-type Order {
-    color: String
-    gid: String
-    id: ID
-    locked: Boolean
-    note: String
-}
-
-type OrderList {
-    data: [Order]
-}
-
-type OrderMenuItem {
-    color: String
-    gid: String
-    id: ID
-    menuItemId: ID
-    quantity: Int
-    servingId: ID
-}
-
-type OrderMenuItemList {
-    data: [OrderMenuItem]
 }
 
 type PageInfo {
@@ -291,25 +257,6 @@ type SendSecondaryEmailActivation {
     success: Boolean
 }
 
-type Serving {
-    called: Boolean
-    code: String
-    gid: String
-    id: ID
-    userId: ID
-}
-
-type ServingList {
-    data: [Serving]
-}
-
-type Subscription {
-    hello: String
-    orderMenuItems: OrderMenuItemList
-    orders: OrderList
-    servings: ServingList
-}
-
 type SwapEmails {
     errors: ExpectedErrorType
     success: Boolean
@@ -322,7 +269,6 @@ type TableList {
 type TableNode {
     code: Int!
     gid: UUID!
-    id: ID
     name: String!
 }
 

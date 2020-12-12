@@ -74,7 +74,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
         return list.filterNotNull().map {
             MenuItem(
-                it.id
+                it.gid.toString() //todo why the fuck is this still here? why does the deployed version not have the fucking ID here? IT DID, what happened?
                     ?: error("Id null."),
                 it.internalName,
                 it.price.roundToInt()
@@ -102,7 +102,12 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         TODO("Not yet implemented")
     }
 
-    override suspend fun unlock(order: Order) {
+    override suspend fun unlockOrder(tableUID: String, color: String) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun lockOrder(tableUID: String, color: String) {
+        TODO("Not yet implemented")
+    }
+
 }
