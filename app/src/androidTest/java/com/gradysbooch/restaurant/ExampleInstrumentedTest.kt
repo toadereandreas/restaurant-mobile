@@ -2,11 +2,13 @@ package com.gradysbooch.restaurant
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.gradysbooch.restaurant.repository.networkRepository.NetworkRepository
 
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import org.junit.Assert.*
+import org.junit.Before
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -16,11 +18,14 @@ import org.junit.Assert.*
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest
 {
+    val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+    val networkRepo = NetworkRepository(appContext)
+
     @Test
     fun useAppContext()
     {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.gradysbooch.restaurant", appContext.packageName)
+
+        Thread.sleep(10000)
+
     }
 }
