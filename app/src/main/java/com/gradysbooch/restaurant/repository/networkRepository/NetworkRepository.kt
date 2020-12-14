@@ -72,14 +72,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
             ?: error("ApolloFailure: menu items returned null.")
 
-        return list.filterNotNull().map {
-            MenuItem(
-                it.gid.toString() //todo why the fuck is this still here? why does the deployed version not have the fucking ID here? IT DID, what happened?
-                    ?: error("Id null."),
-                it.internalName,
-                it.price.roundToInt()
-            )
-        }.toSet()
+        return list.filterNotNull().map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
     override fun getTables(): Flow<Set<Table>> {
