@@ -181,13 +181,18 @@ class OrderViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun checkSearch() = runBlockingTest {
-        val criteria = "item 2"
-        orderViewModel.search(criteria)
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
         insertMenu()
-        Thread.sleep(3000)
+        val criteria = "item"
+        orderViewModel.search(criteria)
         val items = orderViewModel.menu.asLiveData().getOrAwaitValue()
-        assertEquals(1, items.size)
-        assertEquals("2", items[0].id)
+        assertEquals(3, items.size)
+        items.map { it.name }.forEach {
+            assertTrue(it.contains(criteria))
+        }
+        orderViewModel.setTable("-1")
+        removeTable()
     }
 
     @ExperimentalCoroutinesApi
@@ -208,6 +213,23 @@ class OrderViewModelTest {
         assertTrue(notes.contains(colors[0] to testNote))
         assertTrue(notes.contains(colors[1] to ""))
         orderViewModel.clearTable()
+        orderViewModel.setTable("-1")
+        removeTable()
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun checkClearTable() = runBlockingTest {
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        orderViewModel.addBullet()
+        orderViewModel.addBullet()
+        Thread.sleep(1000)
+        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
+        assertTrue(bullets.isNotEmpty())
+        orderViewModel.clearTable()
+        Thread.sleep(1000)
+        assertEquals(0, orderViewModel.bulletList.asLiveData().getOrAwaitValue().size)
         orderViewModel.setTable("-1")
         removeTable()
     }
