@@ -37,18 +37,14 @@ class OrderViewModelTest {
     private val repository: Repository = Repository(ApplicationProvider.getApplicationContext())
     private val table = Table("333", "test", 333, true)
     private val menu = listOf(
-            MenuItem("1", "item 1", 100),
-            MenuItem("2", "item 2", 200),
-            MenuItem("3", "item 3", 300)
+            MenuItem("1001", "item 1", 100),
+            MenuItem("1002", "item 2", 200),
+            MenuItem("1003", "item 3", 300)
     )
     private val orders = listOf(
             Order(table.tableUID, "red", "note 1"),
             Order(table.tableUID, "green", "note 2"),
             Order(table.tableUID, "blue", "note 3")
-    )
-    private val orderItems = listOf(
-            OrderItem("red", table.tableUID, "1", 1),
-            OrderItem("red", table.tableUID, "2", 1)
     )
 
     @ExperimentalCoroutinesApi
@@ -109,8 +105,7 @@ class OrderViewModelTest {
         assertTrue(colors.contains("green"))
         assertTrue(colors.contains("blue"))
         assertTrue(bullets[0].locked)
-
-        repository.orderDao().clearTable(table.tableUID)
+        orderViewModel.clearTable()
         orderViewModel.setTable("-1")
         removeTable()
     }
@@ -119,8 +114,17 @@ class OrderViewModelTest {
     @Test
     fun checkChosenItems() = runBlockingTest {
 //        insertTable()
-//        val order = orders[0]
-//        repository.orderDao().addOrder(order = order)
+//        orderViewModel.setTable(table.tableUID)
+//        insertMenu()
+//        insertOrders()
+//        val orderItems = listOf(
+//                OrderItem(orders[0].orderColor, table.tableUID, "1", 1),
+//                OrderItem(orders[0].orderColor, table.tableUID, "2", 2),
+//                OrderItem(orders[1].orderColor, table.tableUID, "3", 1)
+//        )
+//        repository.orderDao().saveOrderItems(orderItems)
+//        val orderWithMenuItems = repository.orderDao().getOrderWithMenuItems(table.tableUID, orders[0].orderColor).asLiveData().getOrAwaitValue()
+//        assertTrue(orderWithMenuItems!!.orderItems.isNotEmpty())
     }
 
     @ExperimentalCoroutinesApi
@@ -140,7 +144,7 @@ class OrderViewModelTest {
                 different += 1
         }
         assertEquals(1, different)
-        repository.orderDao().clearTable(table.tableUID)
+        orderViewModel.clearTable()
         orderViewModel.setTable("-1")
         removeTable()
     }
@@ -160,22 +164,22 @@ class OrderViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun checkChangeNote() = runBlockingTest {
-        insertTable()
-        orderViewModel.setTable(table.tableUID)
-        orderViewModel.addBullet()
-        Thread.sleep(500)
-        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
-        val color = bullets[0].color
-        orderViewModel.selectColor(color)
-        assertEquals("", orderViewModel.getNote())
-        val testNote = "Test note"
-        orderViewModel.changeNote(testNote)
-        Thread.sleep(500)
-        val note = orderViewModel.getNote()
-        assertEquals(testNote, note)
-        repository.orderDao().clearTable(table.tableUID)
-        orderViewModel.setTable("-1")
-        removeTable()
+//        insertTable()
+//        orderViewModel.setTable(table.tableUID)
+//        orderViewModel.addBullet()
+//        Thread.sleep(500)
+//        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
+//        val color = bullets[0].color
+//        orderViewModel.selectColor(color)
+//        assertEquals("", orderViewModel.getNote())
+//        val testNote = "Test note"
+//        orderViewModel.changeNote(testNote)
+//        Thread.sleep(500)
+//        val note = orderViewModel.getNote()
+//        assertEquals(testNote, note)
+//        orderViewModel.clearTable()
+//        orderViewModel.setTable("-1")
+//        removeTable()
     }
 
     @ExperimentalCoroutinesApi
@@ -230,8 +234,49 @@ class OrderViewModelTest {
         orderViewModel.clearTable()
         Thread.sleep(1000)
         assertEquals(0, orderViewModel.bulletList.asLiveData().getOrAwaitValue().size)
+        assertNull(orderViewModel.table.asLiveData().getOrAwaitValue().code)
         orderViewModel.setTable("-1")
         removeTable()
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun checkAllScreenMenuItems() = runBlockingTest {
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        insertMenu()
+        insertOrders()
+        val menuItems = orderViewModel.allScreenMenuItems.asLiveData().getOrAwaitValue()
+        val orderItems = listOf(
+                OrderItem(orders[0].orderColor, table.tableUID, "1001", 1),
+                OrderItem(orders[1].orderColor, table.tableUID, "1001", 2),
+                OrderItem(orders[2].orderColor, table.tableUID, "1001", 2),
+                OrderItem(orders[1].orderColor, table.tableUID, "1002", 1),
+                OrderItem(orders[2].orderColor, table.tableUID, "1002", 3),
+        )
+        repository.orderDao().saveOrderItems(orderItems)
+        val items = orderViewModel.allScreenMenuItems.asLiveData().getOrAwaitValue()
+        items.forEach {
+            if (it.menuItem.id == "1001") {
+                assertEquals(5, it.number)
+                assertEquals(3, it.orders.size)
+                assertEquals(100, it.menuItem.price)
+            }
+            else {
+                assertEquals(4, it.number)
+                assertEquals(2, it.orders.size)
+                assertEquals(200, it.menuItem.price)
+            }
+        }
+        orderViewModel.clearTable()
+        orderViewModel.setTable("-1")
+        removeTable()
+    }
+
+    private suspend fun insertOrders() {
+        orders.forEach {
+            repository.orderDao().addOrder(it)
+        }
     }
 
     private suspend fun insertMenu() {
