@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.repository
+package com.gradysbooch.restaurant.repository.networkRepository
 
 import com.gradysbooch.restaurant.model.*
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ interface NetworkRepositoryInterface
 
     fun orderItems(): Flow<List<OrderItem>>
 
-    suspend fun clearCall(taleUID: String)
+    suspend fun clearCall(tableUID: String)
 
     suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
 

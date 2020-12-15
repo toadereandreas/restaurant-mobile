@@ -4,15 +4,12 @@ import android.content.Context
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
-import com.gradysbooch.restaurant.model.Table
-import com.gradysbooch.restaurant.repository.NetworkRepository
+import com.gradysbooch.restaurant.repository.networkRepository.NetworkRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
-import java.util.*
-import java.util.stream.Collectors
 
 class NetworkRepoTest {
 
@@ -51,10 +48,6 @@ class NetworkRepoTest {
     @ExperimentalCoroutinesApi
     @Test
     fun TestBasicFlow(){
-        val nRepo = NetworkRepository()
 
-        runBlocking {
-            nRepo.getTables().collect { item -> print(item) }
-        }
     }
 }
