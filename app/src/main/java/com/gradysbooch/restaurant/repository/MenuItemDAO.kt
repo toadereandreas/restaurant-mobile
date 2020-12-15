@@ -21,6 +21,6 @@ interface MenuItemDAO
     suspend fun insertMenu(menuItems: List<MenuItem>)
 
     @Transaction
-    @Query("SELECT MenuItem.* FROM MenuItem JOIN OrderItem ON MenuItem.menuItemUID=OrderItem.menuItemUID WHERE OrderItem.tableUID=:tableUID")
+    @Query("SELECT DISTINCT MenuItem.* FROM MenuItem JOIN OrderItem ON MenuItem.menuItemUID=OrderItem.menuItemUID WHERE OrderItem.tableUID=:tableUID")
     fun getMenuItemsForTable(tableUID: String): Flow<List<MenuItemWithOrderItem>>
 }
