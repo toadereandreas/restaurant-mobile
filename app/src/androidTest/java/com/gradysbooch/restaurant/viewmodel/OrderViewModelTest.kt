@@ -205,6 +205,7 @@ class OrderViewModelTest {
         insertTable()
         orderViewModel.setTable(table.tableUID)
         orderViewModel.addBullet()
+        Thread.sleep(500)
         orderViewModel.addBullet()
         Thread.sleep(1000)
         val colors = orderViewModel.bulletList.asLiveData().getOrAwaitValue().map { it.color }
@@ -268,6 +269,27 @@ class OrderViewModelTest {
                 assertEquals(200, it.menuItem.price)
             }
         }
+        repository.orderDao().deleteOrderItems()
+        orderViewModel.clearTable()
+        orderViewModel.setTable("-1")
+        removeTable()
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun checkChangeNumber() = runBlockingTest {
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        repository.orderDao().addOrder(orders[0])
+        orderViewModel.selectColor(orders[0].orderColor)
+        val orderItem = OrderItem(orders[0].orderColor, table.tableUID, "1001", 1)
+        repository.orderDao().saveOrderItems(listOf(orderItem))
+        var items = orderViewModel.allScreenMenuItems.asLiveData().getOrAwaitValue()
+        assertEquals(1, items.filter { it.menuItem.id == "1001" }[0].number)
+        orderViewModel.changeNumber("1001", 3)
+        items = orderViewModel.allScreenMenuItems.asLiveData().getOrAwaitValue()
+        assertEquals(3, items.filter { it.menuItem.id == "1001" }[0].number)
+        repository.orderDao().deleteOrderItems()
         orderViewModel.clearTable()
         orderViewModel.setTable("-1")
         removeTable()

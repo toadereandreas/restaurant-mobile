@@ -39,4 +39,7 @@ interface OrderDAO
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveOrderItems(orderItems: List<OrderItem>)
 
+    @Query("DELETE FROM `OrderItem`")
+    suspend fun deleteOrderItems()
+
 }
