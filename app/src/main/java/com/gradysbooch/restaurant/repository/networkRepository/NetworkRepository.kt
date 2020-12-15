@@ -23,7 +23,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     private val ORDER_ITEM_WEBSOCKET_URL = "ws://echo.websocket.org"
     private val ORDER_WEBSOCKET_URL = "ws://echo.websocket.org"
     private val TABLE_WEBSOCKET_URL = "ws://echo.websocket.org"
-    private val GRAPHQL_URL = "http://halex193.go.ro:8000/graphql/"
+    private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
     //"https://restaurant.playgroundev.com/graphql/"
 
     private val okHttpClient = OkHttpClient.Builder().build()
