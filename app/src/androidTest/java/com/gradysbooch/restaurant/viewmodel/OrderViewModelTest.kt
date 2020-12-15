@@ -160,25 +160,56 @@ class OrderViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun checkChangeNote() = runBlockingTest {
-//        insertTable()
-//        orderViewModel.setTable(table.tableUID)
-//        orderViewModel.addBullet()
-//        val note = "Test note"
-//        Log.i("test-scope", "assert14")
-//        assertEquals("", orderViewModel.getNote())
-//        orderViewModel.bulletList.asLiveData().observeOnce { it ->
-//            val color = it[0].color
-//            orderViewModel.selectColor(color)
-//            orderViewModel.changeNote(note)
-//            repository.orderDao().getOrdersForTable(table.tableUID).asLiveData().observeOnce {
-//                val newNote = it.filter { it.orderColor == color }[0].note
-//                Log.i("test-scope", "assert15")
-//                assertEquals(note, newNote)
-//            }
-//        }
-//        repository.orderDao().clearTable(table.tableUID)
-//        orderViewModel.setTable("-1")
-//        removeTable()
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        orderViewModel.addBullet()
+        Thread.sleep(500)
+        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
+        val color = bullets[0].color
+        orderViewModel.selectColor(color)
+        assertEquals("", orderViewModel.getNote())
+        val testNote = "Test note"
+        orderViewModel.changeNote(testNote)
+        Thread.sleep(500)
+        val note = orderViewModel.getNote()
+        assertEquals(testNote, note)
+        repository.orderDao().clearTable(table.tableUID)
+        orderViewModel.setTable("-1")
+        removeTable()
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun checkSearch() = runBlockingTest {
+        val criteria = "item 2"
+        orderViewModel.search(criteria)
+        insertMenu()
+        Thread.sleep(3000)
+        val items = orderViewModel.menu.asLiveData().getOrAwaitValue()
+        assertEquals(1, items.size)
+        assertEquals("2", items[0].id)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun checkAllScreenNotes() = runBlockingTest {
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        orderViewModel.addBullet()
+        orderViewModel.addBullet()
+        Thread.sleep(1000)
+        val colors = orderViewModel.bulletList.asLiveData().getOrAwaitValue().map { it.color }
+        orderViewModel.selectColor(colors[0])
+        val testNote = "Test note"
+        orderViewModel.changeNote(testNote)
+        Thread.sleep(1000)
+        val notes = orderViewModel.allScreenNotes.asLiveData().getOrAwaitValue()
+        assertEquals(2, notes.size)
+        assertTrue(notes.contains(colors[0] to testNote))
+        assertTrue(notes.contains(colors[1] to ""))
+        orderViewModel.clearTable()
+        orderViewModel.setTable("-1")
+        removeTable()
     }
 
     private suspend fun insertMenu() {
