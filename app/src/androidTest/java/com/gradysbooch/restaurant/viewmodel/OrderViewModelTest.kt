@@ -164,22 +164,22 @@ class OrderViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun checkChangeNote() = runBlockingTest {
-//        insertTable()
-//        orderViewModel.setTable(table.tableUID)
-//        orderViewModel.addBullet()
-//        Thread.sleep(500)
-//        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
-//        val color = bullets[0].color
-//        orderViewModel.selectColor(color)
-//        assertEquals("", orderViewModel.getNote())
-//        val testNote = "Test note"
-//        orderViewModel.changeNote(testNote)
-//        Thread.sleep(500)
-//        val note = orderViewModel.getNote()
-//        assertEquals(testNote, note)
-//        orderViewModel.clearTable()
-//        orderViewModel.setTable("-1")
-//        removeTable()
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        orderViewModel.addBullet()
+        Thread.sleep(500)
+        val bullets = orderViewModel.bulletList.asLiveData().getOrAwaitValue()
+        val color = bullets[0].color
+        orderViewModel.selectColor(color)
+        assertEquals("", orderViewModel.getNote())
+        val testNote = "Test note"
+        orderViewModel.changeNote(testNote)
+        Thread.sleep(500)
+        val note = orderViewModel.getNote()
+        assertEquals(testNote, note)
+        orderViewModel.clearTable()
+        orderViewModel.setTable("-1")
+        removeTable()
     }
 
     @ExperimentalCoroutinesApi
