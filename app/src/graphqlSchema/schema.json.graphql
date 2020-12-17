@@ -1,0 +1,737 @@
+# This file was generated based on "schema.json". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+"An object with an ID"
+interface Node {
+    "The ID of the object."
+    id: ID!
+}
+
+type AllergenList {
+    data: [AllergenNode]
+}
+
+type AllergenNode {
+    "Unique global identifier"
+    gid: UUID!
+    internalName: String!
+    number: Int!
+}
+
+type AllergenTranslationList {
+    data: [AllergenTranslationNode]
+}
+
+type AllergenTranslationNode {
+    allergen: AllergenNode!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    language: LanguageNode!
+    name: String!
+}
+
+"""
+
+Archive account and revoke refresh tokens.
+
+User must be verified and confirm password.
+"""
+type ArchiveAccount {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type BookingList {
+    data: [BookingNode]
+}
+
+type BookingNode {
+    dateTime: DateTime!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    numberOfPersons: Int!
+    phoneNumber: String!
+    table: TableNode!
+}
+
+type CategoryList {
+    data: [CategoryNode]
+}
+
+type CategoryNode {
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    internalName: String!
+}
+
+type CategoryTranslationList {
+    data: [CategoryTranslationNode]
+}
+
+type CategoryTranslationNode {
+    category: CategoryNode!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    language: LanguageNode!
+    name: String!
+}
+
+"Creates a booking."
+type CreateBookingMutation {
+    "Created booking."
+    booking: BookingNode
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+}
+
+"Creates a category."
+type CreateCategoryMutation {
+    "Created category."
+    category: CategoryNode
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+}
+
+"Creates a dummy."
+type CreateDummyMutation {
+    "Created dummy."
+    dummy: DummyNode
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+}
+
+"Creates a language."
+type CreateLanguageMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Created language."
+    language: LanguageNode
+}
+
+"""
+
+Delete account permanently or make `user.is_active=False`.
+
+The behavior is defined on settings.
+Anyway user refresh tokens are revoked.
+
+User must be verified and confirm password.
+"""
+type DeleteAccount {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type DummyList {
+    data: [DummyNode]
+}
+
+type DummyNode {
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    testAge: Int!
+    testName: String!
+}
+
+type ErrorType {
+    errors: [ErrorType]
+    """
+
+    Name of a field that caused the error. A value of
+    `__all__` indicates that the error isn't associated with a particular
+    field.
+    """
+    field: String
+    "A list of error messages."
+    messages: [String]
+}
+
+type LanguageList {
+    data: [LanguageNode]
+}
+
+type LanguageNode {
+    code: String!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    name: String!
+}
+
+type MenuItemList {
+    data: [MenuItemNode]
+}
+
+type MenuItemNode {
+    allergens: [AllergenNode!]!
+    category: CategoryNode!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    internalName: String!
+    picture: String!
+    price: Float!
+    quantity: String!
+}
+
+type MenuItemTranslationList {
+    data: [MenuItemTranslationNode]
+}
+
+type MenuItemTranslationNode {
+    description: String!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    language: LanguageNode!
+    menuItem: MenuItemNode!
+    name: String!
+}
+
+type Mutation {
+    """
+
+    Archive account and revoke refresh tokens.
+
+    User must be verified and confirm password.
+    """
+    archiveAccount(password: String!): ArchiveAccount
+    "Creates a booking."
+    createBooking(
+        "Fields required to create a booking."
+        input: BookingInput!
+    ): CreateBookingMutation
+    "Creates a category."
+    createCategory(
+        "Fields required to create a category."
+        input: CategoryInput!
+    ): CreateCategoryMutation
+    "Creates a dummy."
+    createDummy(
+        "Fields required to create a dummy."
+        input: DummyInput!
+    ): CreateDummyMutation
+    "Creates a language."
+    createLanguage(
+        "Fields required to create a language."
+        input: LanguageInput!
+    ): CreateLanguageMutation
+    """
+
+    Delete account permanently or make `user.is_active=False`.
+
+    The behavior is defined on settings.
+    Anyway user refresh tokens are revoked.
+
+    User must be verified and confirm password.
+    """
+    deleteAccount(password: String!): DeleteAccount
+    """
+
+    Change account password when user knows the old password.
+
+    A new token and refresh token are sent. User must be verified.
+    """
+    passwordChange(newPassword1: String!, newPassword2: String!, oldPassword: String!): PasswordChange
+    """
+
+    Change user password without old password.
+
+    Receive the token that was sent by email.
+
+    If token and new passwords are valid, update
+    user password and in case of using refresh
+    tokens, revoke all of them.
+
+    Also, if user has not been verified yet, verify it.
+    """
+    passwordReset(newPassword1: String!, newPassword2: String!, token: String!): PasswordReset
+    "Same as `grapgql_jwt` implementation, with standard output."
+    refreshToken(refreshToken: String!): RefreshToken
+    """
+
+    Register user with fields defined in the settings.
+
+    If the email field of the user model is part of the
+    registration fields (default), check if there is
+    no user with that email or as a secondary email.
+
+    If it exists, it does not register the user,
+    even if the email field is not defined as unique
+    (default of the default django user model).
+
+    When creating the user, it also creates a `UserStatus`
+    related to that user, making it possible to track
+    if the user is archived, verified and has a secondary
+    email.
+
+    Send account verification email.
+
+    If allowed to not verified users login, return token.
+    """
+    register(email: String!, password1: String!, password2: String!, username: String!): Register
+    """
+
+    Sends activation email.
+
+    It is called resend because theoretically
+    the first activation email was sent when
+    the user registered.
+
+    If there is no user with the requested email,
+    a successful response is returned.
+    """
+    resendActivationEmail(email: String!): ResendActivationEmail
+    "Same as `grapgql_jwt` implementation, with standard output."
+    revokeToken(refreshToken: String!): RevokeToken
+    """
+
+    Send password reset email.
+
+    For non verified users, send an activation
+    email instead.
+
+    Accepts both primary and secondary email.
+
+    If there is no user with the requested email,
+    a successful response is returned.
+    """
+    sendPasswordResetEmail(email: String!): SendPasswordResetEmail
+    """
+
+    Send activation to secondary email.
+
+    User must be verified and confirm password.
+    """
+    sendSecondaryEmailActivation(email: String!, password: String!): SendSecondaryEmailActivation
+    """
+
+    Swap between primary and secondary emails.
+
+    Require password confirmation.
+    """
+    swapEmails(password: String!): SwapEmails
+    """
+
+    Obtain JSON web token for given user.
+
+    Allow to perform login with different fields,
+    and secondary email if set. The fields are
+    defined on settings.
+
+    Not verified users can login by default. This
+    can be changes on settings.
+
+    If user is archived, make it unarchive and
+    return `unarchiving=True` on output.
+    """
+    tokenAuth(email: String, password: String!): ObtainJSONWebToken
+    """
+
+    Update user model fields, defined on settings.
+
+    User must be verified.
+    """
+    updateAccount(firstName: String, lastName: String): UpdateAccount
+    """
+
+    Verify user account.
+
+    Receive the token that was sent by email.
+    If the token is valid, make the user verified
+    by making the `user.status.verified` field true.
+    """
+    verifyAccount(token: String!): VerifyAccount
+    """
+
+    Verify user secondary email.
+
+    Receive the token that was sent by email.
+    User is already verified when using this mutation.
+
+    If the token is valid, add the secondary email
+    to `user.status.secondary_email` field.
+
+    Note that until the secondary email is verified,
+    it has not been saved anywhere beyond the token,
+    so it can still be used to create a new account.
+    After being verified, it will no longer be available.
+    """
+    verifySecondaryEmail(token: String!): VerifySecondaryEmail
+    "Same as `grapgql_jwt` implementation, with standard output."
+    verifyToken(token: String!): VerifyToken
+}
+
+"""
+
+Obtain JSON web token for given user.
+
+Allow to perform login with different fields,
+and secondary email if set. The fields are
+defined on settings.
+
+Not verified users can login by default. This
+can be changes on settings.
+
+If user is archived, make it unarchive and
+return `unarchiving=True` on output.
+"""
+type ObtainJSONWebToken {
+    errors: ExpectedErrorType
+    refreshToken: String
+    success: Boolean
+    token: String
+    unarchiving: Boolean
+    user: UserNode
+}
+
+"The Relay compliant `PageInfo` type, containing data necessary to paginate this connection."
+type PageInfo {
+    "When paginating forwards, the cursor to continue."
+    endCursor: String
+    "When paginating forwards, are there more items?"
+    hasNextPage: Boolean!
+    "When paginating backwards, are there more items?"
+    hasPreviousPage: Boolean!
+    "When paginating backwards, the cursor to continue."
+    startCursor: String
+}
+
+"""
+
+Change account password when user knows the old password.
+
+A new token and refresh token are sent. User must be verified.
+"""
+type PasswordChange {
+    errors: ExpectedErrorType
+    refreshToken: String
+    success: Boolean
+    token: String
+}
+
+"""
+
+Change user password without old password.
+
+Receive the token that was sent by email.
+
+If token and new passwords are valid, update
+user password and in case of using refresh
+tokens, revoke all of them.
+
+Also, if user has not been verified yet, verify it.
+"""
+type PasswordReset {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type Query {
+    allergen(id: ID!): AllergenNode
+    allergenTranslation(id: ID!): AllergenTranslationNode
+    allergenTranslations: AllergenTranslationList
+    allergens: AllergenList
+    booking(id: ID!): BookingNode
+    bookings: BookingList
+    categories: CategoryList
+    category(id: ID!): CategoryNode
+    categoryTranslation(id: ID!): CategoryTranslationNode
+    categoryTranslations: CategoryTranslationList
+    dummies: DummyList
+    dummy(id: ID!): DummyNode
+    language(id: ID!): LanguageNode
+    languages: LanguageList
+    me: UserNode
+    menuItem(id: ID!): MenuItemNode
+    menuItemTranslation(id: ID!): MenuItemTranslationNode
+    menuItemTranslations: MenuItemTranslationList
+    menuItems(categoryName: String, id: ID, orderBy: String = "-price"): MenuItemList
+    table(id: ID!): TableNode
+    tables: TableList
+    "The ID of the object"
+    user(id: ID!): UserNode
+    users(after: String, before: String, email: String, first: Int, isActive: Boolean, last: Int, status_Archived: Boolean, status_SecondaryEmail: String, status_Verified: Boolean, username: String, username_Icontains: String, username_Istartswith: String): UserNodeConnection
+}
+
+"Same as `grapgql_jwt` implementation, with standard output."
+type RefreshToken {
+    errors: ExpectedErrorType
+    payload: GenericScalar
+    refreshToken: String
+    success: Boolean
+    token: String
+}
+
+"""
+
+Register user with fields defined in the settings.
+
+If the email field of the user model is part of the
+registration fields (default), check if there is
+no user with that email or as a secondary email.
+
+If it exists, it does not register the user,
+even if the email field is not defined as unique
+(default of the default django user model).
+
+When creating the user, it also creates a `UserStatus`
+related to that user, making it possible to track
+if the user is archived, verified and has a secondary
+email.
+
+Send account verification email.
+
+If allowed to not verified users login, return token.
+"""
+type Register {
+    errors: ExpectedErrorType
+    refreshToken: String
+    success: Boolean
+    token: String
+}
+
+"""
+
+Sends activation email.
+
+It is called resend because theoretically
+the first activation email was sent when
+the user registered.
+
+If there is no user with the requested email,
+a successful response is returned.
+"""
+type ResendActivationEmail {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+"Same as `grapgql_jwt` implementation, with standard output."
+type RevokeToken {
+    errors: ExpectedErrorType
+    revoked: Int
+    success: Boolean
+}
+
+"""
+
+Send password reset email.
+
+For non verified users, send an activation
+email instead.
+
+Accepts both primary and secondary email.
+
+If there is no user with the requested email,
+a successful response is returned.
+"""
+type SendPasswordResetEmail {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+"""
+
+Send activation to secondary email.
+
+User must be verified and confirm password.
+"""
+type SendSecondaryEmailActivation {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type Subscription {
+    hello: String
+}
+
+"""
+
+Swap between primary and secondary emails.
+
+Require password confirmation.
+"""
+type SwapEmails {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type TableList {
+    data: [TableNode]
+}
+
+type TableNode {
+    code: Int!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    name: String!
+}
+
+"""
+
+Update user model fields, defined on settings.
+
+User must be verified.
+"""
+type UpdateAccount {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+type UserNode implements Node {
+    archived: Boolean
+    dateJoined: DateTime!
+    email: String!
+    firstName: String!
+    "The ID of the object."
+    id: ID!
+    "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+    isActive: Boolean!
+    "Designates whether the user can log into this admin site."
+    isStaff: Boolean!
+    "Designates that this user has all permissions without explicitly assigning them."
+    isSuperuser: Boolean!
+    lastLogin: DateTime
+    lastName: String!
+    pk: Int
+    secondaryEmail: String
+    "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+    username: String!
+    verified: Boolean
+}
+
+type UserNodeConnection {
+    "Contains the nodes in this connection."
+    edges: [UserNodeEdge]!
+    "Pagination data for this connection."
+    pageInfo: PageInfo!
+}
+
+"A Relay edge containing a `UserNode` and its cursor."
+type UserNodeEdge {
+    "A cursor for use in pagination"
+    cursor: String!
+    "The item at the end of the edge"
+    node: UserNode
+}
+
+"""
+
+Verify user account.
+
+Receive the token that was sent by email.
+If the token is valid, make the user verified
+by making the `user.status.verified` field true.
+"""
+type VerifyAccount {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+"""
+
+Verify user secondary email.
+
+Receive the token that was sent by email.
+User is already verified when using this mutation.
+
+If the token is valid, add the secondary email
+to `user.status.secondary_email` field.
+
+Note that until the secondary email is verified,
+it has not been saved anywhere beyond the token,
+so it can still be used to create a new account.
+After being verified, it will no longer be available.
+"""
+type VerifySecondaryEmail {
+    errors: ExpectedErrorType
+    success: Boolean
+}
+
+"Same as `grapgql_jwt` implementation, with standard output."
+type VerifyToken {
+    errors: ExpectedErrorType
+    payload: GenericScalar
+    success: Boolean
+}
+
+input BookingInput {
+    dateTime: DateTime
+    numberOfPersons: Int
+    phoneNumber: String
+    table: String
+}
+
+input CategoryInput {
+    internalName: String
+}
+
+input DummyInput {
+    testAge: Int
+    testName: String
+}
+
+input LanguageInput {
+    code: String
+    name: String
+}
+
+
+"""
+Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""
+Errors messages and codes mapped to
+fields or non fields errors.
+Example:
+{
+field_name: [
+{
+"message": "error message",
+"code": "error_code"
+            }
+],
+other_field: [
+{
+"message": "error message",
+"code": "error_code"
+            }
+],
+nonFieldErrors: [
+{
+"message": "error message",
+"code": "error_code"
+            }
+]
+}
+"""
+scalar ExpectedErrorType
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
