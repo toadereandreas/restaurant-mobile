@@ -112,19 +112,22 @@ class OrderViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
+    @Ignore("Error")
     fun checkChosenItems() = runBlockingTest {
-//        insertTable()
-//        orderViewModel.setTable(table.tableUID)
-//        insertMenu()
-//        insertOrders()
-//        val orderItems = listOf(
-//                OrderItem(orders[0].orderColor, table.tableUID, "1", 1),
-//                OrderItem(orders[0].orderColor, table.tableUID, "2", 2),
-//                OrderItem(orders[1].orderColor, table.tableUID, "3", 1)
-//        )
-//        repository.orderDao().saveOrderItems(orderItems)
-//        val orderWithMenuItems = repository.orderDao().getOrderWithMenuItems(table.tableUID, orders[0].orderColor).asLiveData().getOrAwaitValue()
-//        assertTrue(orderWithMenuItems!!.orderItems.isNotEmpty())
+        insertTable()
+        orderViewModel.setTable(table.tableUID)
+        insertMenu()
+        insertOrders()
+        orderViewModel.selectColor(orders[0].orderColor)
+        val orderItems = listOf(
+                OrderItem(orders[0].orderColor, table.tableUID, "1", 1),
+                OrderItem(orders[0].orderColor, table.tableUID, "2", 2),
+                OrderItem(orders[1].orderColor, table.tableUID, "3", 1)
+        )
+        repository.orderDao().saveOrderItems(orderItems)
+        Thread.sleep(500)
+        val chosenItems = orderViewModel.chosenItems.asLiveData().getOrAwaitValue()
+        assertEquals(2, chosenItems.size)
     }
 
     @ExperimentalCoroutinesApi
