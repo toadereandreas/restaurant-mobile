@@ -8,7 +8,7 @@ data class OrderItemWithMenuItem(
         @Embedded
         val orderItem: OrderItem,
         @Relation(
-                parentColumn = "orderColor",
+                parentColumn = "menuItemUID",
                 entityColumn = "menuItemUID"
         )
         val menuItem: MenuItem
