@@ -112,7 +112,6 @@ class OrderViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    @Ignore("Error")
     fun checkChosenItems() = runBlockingTest {
         insertTable()
         orderViewModel.setTable(table.tableUID)
@@ -120,9 +119,9 @@ class OrderViewModelTest {
         insertOrders()
         orderViewModel.selectColor(orders[0].orderColor)
         val orderItems = listOf(
-                OrderItem(orders[0].orderColor, table.tableUID, "1", 1),
-                OrderItem(orders[0].orderColor, table.tableUID, "2", 2),
-                OrderItem(orders[1].orderColor, table.tableUID, "3", 1)
+                OrderItem(orders[0].orderColor, table.tableUID, menu[0].menuItemUID, 1),
+                OrderItem(orders[0].orderColor, table.tableUID, menu[1].menuItemUID, 2),
+                OrderItem(orders[1].orderColor, table.tableUID, menu[2].menuItemUID, 1)
         )
         repository.orderDao().saveOrderItems(orderItems)
         Thread.sleep(500)
