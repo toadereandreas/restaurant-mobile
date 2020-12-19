@@ -7,133 +7,154 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.gradysbooch.restaurant.GetMenuItemsQuery
 import com.gradysbooch.restaurant.LoginMutation
 import com.gradysbooch.restaurant.model.*
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderItemWebSocketListener
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderWebSocketListener
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.TableWebSocketListener
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import kotlinx.coroutines.flow.callbackFlow
+import okhttp3.*
 import kotlin.math.roundToInt
 
-class NetworkRepository(context: Context, email: String, password: String) :
-    NetworkRepositoryInterface {
+private const val WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/"
+private const val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
+private const val EMAIL = "admin@welcome.com"
+private const val PASSWORD = "welcome"
+//"http://restaurant.playgroundev.com/graphql/"
+//"http://halex193.go.ro:8000/graphql/"
+
+class NetworkRepository(context: Context) : NetworkRepositoryInterface
+{
+    private val gson = Gson()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val internalOnlineStatus = MutableStateFlow(false)
     override val onlineStatus: Flow<Boolean> = internalOnlineStatus
 
-    private val orderItemWebSocketListener = OrderItemWebSocketListener(internalOnlineStatus)
-    private val orderWebSocketListener = OrderWebSocketListener(internalOnlineStatus)
-    private val tableWebSocketListener = TableWebSocketListener(internalOnlineStatus)
-
-    private lateinit var ORDER_ITEM_WEBSOCKET_URL: String
-    private lateinit var ORDER_WEBSOCKET_URL: String
-    private lateinit var TABLE_WEBSOCKET_URL: String
-    private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
-    //"http://restaurant.playgroundev.com/graphql/"
-    //"http://halex193.go.ro:8000/graphql/"
-
     private val authorizationInterceptor = AuthorizationInterceptor("")
-    private val okHttpClient =
-        OkHttpClient.Builder().addInterceptor(authorizationInterceptor).build()
+    private val okHttpClient = OkHttpClient.Builder().addInterceptor(authorizationInterceptor).build()
     private val apolloClient = ApolloClient.builder().serverUrl(GRAPHQL_URL).build()
 
-    init {
-        LoginToBackend(email, password)
+    private var userIdCache: Int? = null
 
-        okHttpClient.newWebSocket(
-            Request.Builder().url(ORDER_ITEM_WEBSOCKET_URL).build(),
-            orderItemWebSocketListener
-        )
-        okHttpClient.newWebSocket(
-            Request.Builder().url(ORDER_WEBSOCKET_URL).build(),
-            orderWebSocketListener
-        )
-        okHttpClient.newWebSocket(
-            Request.Builder().url(TABLE_WEBSOCKET_URL).build(),
-            tableWebSocketListener
-        )
+    private suspend fun getUserId(): Int
+    {
+        userIdCache ?: run {
+            login()
+        }
+        return userIdCache ?: error("Null user id")
     }
 
-    //those urls are passed tothe socket listeners, by value (their refferences are) so, it should work just fine, as long as you don't make a request before
-    //the serve has had a chance to give you the userid and token. if that happens, I'll run this blocking
-    //todo look into errors: userID error is returned for wrong credentials
-    fun LoginToBackend(email: String, password: String) = runBlocking {
+    private suspend fun login()
+    {
+        val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD)).await().data?.tokenAuth
+        authorizationInterceptor.token = login?.token
+                ?: error("ApolloFailure: Received login token null")
 
-        val login = apolloClient.mutate(LoginMutation(Input.fromNullable(email), password))
-            .await().data?.tokenAuth
+        val userId = login.user?.id ?: error("ApolloFailure: Received login user id null")
 
-        login?.token ?: runBlocking {
-            internalOnlineStatus.emit(false)
-            error("ApolloFailure: Received login token null")
-        }
-        login.user?.id ?: runBlocking {
-            internalOnlineStatus.emit(false)
-            error("ApolloFailure: Received login user id null")
-        }
-
-        authorizationInterceptor.token = login.token
-
-        ORDER_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/order/" + login.user.id + "/"
-        ORDER_ITEM_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/ordermenuitem/" + login.user.id + "/"
-        TABLE_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/serving/" + login.user.id + "/"
-
-        internalOnlineStatus.emit(true)
+        //TODO base64 decode + split
     }
 
+    override suspend fun getMenuItems(): Set<MenuItem>
+    {
+        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
+                ?: error("ApolloFailure: menu items returned null.")
 
-    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
-        try {
+        return list.filterNotNull()
+                .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
+    }
+
+    override fun getTables(): Flow<Set<Table>> = subscribe("serving")
+
+    override fun clientOrders(): Flow<List<Order>> = subscribe("order")
+
+    override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem")
+
+    override suspend fun clearCall(tableUID: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unlockOrder(tableUID: String, color: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lockOrder(tableUID: String, color: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T
+    {
+        try
+        {
             val result = (apolloClient.query(GQLQuery).await().data as? T
-                ?: error("ApolloFailure: Returned null."))
+                    ?: error("ApolloFailure: Returned null."))
 
             internalOnlineStatus.emit(true)
             return result
 
-        } catch (e: ApolloException) {
+        } catch (e: ApolloException)
+        {
             internalOnlineStatus.emit(false)
             throw e
         }
     }
 
-    override suspend fun getMenuItems(): Set<MenuItem> {
-        val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
-            ?: error("ApolloFailure: menu items returned null.")
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun <T> subscribe(endpoint: String): Flow<T> = callbackFlow {
+        val listener = webSocketListener(channel)
 
-        return list.filterNotNull()
-            .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
+        val userId = getUserId()
+
+        val websocket = okHttpClient.newWebSocket(
+                Request.Builder().url("$WEBSOCKET_URL/$endpoint/$userId").build(),
+                listener
+        )
+
+        awaitClose { websocket.close(1001, "Listener closed") }
     }
 
-    override fun getTables(): Flow<Set<Table>> {
-        return tableWebSocketListener.getFlow()
-    }
+    private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>) = object : WebSocketListener()
+    {
+        override fun onMessage(webSocket: WebSocket, text: String)
+        {
+            val receivedValue: T = gson.fromJson(text, object : TypeToken<T>()
+            {}.type)
 
-    override fun clientOrders(): Flow<List<Order>> {
-        return orderWebSocketListener.getFlow()
-    }
+            try
+            {
+                channel.sendBlocking(receivedValue)
+            } catch (e: Exception)
+            {
+                //Ignored
+            }
+        }
 
-    override fun orderItems(): Flow<List<OrderItem>> {
-        return orderItemWebSocketListener.getFlow()
-    }
+        override fun onFailure(webSocket: WebSocket, cause: Throwable, response: Response?)
+        {
+            cancel(CancellationException("Websocket error", cause))
+        }
 
-    override suspend fun clearCall(tableUID: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun unlockOrder(tableUID: String, color: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun lockOrder(tableUID: String, color: String) {
-        TODO("Not yet implemented")
+        override fun onClosed(webSocket: WebSocket, code: Int, reason: String)
+        {
+            channel.close()
+        }
     }
 }
