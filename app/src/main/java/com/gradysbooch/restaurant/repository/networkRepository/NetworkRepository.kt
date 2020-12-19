@@ -14,17 +14,22 @@ import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderI
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderWebSocketListener
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.TableWebSocketListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import kotlin.math.log
 import kotlin.math.roundToInt
 
-class NetworkRepository(context: Context) : NetworkRepositoryInterface {
+class NetworkRepository(context: Context, email: String, password: String) : NetworkRepositoryInterface {
 
-    private val ORDER_ITEM_WEBSOCKET_URL = "ws://echo.websocket.org"
-    private val ORDER_WEBSOCKET_URL = "ws://echo.websocket.org"
-    private val TABLE_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/order/"
+    private lateinit var USER_TOKEN : String
+    private lateinit var ORDER_ITEM_WEBSOCKET_URL : String
+    private lateinit var ORDER_WEBSOCKET_URL : String
+    private lateinit var TABLE_WEBSOCKET_URL : String
     private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
     //"http://restaurant.playgroundev.com/graphql/"
     //"http://halex193.go.ro:8000/graphql/"
@@ -43,6 +48,18 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     private val tableWebSocketListener = TableWebSocketListener(internalOnlineStatus)
 
     init {
+        runBlocking {
+            //The plan here is to run the login request, and setup the links before actually setting up the sockets
+            //albeit, this might be inconsequential due to the fact that I'm sending variables to those constructors, but whatever
+
+            val login = apolloClient.mutate(LoginMutation(Input.fromNullable(email), password)).await().data?.tokenAuth ?: error("ApolloFailure: login is null.")
+            val userID = login.user?.id ?: error("ApolloFailure: user id null")
+
+            USER_TOKEN = login.token ?: error("ApolloFailure: login token null")
+            ORDER_WEBSOCKET_URL = 
+
+        }
+
         okHttpClient.newWebSocket(
             Request.Builder().url(ORDER_ITEM_WEBSOCKET_URL).build(),
             orderItemWebSocketListener
@@ -55,8 +72,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             Request.Builder().url(TABLE_WEBSOCKET_URL).build(),
             tableWebSocketListener
         )
-
-        //todo do login request
     }
 
     private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
@@ -106,9 +121,5 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     override suspend fun lockOrder(tableUID: String, color: String) {
         TODO("Not yet implemented")
-    }
-
-    override suspend fun login(email: String, password: String) : String {
-        return apolloClient.mutate(LoginMutation(Input.fromNullable(email), password)).await().data?.tokenAuth?.token ?: error("ApolloFailure: login token is null.")
     }
 }

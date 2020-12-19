@@ -22,6 +22,4 @@ interface NetworkRepositoryInterface
     suspend fun unlockOrder(tableUID: String, color: String)
 
     suspend fun lockOrder(tableUID: String, color: String)
-
-    suspend fun login(email: String, password: String) : String
 }
