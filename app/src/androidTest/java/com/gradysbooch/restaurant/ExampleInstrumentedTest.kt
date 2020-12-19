@@ -21,15 +21,11 @@ import org.junit.Before
 class ExampleInstrumentedTest
 {
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    val networkRepo = NetworkRepository(appContext)
+    val networkRepo = NetworkRepository(appContext, "admin@welcome.com", "welcome")
 
     @Test
     fun useAppContext()
     {
-        val q : String
-        runBlocking {
-            q = networkRepo.login("admin@welcome.com", "welcome")
-        }
-        Log.d("UndoTag", q)
+        Thread.sleep(3000)
     }
 }

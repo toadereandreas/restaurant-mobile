@@ -14,31 +14,15 @@ import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderI
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderWebSocketListener
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.TableWebSocketListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import kotlin.math.log
 import kotlin.math.roundToInt
 
-class NetworkRepository(context: Context, email: String, password: String) : NetworkRepositoryInterface {
-
-    private lateinit var USER_TOKEN : String
-    private lateinit var ORDER_ITEM_WEBSOCKET_URL : String
-    private lateinit var ORDER_WEBSOCKET_URL : String
-    private lateinit var TABLE_WEBSOCKET_URL : String
-    private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
-    //"http://restaurant.playgroundev.com/graphql/"
-    //"http://halex193.go.ro:8000/graphql/"
-
-    private val okHttpClient = OkHttpClient.Builder().build()
-    //note-to-self: This guy's threads and connections are released automatically, no need to deal with that
-
-    private val apolloClient = ApolloClient.builder().serverUrl(GRAPHQL_URL).build()
-
+class NetworkRepository(context: Context, email: String, password: String) :
+    NetworkRepositoryInterface {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val internalOnlineStatus = MutableStateFlow(false)
     override val onlineStatus: Flow<Boolean> = internalOnlineStatus
@@ -47,18 +31,20 @@ class NetworkRepository(context: Context, email: String, password: String) : Net
     private val orderWebSocketListener = OrderWebSocketListener(internalOnlineStatus)
     private val tableWebSocketListener = TableWebSocketListener(internalOnlineStatus)
 
+    private lateinit var ORDER_ITEM_WEBSOCKET_URL: String
+    private lateinit var ORDER_WEBSOCKET_URL: String
+    private lateinit var TABLE_WEBSOCKET_URL: String
+    private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
+    //"http://restaurant.playgroundev.com/graphql/"
+    //"http://halex193.go.ro:8000/graphql/"
+
+    private val authorizationInterceptor = AuthorizationInterceptor("")
+    private val okHttpClient =
+        OkHttpClient.Builder().addInterceptor(authorizationInterceptor).build()
+    private val apolloClient = ApolloClient.builder().serverUrl(GRAPHQL_URL).build()
+
     init {
-        runBlocking {
-            //The plan here is to run the login request, and setup the links before actually setting up the sockets
-            //albeit, this might be inconsequential due to the fact that I'm sending variables to those constructors, but whatever
-
-            val login = apolloClient.mutate(LoginMutation(Input.fromNullable(email), password)).await().data?.tokenAuth ?: error("ApolloFailure: login is null.")
-            val userID = login.user?.id ?: error("ApolloFailure: user id null")
-
-            USER_TOKEN = login.token ?: error("ApolloFailure: login token null")
-            ORDER_WEBSOCKET_URL = 
-
-        }
+        LoginToBackend(email, password)
 
         okHttpClient.newWebSocket(
             Request.Builder().url(ORDER_ITEM_WEBSOCKET_URL).build(),
@@ -73,6 +59,33 @@ class NetworkRepository(context: Context, email: String, password: String) : Net
             tableWebSocketListener
         )
     }
+
+    //those urls are passed tothe socket listeners, by value (their refferences are) so, it should work just fine, as long as you don't make a request before
+    //the serve has had a chance to give you the userid and token. if that happens, I'll run this blocking
+    //todo look into errors: userID error is returned for wrong credentials
+    fun LoginToBackend(email: String, password: String) = runBlocking {
+
+        val login = apolloClient.mutate(LoginMutation(Input.fromNullable(email), password))
+            .await().data?.tokenAuth
+
+        login?.token ?: runBlocking {
+            internalOnlineStatus.emit(false)
+            error("ApolloFailure: Received login token null")
+        }
+        login.user?.id ?: runBlocking {
+            internalOnlineStatus.emit(false)
+            error("ApolloFailure: Received login user id null")
+        }
+
+        authorizationInterceptor.token = login.token
+
+        ORDER_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/order/" + login.user.id + "/"
+        ORDER_ITEM_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/ordermenuitem/" + login.user.id + "/"
+        TABLE_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/serving/" + login.user.id + "/"
+
+        internalOnlineStatus.emit(true)
+    }
+
 
     private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
         try {
@@ -92,7 +105,8 @@ class NetworkRepository(context: Context, email: String, password: String) : Net
         val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
             ?: error("ApolloFailure: menu items returned null.")
 
-        return list.filterNotNull().map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
+        return list.filterNotNull()
+            .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
     override fun getTables(): Flow<Set<Table>> {

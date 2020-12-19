@@ -23,6 +23,8 @@ class OrderWebSocketListener(val internalOnlineStatus: MutableStateFlow<Boolean>
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
+        Log.d("UndoTag", text)
+
         val receivedValue = gson.fromJson<ArrayList<Order>>(text, object: TypeToken<ArrayList<Order>>(){}.type)
 
         GlobalScope.launch {

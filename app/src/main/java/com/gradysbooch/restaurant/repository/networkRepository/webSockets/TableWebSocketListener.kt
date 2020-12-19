@@ -25,6 +25,8 @@ class TableWebSocketListener(val internalOnlineStatus: MutableStateFlow<Boolean>
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
+        Log.d("UndoTag", text)
+
         val receivedValue = gson.fromJson<Set<Table>>(text, object: TypeToken<Set<Table>>(){}.type)
 
         GlobalScope.launch {
