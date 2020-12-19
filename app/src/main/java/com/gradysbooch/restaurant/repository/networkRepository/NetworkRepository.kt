@@ -2,11 +2,13 @@ package com.gradysbooch.restaurant.repository.networkRepository
 
 import android.content.Context
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
 import com.gradysbooch.restaurant.GetMenuItemsQuery
+import com.gradysbooch.restaurant.LoginMutation
 import com.gradysbooch.restaurant.model.*
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderItemWebSocketListener
 import com.gradysbooch.restaurant.repository.networkRepository.webSockets.OrderWebSocketListener
@@ -22,9 +24,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     private val ORDER_ITEM_WEBSOCKET_URL = "ws://echo.websocket.org"
     private val ORDER_WEBSOCKET_URL = "ws://echo.websocket.org"
-    private val TABLE_WEBSOCKET_URL = "ws://echo.websocket.org"
-    private val GRAPHQL_URL = "http://halex193.go.ro:8000/graphql/"
-    //"https://restaurant.playgroundev.com/graphql/"
+    private val TABLE_WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws/order/"
+    private val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
+    //"http://restaurant.playgroundev.com/graphql/"
+    //"http://halex193.go.ro:8000/graphql/"
 
     private val okHttpClient = OkHttpClient.Builder().build()
     //note-to-self: This guy's threads and connections are released automatically, no need to deal with that
@@ -52,6 +55,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             Request.Builder().url(TABLE_WEBSOCKET_URL).build(),
             tableWebSocketListener
         )
+
+        //todo do login request
     }
 
     private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
@@ -103,4 +108,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         TODO("Not yet implemented")
     }
 
+    override suspend fun login(email: String, password: String) : String {
+        return apolloClient.mutate(LoginMutation(Input.fromNullable(email), password)).await().data?.tokenAuth?.token ?: error("ApolloFailure: login token is null.")
+    }
 }

@@ -1,8 +1,10 @@
 package com.gradysbooch.restaurant
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.gradysbooch.restaurant.repository.networkRepository.NetworkRepository
+import kotlinx.coroutines.runBlocking
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,8 +26,10 @@ class ExampleInstrumentedTest
     @Test
     fun useAppContext()
     {
-
-        Thread.sleep(10000)
-
+        val q : String
+        runBlocking {
+            q = networkRepo.login("admin@welcome.com", "welcome")
+        }
+        Log.d("UndoTag", q)
     }
 }
