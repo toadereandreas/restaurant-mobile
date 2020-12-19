@@ -17,7 +17,7 @@ class Repository private constructor(context: Context) : DataAccess by buildRoom
         orderDao().clearTable(tableUID)
     }
 
-    val networkRepository: NetworkRepositoryInterface = NetworkRepository(context, "email", "password")
+    val networkRepository: NetworkRepositoryInterface = NetworkRepository(context)
 
     companion object
     {
