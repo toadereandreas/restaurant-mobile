@@ -1,0 +1,22 @@
+mutation updateOrder($id: ID!, $serving : String, $color : String, $locked : Boolean, $note: String){
+    updateOrder(id: $id, input: {serving: $serving, color: $color, locked: $locked, note: $note}){
+        errors{
+            messages
+            field
+        }
+        order{
+            id
+            locked
+            color
+            note
+            serving{
+                called
+                code
+                id
+                name
+                userId
+            }
+            servingId
+        }
+    }
+}

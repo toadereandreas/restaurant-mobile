@@ -25,8 +25,8 @@ class ExampleInstrumentedTest
     val networkRepo = NetworkRepository(appContext)
 
     @Test
-    fun useAppContext()
-    = runBlocking{
-        networkRepo.getTables().collect { result -> Log.d("UndoTag", result.toString()) }
+    fun useAppContext(): Unit = runBlocking{
+        //networkRepo.clientOrders().collect { item -> Log.d("UndoTag", item.toString()) }
+        networkRepo.getMenuItems()
     }
 }

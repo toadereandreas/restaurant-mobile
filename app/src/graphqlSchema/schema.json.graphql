@@ -3,7 +3,6 @@
 schema {
     query: Query
     mutation: Mutation
-    subscription: Subscription
 }
 
 "An object with an ID"
@@ -117,6 +116,30 @@ type CreateLanguageMutation {
     language: LanguageNode
 }
 
+"Creates a order_menu_item."
+type CreateOrderMenuItemMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Created order_menu_item."
+    orderMenuItem: OrderMenuItemNode
+}
+
+"Creates an order."
+type CreateOrderMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Created order."
+    order: OrderNode
+}
+
+"Creates a serving."
+type CreateServingMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Created serving."
+    serving: ServingNode
+}
+
 """
 
 Delete account permanently or make `user.is_active=False`.
@@ -129,6 +152,18 @@ User must be verified and confirm password.
 type DeleteAccount {
     errors: ExpectedErrorType
     success: Boolean
+}
+
+type DeleteOrderMenuItemMutation {
+    id: ID
+}
+
+type DeleteOrderMutation {
+    id: ID
+}
+
+type DeleteServingMutation {
+    id: ID
 }
 
 type DummyList {
@@ -226,6 +261,21 @@ type Mutation {
         "Fields required to create a language."
         input: LanguageInput!
     ): CreateLanguageMutation
+    "Creates an order."
+    createOrder(
+        "Fields required to create an order."
+        input: OrderInput!
+    ): CreateOrderMutation
+    "Creates a order_menu_item."
+    createOrderMenuItem(
+        "Fields required to create a order_menu_item."
+        input: OrderMenuItemInput!
+    ): CreateOrderMenuItemMutation
+    "Creates a serving."
+    createServing(
+        "Fields required to create a serving."
+        input: ServingInput!
+    ): CreateServingMutation
     """
 
     Delete account permanently or make `user.is_active=False`.
@@ -236,6 +286,18 @@ type Mutation {
     User must be verified and confirm password.
     """
     deleteAccount(password: String!): DeleteAccount
+    deleteOrder(
+        "id to delete an order"
+        id: ID!
+    ): DeleteOrderMutation
+    deleteOrderMenuItem(
+        "id to delete an OrderMenuItem"
+        id: ID!
+    ): DeleteOrderMenuItemMutation
+    deleteServing(
+        "id to delete a serving"
+        id: ID!
+    ): DeleteServingMutation
     """
 
     Change account password when user knows the old password.
@@ -314,6 +376,16 @@ type Mutation {
     User must be verified and confirm password.
     """
     sendSecondaryEmailActivation(email: String!, password: String!): SendSecondaryEmailActivation
+    setCalled(
+        called: Boolean!,
+        "id to delete an order"
+        id: ID!
+    ): SetCalledMutation
+    setLocked(
+        "id to delete an order"
+        id: ID!,
+        locked: Boolean!
+    ): SetLockedMutation
     """
 
     Swap between primary and secondary emails.
@@ -343,6 +415,27 @@ type Mutation {
     User must be verified.
     """
     updateAccount(firstName: String, lastName: String): UpdateAccount
+    "Updates an order."
+    updateOrder(
+        "id to update an order"
+        id: ID!,
+        "Fields required to create an order."
+        input: OrderInput!
+    ): UpdateOrderMutation
+    "Updates an OrderMenuItem."
+    updateOrderMenuItem(
+        "id to update an OrderMenuItem"
+        id: ID!,
+        "Fields required to create an OrderMenuItem."
+        input: OrderMenuItemInput!
+    ): UpdateOrderMenuItemMutation
+    "Updates a serving."
+    updateServing(
+        "id to update a serving"
+        id: ID!,
+        "Fields required to create a serving."
+        input: ServingInput!
+    ): UpdateServingMutation
     """
 
     Verify user account.
@@ -393,6 +486,37 @@ type ObtainJSONWebToken {
     token: String
     unarchiving: Boolean
     user: UserNode
+}
+
+type OrderList {
+    data: [OrderNode]
+}
+
+type OrderMenuItemList {
+    data: [OrderMenuItemNode]
+}
+
+type OrderMenuItemNode {
+    color: String
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    menuItem: MenuItemNode!
+    menuItemId: ID
+    order: OrderNode!
+    quantity: Int!
+    servingId: ID
+}
+
+type OrderNode {
+    color: String!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    locked: Boolean
+    note: String!
+    serving: ServingNode!
+    servingId: ID
 }
 
 "The Relay compliant `PageInfo` type, containing data necessary to paginate this connection."
@@ -457,6 +581,12 @@ type Query {
     menuItemTranslation(id: ID!): MenuItemTranslationNode
     menuItemTranslations: MenuItemTranslationList
     menuItems(categoryName: String, id: ID, orderBy: String = "-price"): MenuItemList
+    order(id: ID!): OrderNode
+    orderMenuItem(id: ID!): OrderMenuItemNode
+    orderMenuItems(id: ID): OrderMenuItemList
+    orders: OrderList
+    serving(id: ID!): ServingNode
+    servings(id: ID): ServingList
     table(id: ID!): TableNode
     tables: TableList
     "The ID of the object"
@@ -552,8 +682,28 @@ type SendSecondaryEmailActivation {
     success: Boolean
 }
 
-type Subscription {
-    hello: String
+type ServingList {
+    data: [ServingNode]
+}
+
+type ServingNode {
+    called: Boolean
+    code: String!
+    "Unique global identifier"
+    gid: UUID!
+    id: ID
+    name: String!
+    userId: ID
+}
+
+type SetCalledMutation {
+    called: Boolean
+    id: ID
+}
+
+type SetLockedMutation {
+    id: ID
+    locked: Boolean
 }
 
 """
@@ -590,6 +740,30 @@ type UpdateAccount {
     success: Boolean
 }
 
+"Updates an OrderMenuItem."
+type UpdateOrderMenuItemMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Updated OrderMenuItem."
+    orderMenuItem: OrderMenuItemNode
+}
+
+"Updates an order."
+type UpdateOrderMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Updated order."
+    order: OrderNode
+}
+
+"Updates a serving."
+type UpdateServingMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Updated serving."
+    serving: ServingNode
+}
+
 type UserNode implements Node {
     archived: Boolean
     dateJoined: DateTime!
@@ -607,6 +781,7 @@ type UserNode implements Node {
     lastName: String!
     pk: Int
     secondaryEmail: String
+    servingSet: [ServingNode!]!
     "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
     username: String!
     verified: Boolean
@@ -686,6 +861,26 @@ input DummyInput {
 input LanguageInput {
     code: String
     name: String
+}
+
+input OrderInput {
+    color: String
+    locked: Boolean
+    note: String
+    serving: String
+}
+
+input OrderMenuItemInput {
+    menuItem: String
+    order: String
+    quantity: Int
+}
+
+input ServingInput {
+    called: Boolean
+    code: String
+    name: String
+    user: String
 }
 
 

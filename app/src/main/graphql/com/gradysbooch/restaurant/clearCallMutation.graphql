@@ -1,0 +1,12 @@
+mutation clearCall($id : ID!){
+    updateServing(id: $id, input: {called: false}){
+        errors{
+            messages
+            field
+        }
+        serving{
+            called
+            id
+        }
+    }
+}
