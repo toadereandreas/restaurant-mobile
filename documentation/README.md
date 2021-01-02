@@ -2,7 +2,9 @@
 
 Mobile application for Sputnik's restaurant project
 
-- [Use cases](use-cases.md)
-- [User interface guide](ui-guide.md)
-- [Technologies used](technologies.md)
-- [backend communication](backend-communication.md)
+1. [Use cases](use-cases.md)
+2. [User interface guide](ui-guide.md)
+3. [Technologies used](technologies.md)
+4. [Backend communication](backend-communication.md)
+
+Team composition: Iosif Sechelea, Alexandru Ureche, Ianec Umanschii, [Horațiu Udrea](https://www.halex.ro/)
