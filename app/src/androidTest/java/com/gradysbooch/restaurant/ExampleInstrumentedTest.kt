@@ -26,7 +26,7 @@ class ExampleInstrumentedTest
 
     @Test
     fun useAppContext(): Unit = runBlocking{
-        //networkRepo.clientOrders().collect { item -> Log.d("UndoTag", item.toString()) }
-        networkRepo.getMenuItems()
+        networkRepo.clientOrders().collect { item -> Log.d("UndoTag", item.toString()) }
+        //networkRepo.getMenuItems()
     }
 }

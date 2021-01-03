@@ -27,10 +27,11 @@ import okhttp3.*
 import okio.ByteString.Companion.decodeBase64
 import kotlin.math.roundToInt
 
-private const val WEBSOCKET_URL = "ws://localhost:8000/ws"
-private const val GRAPHQL_URL = "http://localhost:8000/graphql/"
+private const val WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws"
+private const val GRAPHQL_URL = "http://restaurant.playgroundev.com/graphql/"
 private const val EMAIL = "admin@welcome.com"
 private const val PASSWORD = "welcome"
+//"ws://restaurant.playgroundev.com:5000/ws"
 //"http://restaurant.playgroundev.com/graphql/"
 //"http://halex193.go.ro:8000/graphql/"
 
@@ -77,7 +78,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
         val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
 
-        val id = matchingOrder.id as String
+        val id = matchingOrder.gid as String
         val locked = matchingOrder.locked
 
         apolloClient.mutate(UpdateOrderMutation(
@@ -89,13 +90,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) {
-        val id = _queryOrderByForeignKeys(tableUID, color).id as String
+        val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         apolloClient.mutate(UnlockOrderMutation(id))
     }
 
     override suspend fun lockOrder(tableUID: String, color: String) {
-        val id = _queryOrderByForeignKeys(tableUID, color).id as String
+        val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         apolloClient.mutate(LockOrderMutation(id))
     }
