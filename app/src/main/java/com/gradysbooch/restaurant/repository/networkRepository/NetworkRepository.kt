@@ -71,10 +71,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem")
 
-    override suspend fun clearCall(tableUID: String) {
-        apolloClient.mutate(ClearCallMutation(tableUID))
-    }
-
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
         val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
 
@@ -86,21 +82,30 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             Input.fromNullable(orderWithMenuItems.order.tableUID),
             Input.fromNullable(orderWithMenuItems.order.orderColor),
             Input.fromNullable(locked),
-            Input.fromNullable(orderWithMenuItems.order.note)))
+            Input.fromNullable(orderWithMenuItems.order.note))).await()
+    }
+
+    override suspend fun clearCall(tableID: String) {
+        val tableUidProper = _queryTableGidByTableId(tableID)
+
+        Log.d("UndoTag", tableUidProper)
+
+        apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) {
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
-        apolloClient.mutate(UnlockOrderMutation(id))
+        apolloClient.mutate(UnlockOrderMutation(id)).await()
     }
 
     override suspend fun lockOrder(tableUID: String, color: String) {
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
-        apolloClient.mutate(LockOrderMutation(id))
-    }
+        Log.d("UndoTag", id)
 
+        apolloClient.mutate(LockOrderMutation(id)).await()
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun <T> subscribe(endpoint: String): Flow<T> = callbackFlow {
@@ -152,19 +157,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
     }
 
-    private suspend fun _queryOrderByForeignKeys(
-        tableUID: String,
-        color: String
-    ): GetOrdersQuery.Data1 {
-        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
-            ?: error("ApolloFailure: orders returned null.")
-
-        val matchingOrder = orders.filterNotNull()
-            .find { it.color == color && it.servingId == tableUID }
-            ?: error("ApolloFailure: failed to get order id")
-        return matchingOrder
-    }
-
     private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
         try {
             val result = (apolloClient.query(GQLQuery).await().data as? T
@@ -177,5 +169,31 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             internalOnlineStatus.emit(false)
             throw e
         }
+    }
+
+    private suspend fun _queryTableGidByTableId(
+        tableUID: String
+    ): String {
+        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
+            ?: error("ApolloFailure: orders returned null.")
+
+        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}) as String
+        return tableUidProper
+    }
+
+    private suspend fun _queryOrderByForeignKeys(
+        tableUID: String,
+        color: String
+    ): GetOrdersQuery.Data1 {
+        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
+            ?: error("ApolloFailure: orders returned null.")
+
+        Log.d("UndoTag", orders.toString())
+        Log.d("UndoTag", tableUID + " "+ color)
+
+        val matchingOrder = orders.filterNotNull()
+            .find { it.color == color && it.id == tableUID }
+            ?: error("ApolloFailure: failed to get order")
+        return matchingOrder
     }
 }
