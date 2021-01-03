@@ -56,19 +56,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         return userIdCache ?: error("Null user id")
     }
 
-    private suspend fun login() {
-        val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD))
-            .await().data?.tokenAuth
-
-        authorizationInterceptor.token = login?.token
-            ?: error("ApolloFailure: Received login token null")
-
-        val userId = login.user?.id
-            ?: error("ApolloFailure: Received login user id null")
-
-        userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
-    }
-
     override suspend fun getMenuItems(): Set<MenuItem> {
         val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
             ?: error("ApolloFailure: menu items returned null.")
@@ -88,18 +75,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
-        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
-            ?: error("ApolloFailure: orders returned null.")
+        val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
 
-        val id = orders.filterNotNull()
-            .find{it->it.color == orderWithMenuItems.order.orderColor && it.servingId == orderWithMenuItems.order.tableUID}
-            ?.id ?: error("ApolloFailure: failed to get order id")
+        val id = matchingOrder.id as String
+        val locked = matchingOrder.locked
 
-        val locked = orders.filterNotNull()
-            .find{it->it.color == orderWithMenuItems.order.orderColor && it.servingId == orderWithMenuItems.order.tableUID}
-            ?.locked ?: error("ApolloFailure: failed to get order locked")
-
-        apolloClient.mutate(UpdateOrderMutation(id,
+        apolloClient.mutate(UpdateOrderMutation(
+            id,
             Input.fromNullable(orderWithMenuItems.order.tableUID),
             Input.fromNullable(orderWithMenuItems.order.orderColor),
             Input.fromNullable(locked),
@@ -107,40 +89,17 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) {
-        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
-            ?: error("ApolloFailure: orders returned null.")
-
-        val id = orders.filterNotNull()
-            .find{it->it.color == color && it.servingId == tableUID}
-            ?.id ?: error("ApolloFailure: failed to get order id")
+        val id = _queryOrderByForeignKeys(tableUID, color).id as String
 
         apolloClient.mutate(UnlockOrderMutation(id))
     }
 
     override suspend fun lockOrder(tableUID: String, color: String) {
-        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
-            ?: error("ApolloFailure: orders returned null.")
-
-        val id = orders.filterNotNull()
-            .find{it->it.color == color && it.servingId == tableUID}
-            ?.id ?: error("ApolloFailure: failed to get order id")
+        val id = _queryOrderByForeignKeys(tableUID, color).id as String
 
         apolloClient.mutate(LockOrderMutation(id))
     }
 
-    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
-        try {
-            val result = (apolloClient.query(GQLQuery).await().data as? T
-                ?: error("ApolloFailure: Returned null."))
-
-            internalOnlineStatus.emit(true)
-            return result
-
-        } catch (e: ApolloException) {
-            internalOnlineStatus.emit(false)
-            throw e
-        }
-    } //todo function that gets order details from color and tableUID, possibly a dto as well, because we don't have locked in our objects
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun <T> subscribe(endpoint: String): Flow<T> = callbackFlow {
@@ -178,4 +137,44 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
                 channel.close()
             }
         }
+
+    private suspend fun login() {
+        val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD))
+            .await().data?.tokenAuth
+
+        authorizationInterceptor.token = login?.token
+            ?: error("ApolloFailure: Received login token null")
+
+        val userId = login.user?.id
+            ?: error("ApolloFailure: Received login user id null")
+
+        userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
+    }
+
+    private suspend fun _queryOrderByForeignKeys(
+        tableUID: String,
+        color: String
+    ): GetOrdersQuery.Data1 {
+        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
+            ?: error("ApolloFailure: orders returned null.")
+
+        val matchingOrder = orders.filterNotNull()
+            .find { it.color == color && it.servingId == tableUID }
+            ?: error("ApolloFailure: failed to get order id")
+        return matchingOrder
+    }
+
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
+        try {
+            val result = (apolloClient.query(GQLQuery).await().data as? T
+                ?: error("ApolloFailure: Returned null."))
+
+            internalOnlineStatus.emit(true)
+            return result
+
+        } catch (e: ApolloException) {
+            internalOnlineStatus.emit(false)
+            throw e
+        }
+    }
 }
