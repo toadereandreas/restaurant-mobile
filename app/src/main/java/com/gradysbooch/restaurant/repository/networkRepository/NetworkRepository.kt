@@ -122,18 +122,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("UndoTag", "Received from socket for type $type: $text")
 
-
-                try {
-                    val receivedValue: T = gson.fromJson(text, type)
-                }
-                catch (e: Exception){
-                    println("_________________________________________________________________________")
-                    e.printStackTrace()
-                }
                 val receivedValue: T = gson.fromJson(text, type)
-                Log.d("UndoTag", "Gson deserialized value for type $type: $receivedValue")
 
                 try {
                     channel.sendBlocking(receivedValue)

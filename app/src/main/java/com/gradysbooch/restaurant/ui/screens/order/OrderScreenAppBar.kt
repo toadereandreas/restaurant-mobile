@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -110,13 +111,13 @@ class OrderScreenAppBar(
     @Composable
     fun AddCustomerButton() {
         val orderViewModel = viewModel<OrderViewModel>()
-
         RoundedIconButton(
                 modifier = Modifier.padding(4.dp, 0.dp),
                 asset = Icons.Filled.Add,
                 onClick = {
                     // todo Maybe select added customer?
                     orderViewModel.addBullet()
+                    Log.d("UndoTag", "Trying to add bullet")
                 })
     }
 
