@@ -25,7 +25,8 @@ import androidx.navigation.compose.navigate
 
 
 class TablesScreen(
-    private val navController: NavHostController
+    private val navController: NavHostController,
+    private val tableViewModel: TableViewModel
 ) {
     @Composable
     fun Show() {
@@ -49,7 +50,7 @@ class TablesScreen(
 
     @Composable
     fun TablesList() {
-        val tableViewModel = viewModel<TableViewModel>()
+        // val tableViewModel = viewModel<TableViewModel>()
         val tables by tableViewModel.tables.collectAsState(initial = emptyList())
 
         LazyColumnFor(items = tables) {

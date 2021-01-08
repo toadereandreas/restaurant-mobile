@@ -28,10 +28,12 @@ import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import kotlinx.coroutines.flow.map
 
 
-class OrdersList () {
+class OrdersList (
+        private val orderViewModel: OrderViewModel
+) {
     @Composable
     fun Show() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val isAllScreenSelected by orderViewModel.allScreen
                 .collectAsState(initial = true)
 
@@ -42,7 +44,7 @@ class OrdersList () {
 
     @Composable
     fun AllCustomerItemsAndNotes() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val allOrderItems by orderViewModel.allScreenMenuItems
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
@@ -94,7 +96,7 @@ class OrdersList () {
 
     @Composable
     fun OneCustomerItemsAndNote() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
@@ -124,7 +126,7 @@ class OrdersList () {
 
     @Composable
     fun OneCustomerItem(item: Pair<MenuItemDTO, Int>, color: Color) {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         RoundedRowCard(
                 color = color
         ) {

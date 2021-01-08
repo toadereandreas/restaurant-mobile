@@ -20,10 +20,12 @@ import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.flow.map
 
-class MenuItems() {
+class MenuItems(
+        private val orderViewModel: OrderViewModel
+) {
     @Composable
     fun Show() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val isAllScreenSelected by orderViewModel.allScreen
                 .collectAsState(initial = true)
 
@@ -36,7 +38,7 @@ class MenuItems() {
 
     @Composable
     fun FilteredMenuItems(searchText: String) {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val allMenuItems by orderViewModel.menu
                 .collectAsState(initial = emptyList())
 
@@ -48,7 +50,7 @@ class MenuItems() {
 
     @Composable
     fun MenuItemEntry(item: MenuItemDTO) {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedBullet by orderViewModel.bulletList
                 .map { bullets -> bullets.firstOrNull() { it.pressed } }
                 .collectAsState(initial = Bullet("#000", false, false))
