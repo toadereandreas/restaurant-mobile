@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,10 @@ import kotlinx.coroutines.flow.map
 class OrdersList (
         private val orderViewModel: OrderViewModel
 ) {
+    init{
+        Log.d("UndoTag", "OrderList: "+System.identityHashCode(orderViewModel).toString())
+    }
+
     @Composable
     fun Show() {
         // val orderViewModel = viewModel<OrderViewModel>()

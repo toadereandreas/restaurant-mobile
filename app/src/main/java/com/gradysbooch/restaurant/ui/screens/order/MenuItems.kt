@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.material.Text
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,10 @@ import kotlinx.coroutines.flow.map
 class MenuItems(
         private val orderViewModel: OrderViewModel
 ) {
+    init{
+        Log.d("UndoTag", "MenuItems: "+System.identityHashCode(orderViewModel).toString())
+    }
+
     @Composable
     fun Show() {
         // val orderViewModel = viewModel<OrderViewModel>()

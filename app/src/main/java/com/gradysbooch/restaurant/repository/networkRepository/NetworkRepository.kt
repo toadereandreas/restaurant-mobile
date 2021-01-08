@@ -84,9 +84,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun clearCall(tableID: String) {
-        val tableUidProper = _queryTableGidByTableId(tableID)
-
-        Log.d("UndoTag", tableUidProper)
+        val tableUidProper = tableID//_queryTableGidByTableId(tableID)
 
         apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
@@ -168,15 +166,16 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
-    private suspend fun _queryTableGidByTableId(
-        tableUID: String
-    ): String {
-        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
-            ?: error("ApolloFailure: orders returned null.")
-
-        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}) as String
-        return tableUidProper
-    }
+//    private suspend fun _queryTableGidByTableId(
+//        tableUID: String
+//    ): String {
+//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
+//            ?: error("ApolloFailure: orders returned null.")
+//
+//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
+//        Log.d("UndoTag", tableUidProper)
+//        return tableUidProper
+//    }
 
     private suspend fun _queryOrderByForeignKeys(
         tableUID: String,

@@ -123,8 +123,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun setTable(tableId: String)
     {
-        Log.d("UndoTag","Set table says: $tableId")
         this.tableUID.value = tableId
+        Log.d("UndoTag", "setTable: "+System.identityHashCode(this).toString())
+        Log.d("UndoTag", "setTable: "+tableUID.value.toString())
     }
 
     override fun selectAllScreen()
@@ -134,7 +135,8 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun addBullet()
     {
-        Log.d("UndoTag", tableUID.value.toString())
+        Log.d("UndoTag", "addBullet: "+System.identityHashCode(this).toString())
+        Log.d("UndoTag", "addBullet: "+tableUID.value.toString())
 
         viewModelScope.launch {
             tableUID.value?.let { tableUID ->
@@ -147,7 +149,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                 )
             }
 
-            bulletList.collect { Log.d("UndoTag", it.toString()) }
+            bulletList.collect { Log.d("UndoTag", "addBullet: "+it.toString()) }
         }
     }
 

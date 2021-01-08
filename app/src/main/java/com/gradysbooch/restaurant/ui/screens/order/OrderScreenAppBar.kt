@@ -27,6 +27,10 @@ class OrderScreenAppBar(
     private val navController: NavHostController,
     private val orderViewModel: OrderViewModel
 ) {
+    init{
+        Log.d("UndoTag", "OrderScreenAppBar: "+System.identityHashCode(orderViewModel).toString())
+    }
+
     @Composable
     fun Show() {
         // val orderViewModel = viewModel<OrderViewModel>()
@@ -118,7 +122,6 @@ class OrderScreenAppBar(
                 onClick = {
                     // todo Maybe select added customer?
                     orderViewModel.addBullet()
-                    Log.d("UndoTag", "Trying to add bullet")
                 })
     }
 
