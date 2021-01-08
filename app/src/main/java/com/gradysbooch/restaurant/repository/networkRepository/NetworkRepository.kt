@@ -19,12 +19,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import okhttp3.*
 import okio.ByteString.Companion.decodeBase64
+import java.lang.reflect.Type
 import kotlin.math.roundToInt
 
 private const val WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws"
@@ -36,7 +34,7 @@ private const val PASSWORD = "welcome"
 //"http://halex193.go.ro:8000/graphql/"
 
 class NetworkRepository(context: Context) : NetworkRepositoryInterface {
-    private val gson = Gson().newBuilder().excludeFieldsWithoutExposeAnnotation().create()
+    private val gson = Gson().newBuilder().create()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val internalOnlineStatus =
@@ -65,11 +63,11 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
-    override fun getTables(): Flow<Set<Table>> = (subscribe<ArrayList<Table>>("serving")).map { it.toSet() }
+    override fun getTables(): Flow<Set<Table>> = (subscribe<ArrayList<Table>>("serving", object: TypeToken<ArrayList<Table>>(){}.type)).map{ it.toSet() }
 
-    override fun clientOrders(): Flow<List<Order>> = subscribe("order")
+    override fun clientOrders(): Flow<List<Order>> = subscribe("order", object: TypeToken<ArrayList<Order>>(){}.type)
 
-    override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem")
+    override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem",object: TypeToken<ArrayList<OrderItem>>(){}.type)
 
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
         val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
@@ -108,8 +106,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> subscribe(endpoint: String): Flow<T> = callbackFlow {
-        val listener = webSocketListener(channel)
+    private fun <T> subscribe(endpoint: String, type : Type): Flow<T> = callbackFlow {
+        val listener = webSocketListener(channel, type)
 
         val userId = getUserId()
 
@@ -121,12 +119,21 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         awaitClose { websocket.close(1001, "Listener closed") }
     }
 
-    private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>) =
+    private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val receivedValue: T = gson.fromJson(text, object : TypeToken<T>() {}.type)
+                Log.d("UndoTag", "Received from socket for type $type: $text")
 
-                Log.d("UndoTag", "Received from socket: $text")
+
+                try {
+                    val receivedValue: T = gson.fromJson(text, type)
+                }
+                catch (e: Exception){
+                    println("_________________________________________________________________________")
+                    e.printStackTrace()
+                }
+                val receivedValue: T = gson.fromJson(text, type)
+                Log.d("UndoTag", "Gson deserialized value for type $type: $receivedValue")
 
                 try {
                     channel.sendBlocking(receivedValue)
