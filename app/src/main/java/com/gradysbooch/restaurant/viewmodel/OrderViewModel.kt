@@ -27,7 +27,6 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
         }
     }
-    private var tableUIDS = "RAWDATABOYYYY"
     private val tableUID = MutableStateFlow<String?>(null)
     private val activeColor = MutableStateFlow<String?>(null)
     private val searchQuery = MutableStateFlow("")
@@ -126,7 +125,6 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     {
         Log.d("UndoTag","Set table says: $tableId")
         this.tableUID.value = tableId
-        this.tableUIDS = tableId
     }
 
     override fun selectAllScreen()
@@ -136,25 +134,19 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun addBullet()
     {
-        Log.d("UndoTag", tableUIDS)
+        Log.d("UndoTag", tableUID.value.toString())
 
         viewModelScope.launch {
-//            tableUID.value?.let { tableUID ->
-//                repository.orderDao().addOrder(
-//                        Order(
-//                                tableUID,
-//                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
-//                                ""
-//                        )
-//                )
-//            }
-            repository.orderDao().addOrder(
-                Order(
-                    tableUIDS,
-                    ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
-                    ""
+            tableUID.value?.let { tableUID ->
+                repository.orderDao().addOrder(
+                        Order(
+                                tableUID,
+                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                                ""
+                        )
                 )
-            )
+            }
+
             bulletList.collect { Log.d("UndoTag", it.toString()) }
         }
     }
