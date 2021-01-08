@@ -12,5 +12,5 @@ data class OrderWithMenuItems(
                 entityColumn = "orderColor",
                 entity = OrderItem::class
         )
-        var orderItems: List<OrderItemWithMenuItem>
+        var orderItems:  List<OrderItemWithMenuItem>
 )

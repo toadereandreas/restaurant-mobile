@@ -37,17 +37,4 @@ class NetworkRepoTest {
         println(q.toString());
 
     }
-
-    lateinit var instrumentationContext: Context
-
-    @Before
-    fun setup(){
-        //instrumentationContext = InstrumentationRegistry.getContext()
-    }
-
-    @ExperimentalCoroutinesApi
-    @Test
-    fun TestBasicFlow(){
-
-    }
 }
