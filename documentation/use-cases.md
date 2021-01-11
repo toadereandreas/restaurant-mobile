@@ -12,3 +12,9 @@ When no table is selected, the app is listing all the tables in the restaurant. 
 ### 14.3. Order Screen
 When a table is clicked, a new screen is opened, with all the information about the table. The screen contains the code of the table, the clients for this table, each one
 assigned with a color (at most 6 clients per table), and all the orders for each client together with some notes if needed, which can be seen if the waiter click on a certain client.
+
+### 14.4. Table Crearing
+When the client is about to leave and want to pay his order, the waiter can clear the table, and all the orders for this table are removed. The table is ready to wait for another clients.
+
+### 14.5. Conclusion
+This application can be used by any restaurant in order to ease the waiters' work. All they need are android devices. 
