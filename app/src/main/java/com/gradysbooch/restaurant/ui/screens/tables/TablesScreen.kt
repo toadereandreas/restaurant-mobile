@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.tables
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,47 +20,58 @@ import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.viewmodel.TableViewModel
 import androidx.compose.runtime.getValue
-
-@Composable
-fun TablesScreen() {
-    Column {
-        TablesScreenAppBar()
-        TablesList()
-    }
-}
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.navigate
 
 
-@Composable
-fun TablesScreenAppBar() {
-    TopAppBar(title = {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Restaurant")
+class TablesScreen(
+    private val navController: NavHostController,
+    private val tableViewModel: TableViewModel,
+    private val orderViewModel: OrderViewModel,
+) {
+    @Composable
+    fun Show() {
+        Column {
+            TablesScreenAppBar()
+            TablesList()
         }
-    })
-}
+    }
 
-@Composable
-fun TablesList() {
-    val tableViewModel = viewModel<TableViewModel>()
-    val tables by tableViewModel.tables.collectAsState(initial = emptyList())
+    @Composable
+    fun TablesScreenAppBar() {
+        TopAppBar(title = {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Restaurant")
+            }
+        })
+    }
 
-    LazyColumnFor(items = tables) {
-        TableEntry(table = it)
+    @Composable
+    fun TablesList() {
+        // val tableViewModel = viewModel<TableViewModel>()
+        val tables by tableViewModel.tables.collectAsState(initial = emptyList())
+
+        LazyColumnFor(items = tables) {
+            TableEntry(table = it)
+        }
+    }
+
+    @Composable
+    fun TableEntry(table: TableDTO) {
+
+        RoundedButtonRowCard(
+                border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
+                onClick = {
+                    orderViewModel.setTable(table.id)
+                    navController.navigate("orders")
+                }
+        ) {
+            Text(text = table.name)
+        }
     }
 }
 
-@Composable
-fun TableEntry(table: TableDTO) {
-    val orderViewModel = viewModel<OrderViewModel>()
-
-    RoundedButtonRowCard(
-            border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
-            onClick = { orderViewModel.setTable(table.id) }
-    ) {
-        Text(text = table.name)
-    }
-}
 

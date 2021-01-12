@@ -3,25 +3,23 @@ package com.gradysbooch.restaurant.ui.screens.order
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.viewModel
-import com.gradysbooch.restaurant.model.dto.TableDTO
+import androidx.navigation.NavHostController
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 
 @Composable
-fun OrderScreen() {
-    val orderViewModel = viewModel<OrderViewModel>()
-
+fun OrderScreen(
+    navController: NavHostController,
+    orderViewModel: OrderViewModel
+) {
     Column (
             modifier = Modifier.fillMaxSize()
     ){
-        orderViewModel.selectAllScreen()
-        OrderScreenAppBar()
+        OrderScreenAppBar(navController, orderViewModel).Show()
         Column {
-            OrdersList()
-            MenuSubScreen()
+            OrdersList(orderViewModel).Show()
+            MenuItems(orderViewModel).Show()
         }
     }
 }

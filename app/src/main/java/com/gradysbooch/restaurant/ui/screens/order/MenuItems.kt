@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
-import androidx.compose.foundation.Text
+import android.util.Log
+import androidx.compose.material.Text
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumnFor
@@ -11,56 +12,60 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.RoundedRowCard
 import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
 import com.gradysbooch.restaurant.ui.values.getColor
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.flow.map
 
-
-@Composable
-fun MenuSubScreen() {
-    val orderViewModel = viewModel<OrderViewModel>()
-    val isAllScreenSelected by orderViewModel.allScreen
-            .collectAsState(initial = true)
-
-    if (isAllScreenSelected) return
-    val text = remember { mutableStateOf("search ...") }
-    RoundedSearchBar(text)
-    Spacer(modifier = Modifier.height(16.dp))
-    FilteredMenuItems(text.value)
-}
-
-@Composable
-fun FilteredMenuItems(searchText: String) {
-    val orderViewModel = viewModel<OrderViewModel>()
-    val allMenuItems by orderViewModel.menu
-            .collectAsState(initial = emptyList())
-
-    LazyColumnFor(items = allMenuItems
-            .filter { it.name.contains(searchText) }) {
-        MenuItemEntry(it)
+class MenuItems(
+        private val orderViewModel: OrderViewModel
+) {
+    init{
+        Log.d("UndoTag", "MenuItems: "+System.identityHashCode(orderViewModel).toString())
     }
-}
 
-@Composable
-fun MenuItemEntry(item: MenuItemDTO) {
-    val orderViewModel = viewModel<OrderViewModel>()
-    val selectedBullet by orderViewModel.bulletList
-            .map { bullets -> bullets.first { it.pressed } }
-            .collectAsState(initial = Bullet("#000", false, false))
+    @Composable
+    fun Show() {
+        // val orderViewModel = viewModel<OrderViewModel>()
+        val isAllScreenSelected by orderViewModel.allScreen
+                .collectAsState(initial = true)
 
-    RoundedRowCard(
-            color = getColor(selectedBullet.color)
-    ) {
-        Text(text = item.name)
-        Text(text = "${item.price} RON")
+        if (isAllScreenSelected) return
+        val text = remember { mutableStateOf("search ...") }
+        RoundedSearchBar(text)
+        Spacer(modifier = Modifier.height(16.dp))
+        FilteredMenuItems(text.value)
+    }
+
+    @Composable
+    fun FilteredMenuItems(searchText: String) {
+        // val orderViewModel = viewModel<OrderViewModel>()
+        val allMenuItems by orderViewModel.menu
+                .collectAsState(initial = emptyList())
+
+        LazyColumnFor(items = allMenuItems
+                .filter { it.name.contains(searchText) }) {
+            MenuItemEntry(it)
+        }
+    }
+
+    @Composable
+    fun MenuItemEntry(item: MenuItemDTO) {
+        // val orderViewModel = viewModel<OrderViewModel>()
+        val selectedBullet by orderViewModel.bulletList
+                .map { bullets -> bullets.firstOrNull() { it.pressed } }
+                .collectAsState(initial = Bullet("#000", false, false))
+
+        RoundedRowCard(
+                color = getColor(selectedBullet?.color)
+        ) {
+            Text(text = item.name)
+            Text(text = "${item.price} RON")
+        }
     }
 }
 

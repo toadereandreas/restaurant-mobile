@@ -1,0 +1,12 @@
+mutation lockOrder($id: ID!){
+    updateOrder(id: $id, input: {locked: true}){
+        errors{
+            messages
+            field
+        }
+        order{
+            id
+            locked
+        }
+    }
+}
