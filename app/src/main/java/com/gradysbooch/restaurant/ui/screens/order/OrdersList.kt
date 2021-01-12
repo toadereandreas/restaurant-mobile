@@ -1,6 +1,5 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,36 +19,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
-import kotlinx.coroutines.flow.map
 
 
-class OrdersList (
-        private val orderViewModel: OrderViewModel
+class OrdersList(
+        private val orderViewModel: OrderViewModel,
+        private var selectedBullet: State<Bullet?>
 ) {
-    init{
-        Log.d("UndoTag", "OrderList: "+System.identityHashCode(orderViewModel).toString())
-    }
 
     @Composable
-    fun Show() {
-        // val orderViewModel = viewModel<OrderViewModel>()
+    fun Show(isAllScreenSelected: State<Boolean>) {
+        /*
         val isAllScreenSelected by orderViewModel.allScreen
                 .collectAsState(initial = true)
+         */
 
-        if(isAllScreenSelected) {
+        if(isAllScreenSelected.value) {
             AllCustomerItemsAndNotes()
         } else OneCustomerItemsAndNote()
     }
 
     @Composable
     fun AllCustomerItemsAndNotes() {
-        // val orderViewModel = viewModel<OrderViewModel>()
         val allOrderItems by orderViewModel.allScreenMenuItems
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
@@ -82,7 +77,9 @@ class OrdersList (
                             color = getColor(quantity.first),
                             modifier = Modifier.padding(4.dp, 0.dp)
                         ) {
-                            Text(text = quantity.second.toString(), modifier = Modifier.padding(10.dp, 4.dp))
+                            Text(   modifier = Modifier.padding(10.dp, 4.dp),
+                                    text = quantity.second.toString()
+                            )
                         }
                     }
                 }
@@ -93,7 +90,7 @@ class OrdersList (
     @Composable
     fun AllCustomerNote(note: Pair<String, String>) {
         RoundedRowCard(
-                color = getColor(note.first)
+                border = BorderStroke(1.dp, getColor(note.first))
         ){
             Text(text = note.second)
         }
@@ -101,7 +98,6 @@ class OrdersList (
 
     @Composable
     fun OneCustomerItemsAndNote() {
-        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
@@ -109,17 +105,21 @@ class OrdersList (
         LaunchedEffect(subject = selectedOrderNote, block = {
             selectedOrderNote = orderViewModel.getNote()
         })
+        /*
         val selectedBullet by orderViewModel.bulletList
                 .map { bullets -> bullets.firstOrNull { it.pressed } }
                 .collectAsState(initial = Bullet("#000", false, false))
+         */
 
         LazyColumn{
-            items(selectedOrderItems) { OneCustomerItem(it, getColor(selectedBullet?.color)) }
+            items(selectedOrderItems) {
+                OneCustomerItem(it, getColor(selectedBullet.value?.color))
+            }
             item{
                 val customerNote = remember { mutableStateOf(selectedOrderNote) }
                 TextField(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
-                    backgroundColor = getColor(selectedBullet?.color),
+                    backgroundColor = getColor(selectedBullet.value?.color),
                     value = customerNote.value,
                     onValueChange = {
                         customerNote.value = it
@@ -131,7 +131,6 @@ class OrdersList (
 
     @Composable
     fun OneCustomerItem(item: Pair<MenuItemDTO, Int>, color: Color) {
-        // val orderViewModel = viewModel<OrderViewModel>()
         RoundedRowCard(
                 color = color
         ) {

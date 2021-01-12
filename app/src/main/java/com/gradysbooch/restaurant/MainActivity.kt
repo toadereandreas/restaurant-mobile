@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity()
 
 // @Preview
 @Composable
-fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "table") {
+fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "tables") {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
         Surface(
