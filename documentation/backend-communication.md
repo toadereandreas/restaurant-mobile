@@ -1,6 +1,6 @@
 ## 4. Backend communication 
  
-The application's main purpose is to aid the waiters by keeping track of their orders, bills and ultimately their customers. To achieve this, the application requires a degree of synchronicity with the webserver, which is achieved through the network communication layer.
+The application's main purpose is to aid the waiters in keeping track of their orders, bills and ultimately their customers. To achieve this, the application requires a degree of synchronicity with the webserver, which is achieved through the network communication layer.
  
 ## 4.1 Simple requests
  
@@ -13,3 +13,7 @@ Such calls are being made everytime the user chooses to update, create or remove
 Tasks such as screen mirroring require a higher degree of cohesion with the webserver, as well as faster, event-driven updates. To tackle these issues we have used websockets, implemented using [okHttp](https://square.github.io/okhttp/). 
  
 This allows us to sync the data received by the server, from the restaurant's clients, to the data of the application's user and thus allows for smooth and transparent communication between the parties involved.
+
+## 4.3 Serialization and DeSerialization
+
+To serialize and deserialize the data given to and received from the server, the layer makes use of the [gson library](https://github.com/google/gson).
