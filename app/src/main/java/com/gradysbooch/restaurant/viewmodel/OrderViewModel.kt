@@ -8,9 +8,11 @@ import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OrderViewModel(application: Application) : BaseViewModel(application),
@@ -26,6 +28,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
         }
     }
+
     private val tableUID = MutableStateFlow<String?>(null)
     private val activeColor = MutableStateFlow<String?>(null)
     private val searchQuery = MutableStateFlow("")
@@ -42,12 +45,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
         val clientOrders = repository.networkRepository.clientOrders().map { orders ->
             orders.filter { it.tableUID == tableUID }.map {
-                Bullet(it.orderColor, false, it.orderColor == activeColor)
+                Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
         }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
-                Bullet(it.orderColor, true, it.orderColor == activeColor)
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
         }.combine(clientOrders) { lockedBullets, unlockedBullets ->
             lockedBullets + unlockedBullets
@@ -97,8 +100,13 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                     .getMenuItemsForTable(tableUID)
                     .map { menuItemsWithOrderItems ->
                         menuItemsWithOrderItems.map {
-                            val orders = it.orderItems.map { orderItem -> orderItem.orderColor to orderItem.quantity }
-                            AllScreenItem(it.menuItem.toDTO(), orders.sumOf { order -> order.second }, orders)
+                            val orders =
+                                    it.orderItems.map { orderItem -> orderItem.orderColor to orderItem.quantity }
+                            AllScreenItem(
+                                    it.menuItem.toDTO(),
+                                    orders.sumOf { order -> order.second },
+                                    orders
+                            )
                         }
                     }
         }
@@ -193,11 +201,15 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
     override fun lockOrder(tableUID: String, color: Color)
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            repository.networkRepository.lockOrder(tableUID, color)
+        }
     }
 
     override fun unlockOrder(tableUID: String, color: Color)
     {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            repository.networkRepository.unlockOrder(tableUID, color)
+        }
     }
 }
