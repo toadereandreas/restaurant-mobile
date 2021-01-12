@@ -1,6 +1,7 @@
 query getTables{
     tables{
         data{
+            id
             gid
             name
             code

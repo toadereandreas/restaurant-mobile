@@ -5,19 +5,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 
 @Composable
 fun OrderScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    orderViewModel: OrderViewModel
 ) {
     Column (
             modifier = Modifier.fillMaxSize()
     ){
-        OrderScreenAppBar(navController).Show()
+        OrderScreenAppBar(navController, orderViewModel).Show()
         Column {
-            OrdersList().Show()
-            MenuItems().Show()
+            OrdersList(orderViewModel).Show()
+            MenuItems(orderViewModel).Show()
         }
     }
 }

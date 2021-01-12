@@ -1,0 +1,11 @@
+query getOrders{
+    orders{
+        data{
+            gid
+            id
+            color
+            servingId
+            locked
+        }
+    }
+}

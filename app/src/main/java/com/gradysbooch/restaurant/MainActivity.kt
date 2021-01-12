@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -19,9 +20,12 @@ import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import com.gradysbooch.restaurant.viewmodel.TableViewModel
 
 class MainActivity : AppCompatActivity()
 {
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -32,7 +36,7 @@ class MainActivity : AppCompatActivity()
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
 
         setContent {
-            App()
+            App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
         }
 
     }
@@ -47,9 +51,9 @@ class MainActivity : AppCompatActivity()
     }
 }
 
-@Preview
+// @Preview
 @Composable
-fun App(startLocation: String = "table") {
+fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "table") {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
         Surface(
@@ -59,10 +63,10 @@ fun App(startLocation: String = "table") {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = startLocation) {
                 composable("tables"){
-                    TablesScreen(navController).Show()
+                    TablesScreen(navController, tableViewModel, orderViewModel).Show()
                 }
                 composable("orders") {
-                    OrderScreen(navController)
+                    OrderScreen(navController, orderViewModel)
                 }
             }
 

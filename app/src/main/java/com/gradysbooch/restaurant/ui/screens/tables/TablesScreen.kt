@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.tables
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,9 @@ import androidx.navigation.compose.navigate
 
 
 class TablesScreen(
-    private val navController: NavHostController
+    private val navController: NavHostController,
+    private val tableViewModel: TableViewModel,
+    private val orderViewModel: OrderViewModel,
 ) {
     @Composable
     fun Show() {
@@ -48,7 +51,7 @@ class TablesScreen(
 
     @Composable
     fun TablesList() {
-        val tableViewModel = viewModel<TableViewModel>()
+        // val tableViewModel = viewModel<TableViewModel>()
         val tables by tableViewModel.tables.collectAsState(initial = emptyList())
 
         LazyColumnFor(items = tables) {
@@ -58,7 +61,6 @@ class TablesScreen(
 
     @Composable
     fun TableEntry(table: TableDTO) {
-        val orderViewModel = viewModel<OrderViewModel>()
 
         RoundedButtonRowCard(
                 border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),

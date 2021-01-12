@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.dto.TableDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
@@ -15,7 +16,10 @@ class TableViewModel(application: Application) : BaseViewModel(application),
     init
     {
         repository.networkRepository.getTables()
-                .onEach { repository.tableDao().updateTables(it) }
+                .onEach {
+                    Log.d("UndoTag", "$it")
+                    repository.tableDao().updateTables(it)
+                }
                 .launchIn(viewModelScope)
     }
     override val tables: Flow<List<TableDTO>> =

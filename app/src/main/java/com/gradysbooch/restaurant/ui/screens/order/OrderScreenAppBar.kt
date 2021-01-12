@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,11 +24,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
 
 class OrderScreenAppBar(
-    private val navController: NavHostController
+    private val navController: NavHostController,
+    private val orderViewModel: OrderViewModel
 ) {
+    init{
+        Log.d("UndoTag", "OrderScreenAppBar: "+System.identityHashCode(orderViewModel).toString())
+    }
+
     @Composable
     fun Show() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedBullet by orderViewModel.bulletList
                 .map { bullets -> bullets.firstOrNull { it.pressed } }
                 .collectAsState(initial = Bullet("#000", false, false))
@@ -45,7 +51,7 @@ class OrderScreenAppBar(
 
     @Composable
     fun OrderScreenTopRow() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedTable by orderViewModel.table
                 .collectAsState(initial = Table("-1", "name", 0, false))
 
@@ -97,7 +103,7 @@ class OrderScreenAppBar(
 
     @Composable
     fun WholeOrderNavigationButton() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
 
         RoundedIconButton(
                 modifier = Modifier.padding(4.dp, 0.dp),
@@ -109,8 +115,7 @@ class OrderScreenAppBar(
 
     @Composable
     fun AddCustomerButton() {
-        val orderViewModel = viewModel<OrderViewModel>()
-
+        // val orderViewModel = viewModel<OrderViewModel>()
         RoundedIconButton(
                 modifier = Modifier.padding(4.dp, 0.dp),
                 asset = Icons.Filled.Add,
@@ -122,7 +127,7 @@ class OrderScreenAppBar(
 
     @Composable
     fun AllCustomersNavigationButtons() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val bullets by orderViewModel.bulletList
                 .collectAsState(initial = emptyList())
 
@@ -133,7 +138,7 @@ class OrderScreenAppBar(
 
     @Composable
     fun CustomerNavigationButton(bullet: Bullet) {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
 
         RoundedIconButton(
                 modifier = Modifier.padding(4.dp, 0.dp)

@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,10 +29,16 @@ import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import kotlinx.coroutines.flow.map
 
 
-class OrdersList () {
+class OrdersList (
+        private val orderViewModel: OrderViewModel
+) {
+    init{
+        Log.d("UndoTag", "OrderList: "+System.identityHashCode(orderViewModel).toString())
+    }
+
     @Composable
     fun Show() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val isAllScreenSelected by orderViewModel.allScreen
                 .collectAsState(initial = true)
 
@@ -42,7 +49,7 @@ class OrdersList () {
 
     @Composable
     fun AllCustomerItemsAndNotes() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val allOrderItems by orderViewModel.allScreenMenuItems
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
@@ -94,7 +101,7 @@ class OrdersList () {
 
     @Composable
     fun OneCustomerItemsAndNote() {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
@@ -124,7 +131,7 @@ class OrdersList () {
 
     @Composable
     fun OneCustomerItem(item: Pair<MenuItemDTO, Int>, color: Color) {
-        val orderViewModel = viewModel<OrderViewModel>()
+        // val orderViewModel = viewModel<OrderViewModel>()
         RoundedRowCard(
                 color = color
         ) {
