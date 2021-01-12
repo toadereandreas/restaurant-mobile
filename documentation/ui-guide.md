@@ -5,15 +5,23 @@ The application opens with a screen containing the list of **Tables** in your re
 
 ## 2.1 Tables Screen
 
+The tables are listed with their names and an tick image that indicates if the waiter is called at the table.
+
 ![Tables Screen](tables-screen.png)
+
+---
 
 Waiters can select a table by pressing on it and see its orders in the **Orders** screen.
 
 ## 2.2 Orders Screen
 
+In this screen, the waiter can manage the **Orders** for a specific **Table**.
+
 ![All Orders](all-orders-screen.png)
 
-At the top of the **Orders** screen one can see the name and unique code of the selected **Table**.
+---
+
+At the top of the **Orders** screen one can see the name, unique code of the selected **Table** and the call indicator.
 A horizontal menu can be found directly underneath it.
 
 ![Circles List](vertical-circles-list.png)
@@ -47,5 +55,3 @@ Below the items, specific notes for a customer can be added.
 To add an item from the menu, simply scroll through the menu at the bottom, or use the search bar.
 
 ![Menu Subscreen](menu-subscreen.png)
-
----
