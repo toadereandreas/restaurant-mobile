@@ -1,5 +1,7 @@
 ## 4. Backend communication 
- 
+
+![Communication Architecture](BackendConnectionDiagram.png)
+
 The application's main purpose is to aid the waiters in keeping track of their orders, bills and ultimately their customers. To achieve this, the application requires a degree of synchronicity with the webserver, which is achieved through the network communication layer.
  
 ## 4.1 Simple requests
