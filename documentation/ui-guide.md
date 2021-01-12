@@ -52,6 +52,7 @@ Below the items, specific notes for a customer can be added.
 
 ---
 
-To add an item from the menu, simply scroll through the menu at the bottom, or use the search bar.
+To find an item from the menu, simply scroll through the menu at the bottom, or use the search bar.
+To select an item and add it to the current order of the selected customer, press on it.
 
 ![Menu Subscreen](menu-subscreen.png)
