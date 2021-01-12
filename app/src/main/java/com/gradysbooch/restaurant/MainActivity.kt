@@ -11,17 +11,14 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.ui.tooling.preview.Preview
-import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
-import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 class MainActivity : AppCompatActivity()
 {
@@ -52,7 +49,7 @@ class MainActivity : AppCompatActivity()
 
 @Preview
 @Composable
-fun App() {
+fun App(startLocation: String = "table") {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
         Surface(
@@ -60,7 +57,7 @@ fun App() {
                 color = MaterialTheme.colors.background
         ) {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "tables") {
+            NavHost(navController = navController, startDestination = startLocation) {
                 composable("tables"){
                     TablesScreen(navController).Show()
                 }
