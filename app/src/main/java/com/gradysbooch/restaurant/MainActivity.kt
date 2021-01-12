@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -12,6 +11,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -69,21 +69,6 @@ fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLoc
                     OrderScreen(navController, orderViewModel)
                 }
             }
-
-            /* Old code
-            /**
-             *  The Selected Table ID will control what screen is displayed
-             *      main -> TablesScreen
-             *      anything else -> OrderScreen
-             * todo error -> ErrorScreen
-             */
-            val orderViewModel = viewModel<OrderViewModel>()
-            val selectedTable by orderViewModel.table
-                    .collectAsState(initial = Table("-1", "name", 0, false))
-            if (selectedTable.code != 0) TablesScreen(navController)
-            else OrderScreen(navController)
-
-             */
         }
     }
 }
