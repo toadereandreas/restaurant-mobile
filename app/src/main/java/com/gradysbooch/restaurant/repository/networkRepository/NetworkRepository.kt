@@ -110,7 +110,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
-    override suspend fun clearTable(tableUID: String) = withContext(Dispatchers.IO){
+    override suspend fun clearTable(tableUID: String) : Unit = withContext(Dispatchers.IO){
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
 
@@ -120,7 +120,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             }
         }
 
-        //todo request code regeneration
+        apolloClient.mutate(GenerateServingCodeMutation(tableUID)).await()
     }
 
     override suspend fun createOrderItem(orderItem: OrderItem) : Unit  = withContext(Dispatchers.IO){
@@ -143,7 +143,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         )).await()
     }
 
-    override suspend fun createOrder(color: String, tableUID: String) {
+    override suspend fun createOrder(color: String, tableUID: String) : Unit = withContext(Dispatchers.IO){
         apolloClient.mutate(CreateOrderMutation(
             Input.fromNullable(color),
             Input.fromNullable(tableUID)
