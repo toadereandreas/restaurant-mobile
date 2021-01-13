@@ -148,7 +148,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     {
         viewModelScope.launch {
             tableUID.value?.let { tableUID ->
-                val orderColor = ColorManager.randomColor(bulletList.first().map { it.color }.toSet())
+                val orderColor = ColorManager.randomColor(bulletList.first().map { it.color }.toSet()) ?: return@let
                 repository.orderDao().addOrder(
                         Order(
                                 tableUID,
