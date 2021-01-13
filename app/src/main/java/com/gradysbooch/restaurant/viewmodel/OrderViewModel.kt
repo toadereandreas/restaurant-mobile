@@ -43,12 +43,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
         val clientOrders = repository.networkRepository.clientOrders().map { orders ->
             orders.filter { it.tableUID == tableUID }.map {
-                Bullet(it.orderColor, false, it.orderColor == activeColor)
+                Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
         }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
-                Bullet(it.orderColor, true, it.orderColor == activeColor)
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
         }.combine(clientOrders) { lockedBullets, unlockedBullets ->
             lockedBullets + unlockedBullets

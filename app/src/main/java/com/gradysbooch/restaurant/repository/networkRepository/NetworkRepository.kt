@@ -12,10 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.gradysbooch.restaurant.*
 import com.gradysbooch.restaurant.model.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.sendBlocking
@@ -52,7 +49,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         userIdCache ?: run {
             login()
         }
-        return userIdCache ?: error("Null user id")
+        return 5//userIdCache ?: error("Null user id")
     }
 
     override suspend fun getMenuItems(): Set<MenuItem> {
@@ -83,19 +80,19 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             Input.fromNullable(orderWithMenuItems.order.note))).await()
     }
 
-    override suspend fun clearCall(tableID: String) {
+    override suspend fun clearCall(tableID: String): Unit = withContext(Dispatchers.IO){
         val tableUidProper = tableID//_queryTableGidByTableId(tableID)
 
         apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
 
-    override suspend fun unlockOrder(tableUID: String, color: String) {
+    override suspend fun unlockOrder(tableUID: String, color: String) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         apolloClient.mutate(UnlockOrderMutation(id)).await()
     }
 
-    override suspend fun lockOrder(tableUID: String, color: String) {
+    override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         Log.d("UndoTag", id)
@@ -123,6 +120,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
                 val receivedValue: T = gson.fromJson(text, type)
 
+                Log.d("Yeet", type.toString()+" "+receivedValue.toString())
+
                 try {
                     channel.sendBlocking(receivedValue)
                 } catch (e: Exception) {
@@ -139,7 +138,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             }
         }
 
-    private suspend fun login() {
+    private suspend fun login() = withContext(Dispatchers.IO){
         val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD))
             .await().data?.tokenAuth
 
@@ -152,13 +151,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
     }
 
-    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T  = withContext(Dispatchers.IO){
         try {
             val result = (apolloClient.query(GQLQuery).await().data as? T
                 ?: error("ApolloFailure: Returned null."))
 
             internalOnlineStatus.emit(true)
-            return result
+            return@withContext result
 
         } catch (e: ApolloException) {
             internalOnlineStatus.emit(false)
@@ -177,10 +176,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 //        return tableUidProper
 //    }
 
-    private suspend fun _queryOrderByForeignKeys(
+    private suspend fun _queryOrderByForeignKeys (
         tableUID: String,
         color: String
-    ): GetOrdersQuery.Data1 {
+    ): GetOrdersQuery.Data1  = withContext(Dispatchers.IO) {
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
 
@@ -190,6 +189,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.id == tableUID }
             ?: error("ApolloFailure: failed to get order")
-        return matchingOrder
+        return@withContext matchingOrder
     }
 }
