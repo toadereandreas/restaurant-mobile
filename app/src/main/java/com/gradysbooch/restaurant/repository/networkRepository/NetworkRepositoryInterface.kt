@@ -9,7 +9,7 @@ interface NetworkRepositoryInterface
 
     suspend fun getMenuItems(): Set<MenuItem>
 
-    fun getTables(): Flow<Set<Table>>
+    fun getTables(): Flow<List<Table>>
 
     fun clientOrders(): Flow<List<Order>>
 

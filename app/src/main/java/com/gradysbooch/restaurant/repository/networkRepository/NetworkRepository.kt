@@ -12,10 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.gradysbooch.restaurant.*
 import com.gradysbooch.restaurant.model.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.sendBlocking
@@ -38,7 +35,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val internalOnlineStatus =
-        MutableStateFlow(false) //todo implement proper online status tracking
+        MutableStateFlow(false) //Improvement: implement proper online status tracking
     override val onlineStatus: Flow<Boolean> = internalOnlineStatus
 
     private val authorizationInterceptor = AuthorizationInterceptor("")
@@ -63,9 +60,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
-    override fun getTables(): Flow<Set<Table>> = (subscribe<ArrayList<Table>>("serving", object: TypeToken<ArrayList<Table>>(){}.type)).map{ it.toSet() }
+    override fun getTables(): Flow<List<Table>> = subscribe("serving", object: TypeToken<ArrayList<Table>>(){}.type)
 
-    override fun clientOrders(): Flow<List<Order>> = subscribe("order", object: TypeToken<ArrayList<Order>>(){}.type)
+    override fun clientOrders(): Flow<List<Order>> = subscribe<List<Order>>("order", object: TypeToken<ArrayList<Order>>(){}.type)
+        .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
 
     override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem",object: TypeToken<ArrayList<OrderItem>>(){}.type)
 
@@ -83,10 +81,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             Input.fromNullable(orderWithMenuItems.order.note))).await()
     }
 
-    override suspend fun clearCall(tableID: String) {
-        val tableUidProper = tableID//_queryTableGidByTableId(tableID)
-
-        apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
+    override suspend fun clearCall(tableUID: String) {
+        apolloClient.mutate(ClearCallMutation(tableUID)).await()
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) {
@@ -104,7 +100,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> subscribe(endpoint: String, type : Type): Flow<T> = callbackFlow {
+    private fun <T> subscribe(endpoint: String, type : Type): Flow<T> = callbackFlow<T> {
         val listener = webSocketListener(channel, type)
 
         val userId = getUserId()
@@ -115,7 +111,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         )
 
         awaitClose { websocket.close(1001, "Listener closed") }
-    }
+    }.flowOn(Dispatchers.IO)
 
     private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {

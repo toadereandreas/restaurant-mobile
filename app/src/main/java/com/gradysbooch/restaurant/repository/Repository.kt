@@ -9,7 +9,7 @@ fun buildRoomDB(context: Context) = Room.databaseBuilder(context, RoomDB::class.
 
 class Repository private constructor(context: Context) : DataAccess by buildRoomDB(context)
 {
-    //TODO think about coroutines being cancelled because application is closed (should we create a background service?)
+    //TODO check overall coroutine scope handling
 
     suspend fun clearTable(tableUID: String)
     {

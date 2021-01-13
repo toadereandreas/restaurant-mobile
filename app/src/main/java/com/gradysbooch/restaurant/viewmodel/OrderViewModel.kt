@@ -2,18 +2,16 @@ package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
+import com.gradysbooch.restaurant.model.OrderItem
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OrderViewModel(application: Application) : BaseViewModel(application),
@@ -22,11 +20,16 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     init
     {
         repository.networkRepository.orderItems()
-                .onEach { repository.orderDao().saveOrderItems(it) }
+                .onEach {
+                    repository.orderDao().saveOrderItems(it)
+                    Log.d(this::class.simpleName, "Saved order Items $it")
+                }
                 .launchIn(viewModelScope)
 
         viewModelScope.launch {
-            repository.menuItemDAO().updateMenu(repository.networkRepository.getMenuItems())
+            val menuItems = repository.networkRepository.getMenuItems()
+            repository.menuItemDAO().updateMenu(menuItems)
+            Log.d(this::class.simpleName, "Updated Menu Items: $menuItems")
         }
     }
 
@@ -46,12 +49,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
         val clientOrders = repository.networkRepository.clientOrders().map { orders ->
             orders.filter { it.tableUID == tableUID }.map {
-                Bullet(it.orderColor, true, it.orderColor == activeColor)
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
         }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
-                Bullet(it.orderColor, false, it.orderColor == activeColor)
+                Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
         }.combine(clientOrders) { lockedBullets, unlockedBullets ->
             lockedBullets + unlockedBullets
@@ -132,32 +135,29 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun setTable(tableId: String)
     {
         this.tableUID.value = tableId
-        Log.d("UndoTag", "setTable: "+System.identityHashCode(this).toString())
-        Log.d("UndoTag", "setTable: "+tableUID.value.toString())
+        Log.d(this::class.simpleName, "Changed table to id $tableId")
     }
 
     override fun selectAllScreen()
     {
         activeColor.value = null
+        Log.d(this::class.simpleName, "All screen selected")
     }
 
     override fun addBullet()
     {
-        Log.d("UndoTag", "addBullet: "+System.identityHashCode(this).toString())
-        Log.d("UndoTag", "addBullet: "+tableUID.value.toString())
-
         viewModelScope.launch {
             tableUID.value?.let { tableUID ->
+                val orderColor = ColorManager.randomColor(bulletList.first().map { it.color }.toSet())
                 repository.orderDao().addOrder(
                         Order(
                                 tableUID,
-                                ColorManager.randomColor(bulletList.first().map { it.color }.toSet()),
+                                orderColor,
                                 ""
                         )
                 )
+                Log.d(this::class.simpleName, "Added order with color $orderColor")
             }
-
-            bulletList.collect { Log.d("UndoTag", "addBullet: "+it.toString()) }
         }
     }
 
@@ -167,6 +167,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             tableUID.value?.let {
                 repository.tableDao().updateTableCall(it, false)
                 repository.networkRepository.clearCall(it)
+                Log.d(this::class.simpleName, "Cleared call for table $it")
             }
         }
     }
@@ -174,6 +175,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun selectColor(color: String)
     {
         activeColor.value = color
+        Log.d(this::class.simpleName, "Selected order with color $color")
     }
 
     override fun search(searchString: String)
@@ -205,19 +207,45 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         viewModelScope.launch {
             repository.clearTable(tableUID)
         }
+        Log.d(this::class.simpleName, "Cleared table")
     }
 
     override fun lockOrder(tableUID: String, color: Color)
     {
         viewModelScope.launch {
+            val order = repository.networkRepository
+                    .clientOrders()
+                    .first()
+                    .find { it.tableUID == tableUID && it.orderColor == color }
+                    ?: return@launch
             repository.networkRepository.lockOrder(tableUID, color)
+            repository.orderDao().addOrder(order)
+            Log.d(this::class.simpleName, "Locked order $tableUID - $color")
         }
     }
 
     override fun unlockOrder(tableUID: String, color: Color)
     {
         viewModelScope.launch {
+            repository.orderDao().deleteOrder(tableUID, color)
             repository.networkRepository.unlockOrder(tableUID, color)
+            Log.d(this::class.simpleName, "Unlocked order $tableUID - $color")
+        }
+    }
+
+    override fun addMenuItem(menuItemUID: String)
+    {
+        val orderColor = activeColor.value ?: run {
+            Log.e(this::class.simpleName, "No active color")
+            return
+        }
+        val table = tableUID.value ?: run {
+            Log.e(this::class.simpleName, "No active table")
+            return
+        }
+        viewModelScope.launch {
+            repository.orderDao().addOrderItem(OrderItem(orderColor, table, menuItemUID, 1))
+            Log.d(this::class.simpleName, "Added menu item $menuItemUID")
         }
     }
 }

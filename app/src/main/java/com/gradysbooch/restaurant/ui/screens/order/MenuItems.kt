@@ -51,7 +51,7 @@ class MenuItems(
         RoundedButtonRowCard(
                 color = getColor(selectedBullet.value?.color),
                 onClick = {
-                    // todo - add item to order
+                    orderViewModel.addMenuItem(item.id)
                 }
         ) {
             Text(text = item.name)
