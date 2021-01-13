@@ -110,12 +110,12 @@ class OrdersList(
         Log.d("WHAT IS THIS", "One customer notes: $allOrderNotes")
 
         val selectedOrderNote = orderViewModel.allScreenNotes
-                .map { list -> list.first {
+                .map { list -> list.firstOrNull {
                     Log.d("WHAT IS THIS", "${it.first} ?? $selectedColor")
                     it.first == selectedColor
                 } }
-                .map { it.second }
-                .collectAsState(initial = "") as MutableState
+                .map { it?.second }
+                .collectAsState(initial = null) as MutableState
         Log.d("WHAT IS THIS", "Selected note: $selectedOrderNote")
         /*
         val selectedBullet by orderViewModel.bulletList
@@ -132,7 +132,7 @@ class OrdersList(
                 TextField(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
                     backgroundColor = getColor(selectedColor),
-                    value = selectedOrderNote.value,
+                    value = selectedOrderNote.value ?: "",
                     onValueChange = {
                         selectedOrderNote.value = it
                         orderViewModel.changeNote(it)
