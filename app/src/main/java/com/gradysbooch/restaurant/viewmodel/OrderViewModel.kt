@@ -156,6 +156,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                                 ""
                         )
                 )
+                repository.networkRepository.createOrder(tableUID, orderColor)
                 Log.d(this::class.simpleName, "Added order with color $orderColor")
             }
         }
