@@ -6,6 +6,9 @@ query getOrders{
             color
             servingId
             locked
+            serving{
+                gid
+            }
         }
     }
 }

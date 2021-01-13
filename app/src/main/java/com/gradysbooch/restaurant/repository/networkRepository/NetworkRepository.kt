@@ -12,19 +12,14 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.gradysbooch.restaurant.*
 import com.gradysbooch.restaurant.model.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import okhttp3.*
 import okio.ByteString.Companion.decodeBase64
+import java.lang.reflect.Type
 import kotlin.math.roundToInt
 
 private const val WEBSOCKET_URL = "ws://restaurant.playgroundev.com:5000/ws"
@@ -36,11 +31,11 @@ private const val PASSWORD = "welcome"
 //"http://halex193.go.ro:8000/graphql/"
 
 class NetworkRepository(context: Context) : NetworkRepositoryInterface {
-    private val gson = Gson().newBuilder().excludeFieldsWithoutExposeAnnotation().create()
+    private val gson = Gson().newBuilder().create()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val internalOnlineStatus =
-        MutableStateFlow(false) //todo implement proper online status tracking
+        MutableStateFlow(false) //Improvement: implement proper online status tracking
     override val onlineStatus: Flow<Boolean> = internalOnlineStatus
 
     private val authorizationInterceptor = AuthorizationInterceptor("")
@@ -65,32 +60,38 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
-    override fun getTables(): Flow<Set<Table>> = (subscribe<ArrayList<Table>>("serving")).map { it.toSet() }
+    override fun getTables(): Flow<List<Table>> =
+        subscribe("serving", object : TypeToken<ArrayList<Table>>() {}.type)
 
-    override fun clientOrders(): Flow<List<Order>> = subscribe("order")
+    override fun clientOrders(): Flow<List<Order>> =
+        subscribe<List<Order>>("order", object : TypeToken<ArrayList<Order>>() {}.type)
+            .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
 
-    override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem")
+    override fun orderItems(): Flow<List<OrderItem>> =
+        subscribe("ordermenuitem", object : TypeToken<ArrayList<OrderItem>>() {}.type)
 
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
-        val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
+        val matchingOrder = _queryOrderByForeignKeys(
+            orderWithMenuItems.order.tableUID,
+            orderWithMenuItems.order.orderColor
+        )
 
         val id = matchingOrder.gid as String
         val locked = matchingOrder.locked
 
-        apolloClient.mutate(UpdateOrderMutation(
-            id,
-            Input.fromNullable(orderWithMenuItems.order.tableUID),
-            Input.fromNullable(orderWithMenuItems.order.orderColor),
-            Input.fromNullable(locked),
-            Input.fromNullable(orderWithMenuItems.order.note))).await()
+        apolloClient.mutate(
+            UpdateOrderMutation(
+                id,
+                Input.fromNullable(orderWithMenuItems.order.tableUID),
+                Input.fromNullable(orderWithMenuItems.order.orderColor),
+                Input.fromNullable(locked),
+                Input.fromNullable(orderWithMenuItems.order.note)
+            )
+        ).await()
     }
 
-    override suspend fun clearCall(tableID: String) {
-        val tableUidProper = _queryTableGidByTableId(tableID)
-
-        Log.d("UndoTag", tableUidProper)
-
-        apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
+    override suspend fun clearCall(tableUID: String) {
+        apolloClient.mutate(ClearCallMutation(tableUID)).await()
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) {
@@ -107,9 +108,22 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
+    override suspend fun clearTable(tableUID: String) {
+        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
+            ?: error("ApolloFailure: orders returned null.")
+
+        orders.forEach {
+            if (it != null && it.serving.gid == tableUID) {
+                apolloClient.mutate(DeleteOrderMutation(it.gid as String)).await()
+            }
+        }
+
+        //todo request code regeneration
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> subscribe(endpoint: String): Flow<T> = callbackFlow {
-        val listener = webSocketListener(channel)
+    private fun <T> subscribe(endpoint: String, type: Type): Flow<T> = callbackFlow<T> {
+        val listener = webSocketListener(channel, type)
 
         val userId = getUserId()
 
@@ -119,14 +133,17 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         )
 
         awaitClose { websocket.close(1001, "Listener closed") }
-    }
+    }.flowOn(Dispatchers.IO)
 
-    private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>) =
+    private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val receivedValue: T = gson.fromJson(text, object : TypeToken<T>() {}.type)
 
-                Log.d("UndoTag", "Received from socket: $text")
+                Log.d("UndoTag", "Socket got raw $text")
+
+                val receivedValue: T = gson.fromJson(text, type)
+
+                Log.d("UndoTag", "Socket got $receivedValue")
 
                 try {
                     channel.sendBlocking(receivedValue)
@@ -171,15 +188,16 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
-    private suspend fun _queryTableGidByTableId(
-        tableUID: String
-    ): String {
-        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
-            ?: error("ApolloFailure: orders returned null.")
-
-        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}) as String
-        return tableUidProper
-    }
+//    private suspend fun _queryTableGidByTableId(
+//        tableUID: String
+//    ): String {
+//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
+//            ?: error("ApolloFailure: orders returned null.")
+//
+//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
+//        Log.d("UndoTag", tableUidProper)
+//        return tableUidProper
+//    }
 
     private suspend fun _queryOrderByForeignKeys(
         tableUID: String,
@@ -189,7 +207,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             ?: error("ApolloFailure: orders returned null.")
 
         Log.d("UndoTag", orders.toString())
-        Log.d("UndoTag", tableUID + " "+ color)
+        Log.d("UndoTag", tableUID + " " + color)
 
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.id == tableUID }

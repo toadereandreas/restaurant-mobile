@@ -9,7 +9,7 @@ interface NetworkRepositoryInterface
 
     suspend fun getMenuItems(): Set<MenuItem>
 
-    fun getTables(): Flow<Set<Table>>
+    fun getTables(): Flow<List<Table>>
 
     fun clientOrders(): Flow<List<Order>>
 
@@ -22,4 +22,6 @@ interface NetworkRepositoryInterface
     suspend fun unlockOrder(tableUID: String, color: String)
 
     suspend fun lockOrder(tableUID: String, color: String)
+
+    suspend fun clearTable(tableUID: String)
 }
