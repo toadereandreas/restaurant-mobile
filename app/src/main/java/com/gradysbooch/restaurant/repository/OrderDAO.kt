@@ -3,6 +3,7 @@ package com.gradysbooch.restaurant.repository
 import androidx.room.*
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.OrderItem
+import com.gradysbooch.restaurant.model.OrderItemWithMenuItem
 import com.gradysbooch.restaurant.model.OrderWithMenuItems
 import kotlinx.coroutines.flow.Flow
 
@@ -69,5 +70,9 @@ interface OrderDAO
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addOrderItem(orderItem: OrderItem)
+
+    @Transaction
+    @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID AND orderColor=:color")
+    suspend fun orderWithMenuItems(tableUID: String, color: String) : OrderWithMenuItems?
 
 }

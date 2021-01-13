@@ -198,6 +198,13 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             val tableUID = tableUID.value ?: return@launch
             val activeColor = activeColor.value ?: return@launch
             repository.orderDao().changeNumber(tableUID, activeColor, menuItemId, number)
+
+            val order = repository.orderDao().orderWithMenuItems(tableUID, activeColor) ?: run {
+                Log.e(this::class.simpleName, "Order item not found for $tableUID - $activeColor")
+                return@launch
+            }
+            repository.networkRepository.updateOrder(order)
+            Log.d(this::class.simpleName, "Number updated for table $tableUID - $activeColor menu item $menuItemId")
         }
     }
 
@@ -245,6 +252,11 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         }
         viewModelScope.launch {
             repository.orderDao().addOrderItem(OrderItem(orderColor, table, menuItemUID, 1))
+            val order = repository.orderDao().orderWithMenuItems(table, orderColor) ?: run {
+                Log.e(this::class.simpleName, "Order item not found for $tableUID - $orderColor")
+                return@launch
+            }
+            repository.networkRepository.updateOrder(order)
             Log.d(this::class.simpleName, "Added menu item $menuItemUID")
         }
     }
