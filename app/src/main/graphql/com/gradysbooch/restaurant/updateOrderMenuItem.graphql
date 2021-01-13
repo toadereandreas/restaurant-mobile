@@ -1,0 +1,7 @@
+mutation updateOrderMenuItem($input : OrderMenuItemInput!){
+    createOrderMenuItem(input: $input){
+        orderMenuItem{
+            id
+        }
+    }
+}
