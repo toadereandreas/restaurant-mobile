@@ -143,7 +143,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         )).await()
     }
 
-    override suspend fun createOrder(color: String, tableUID: String) : Unit = withContext(Dispatchers.IO){
+    override suspend fun createOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         apolloClient.mutate(CreateOrderMutation(
             Input.fromNullable(color),
             Input.fromNullable(tableUID)
