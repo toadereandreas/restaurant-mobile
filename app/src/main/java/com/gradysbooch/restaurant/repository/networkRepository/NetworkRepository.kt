@@ -105,8 +105,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
-        Log.d("UndoTag", id)
-
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
@@ -126,6 +124,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun createOrderItem(orderItem: OrderItem) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(orderItem.tableUID, orderItem.orderColor).gid as String
 
+        Log.d("UndoTag", "creating order item for orderId = $id")
+
         apolloClient.mutate(CreateOrderMenuItemMutation(
             Input.fromNullable(id),
             Input.fromNullable(orderItem.menuItemUID),
@@ -144,6 +144,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun createOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
+        Log.d("UndoTag", color + "  " + tableUID)
+
         apolloClient.mutate(CreateOrderMutation(
             Input.fromNullable(color),
             Input.fromNullable(tableUID)
@@ -168,7 +170,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
 
-                Log.d("UndoTag", "Socket got raw $text")
+//                Log.d("UndoTag", "Socket got raw $text")
 
                 val receivedValue: T = gson.fromJson(text, type)
 
