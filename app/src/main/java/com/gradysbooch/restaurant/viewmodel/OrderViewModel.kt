@@ -49,12 +49,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
         val clientOrders = repository.networkRepository.clientOrders().map { orders ->
             orders.filter { it.tableUID == tableUID }.map {
-                Bullet(it.orderColor, true, it.orderColor == activeColor)
+                Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
         }.onStart { emit(emptyList()) }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
-                Bullet(it.orderColor, false, it.orderColor == activeColor)
+                Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
         }.combine(clientOrders) { lockedBullets, unlockedBullets ->
             lockedBullets + unlockedBullets
@@ -199,8 +199,11 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             val activeColor = activeColor.value ?: return@launch
             repository.orderDao().changeNumber(tableUID, activeColor, menuItemId, number)
 
-            val orderItem = OrderItem(tableUID, activeColor, menuItemId, number)
-            repository.networkRepository.updateOrderItem(orderItem)
+            val order = repository.orderDao().orderWithMenuItems(tableUID, activeColor) ?: run {
+                Log.e(this::class.simpleName, "Order item not found for $tableUID - $activeColor")
+                return@launch
+            }
+            repository.networkRepository.updateOrder(order)
             Log.d(this::class.simpleName, "Number updated for table $tableUID - $activeColor menu item $menuItemId")
         }
     }
@@ -248,9 +251,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             return
         }
         viewModelScope.launch {
-            val orderItem = OrderItem(orderColor, table, menuItemUID, 1)
-            repository.orderDao().addOrderItem(orderItem)
-            repository.networkRepository.createOrderItem(orderItem)
+            repository.orderDao().addOrderItem(OrderItem(orderColor, table, menuItemUID, 1))
+            val order = repository.orderDao().orderWithMenuItems(table, orderColor) ?: run {
+                Log.e(this::class.simpleName, "Order item not found for $tableUID - $orderColor")
+                return@launch
+            }
+            repository.networkRepository.updateOrder(order)
             Log.d(this::class.simpleName, "Added menu item $menuItemUID")
         }
     }
