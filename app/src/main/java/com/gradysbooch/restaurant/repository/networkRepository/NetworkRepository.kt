@@ -52,11 +52,11 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         return userIdCache ?: error("Null user id")
     }
 
-    override suspend fun getMenuItems(): Set<MenuItem> {
+    override suspend fun getMenuItems(): Set<MenuItem>  = withContext(Dispatchers.IO){
         val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
             ?: error("ApolloFailure: menu items returned null.")
 
-        return list.filterNotNull()
+        return@withContext list.filterNotNull()
             .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
@@ -90,8 +90,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         ).await()
     }
 
-    override suspend fun clearCall(tableID: String) {
-        val tableUidProper = tableID//_queryTableGidByTableId(tableID)
+    override suspend fun clearCall(tableUID: String) :Unit = withContext(Dispatchers.IO) {
+        val tableUidProper = tableUID//_queryTableGidByTableId(tableID)
 
         apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
@@ -110,7 +110,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
-    override suspend fun clearTable(tableUID: String) {
+    override suspend fun clearTable(tableUID: String) = withContext(Dispatchers.IO){
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
 
@@ -121,6 +121,14 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
 
         //todo request code regeneration
+    }
+
+    override suspend fun createOrderItem(orderItem: OrderItem)  = withContext(Dispatchers.IO){
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateOrderItem(orderItem: OrderItem)  = withContext(Dispatchers.IO){
+        TODO("Not yet implemented")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -199,7 +207,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 //        return tableUidProper
 //    }
 
-    private suspend fun _queryOrderByForeignKeys(
+    private suspend fun _queryOrderByForeignKeys (
         tableUID: String,
         color: String
     ): GetOrdersQuery.Data1  = withContext(Dispatchers.IO) {
