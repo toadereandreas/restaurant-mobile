@@ -188,17 +188,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
-//    private suspend fun _queryTableGidByTableId(
-//        tableUID: String
-//    ): String {
-//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
-//            ?: error("ApolloFailure: orders returned null.")
-//
-//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
-//        Log.d("UndoTag", tableUidProper)
-//        return tableUidProper
-//    }
-
     private suspend fun _queryOrderByForeignKeys(
         tableUID: String,
         color: String

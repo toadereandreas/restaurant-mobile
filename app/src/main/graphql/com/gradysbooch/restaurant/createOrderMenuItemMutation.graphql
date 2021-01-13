@@ -1,0 +1,11 @@
+mutation createOrderMenuItem($inputOMI: OrderMenuItemInput!){
+    createOrderMenuItem(input: $inputOMI){
+        orderMenuItem{
+            gid,
+            order{
+                gid
+            }
+            servingId
+        }
+    }
+}

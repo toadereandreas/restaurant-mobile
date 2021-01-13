@@ -72,4 +72,9 @@ class ExampleInstrumentedTest
     fun clearTableTest(): Unit = runBlocking{
         networkRepo.clearTable("4120daa2-b40f-4655-a6fc-07ceef7a9cc0")
     }
+
+    @Test
+    fun testOrderViewModelIncreaseNumber(){
+
+    }
 }
