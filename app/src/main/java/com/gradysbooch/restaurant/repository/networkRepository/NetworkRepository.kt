@@ -90,17 +90,19 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         ).await()
     }
 
-    override suspend fun clearCall(tableUID: String) {
-        apolloClient.mutate(ClearCallMutation(tableUID)).await()
+    override suspend fun clearCall(tableID: String) {
+        val tableUidProper = tableID//_queryTableGidByTableId(tableID)
+
+        apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
 
-    override suspend fun unlockOrder(tableUID: String, color: String) {
+    override suspend fun unlockOrder(tableUID: String, color: String) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         apolloClient.mutate(UnlockOrderMutation(id)).await()
     }
 
-    override suspend fun lockOrder(tableUID: String, color: String) {
+    override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         Log.d("UndoTag", id)
@@ -143,8 +145,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
                 val receivedValue: T = gson.fromJson(text, type)
 
-                Log.d("UndoTag", "Socket got $receivedValue")
-
                 try {
                     channel.sendBlocking(receivedValue)
                 } catch (e: Exception) {
@@ -161,7 +161,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             }
         }
 
-    private suspend fun login() {
+    private suspend fun login() = withContext(Dispatchers.IO){
         val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD))
             .await().data?.tokenAuth
 
@@ -174,13 +174,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
     }
 
-    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T  = withContext(Dispatchers.IO){
         try {
             val result = (apolloClient.query(GQLQuery).await().data as? T
                 ?: error("ApolloFailure: Returned null."))
 
             internalOnlineStatus.emit(true)
-            return result
+            return@withContext result
 
         } catch (e: ApolloException) {
             internalOnlineStatus.emit(false)
@@ -188,10 +188,21 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
+//    private suspend fun _queryTableGidByTableId(
+//        tableUID: String
+//    ): String {
+//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
+//            ?: error("ApolloFailure: orders returned null.")
+//
+//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
+//        Log.d("UndoTag", tableUidProper)
+//        return tableUidProper
+//    }
+
     private suspend fun _queryOrderByForeignKeys(
         tableUID: String,
         color: String
-    ): GetOrdersQuery.Data1 {
+    ): GetOrdersQuery.Data1  = withContext(Dispatchers.IO) {
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
 
@@ -201,6 +212,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.id == tableUID }
             ?: error("ApolloFailure: failed to get order")
-        return matchingOrder
+        return@withContext matchingOrder
     }
 }
