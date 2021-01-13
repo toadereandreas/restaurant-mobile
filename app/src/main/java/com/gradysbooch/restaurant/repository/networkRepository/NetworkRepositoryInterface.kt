@@ -29,4 +29,6 @@ interface NetworkRepositoryInterface
     suspend fun createOrderItem(orderItem: OrderItem)
 
     suspend fun updateOrderItem(orderItem: OrderItem)
+
+    suspend fun createOrder(color: String, tableUID: String)
 }

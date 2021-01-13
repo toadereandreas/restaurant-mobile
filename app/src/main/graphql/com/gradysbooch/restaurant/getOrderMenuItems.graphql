@@ -1,0 +1,11 @@
+query getOrderMenuItems{
+    orderMenuItems{
+        data{
+            gid
+            id
+            menuItemId
+            color
+            servingId
+        }
+    }
+}

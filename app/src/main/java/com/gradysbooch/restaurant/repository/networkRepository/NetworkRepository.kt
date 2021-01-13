@@ -123,12 +123,31 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         //todo request code regeneration
     }
 
-    override suspend fun createOrderItem(orderItem: OrderItem)  = withContext(Dispatchers.IO){
-        TODO("Not yet implemented")
+    override suspend fun createOrderItem(orderItem: OrderItem) : Unit  = withContext(Dispatchers.IO){
+        val id = _queryOrderByForeignKeys(orderItem.tableUID, orderItem.orderColor).gid as String
+
+        apolloClient.mutate(CreateOrderMenuItemMutation(
+            Input.fromNullable(id),
+            Input.fromNullable(orderItem.menuItemUID),
+            Input.fromNullable(orderItem.quantity)
+        )).await()
     }
 
-    override suspend fun updateOrderItem(orderItem: OrderItem)  = withContext(Dispatchers.IO){
-        TODO("Not yet implemented")
+    override suspend fun updateOrderItem(orderItem: OrderItem) : Unit = withContext(Dispatchers.IO){
+        val idOrderMenuItem= _queryOrderMenuItemByForeignKeys(orderItem.menuItemUID, orderItem.orderColor, orderItem.tableUID).gid as String
+
+        apolloClient.mutate(UpdateOrderMenuItemMutation(
+            idOrderMenuItem,
+            Input.fromNullable(orderItem.menuItemUID),
+            Input.fromNullable(orderItem.quantity.toString())
+        )).await()
+    }
+
+    override suspend fun createOrder(color: String, tableUID: String) {
+        apolloClient.mutate(CreateOrderMutation(
+            Input.fromNullable(color),
+            Input.fromNullable(tableUID)
+        )).await()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -196,17 +215,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
-//    private suspend fun _queryTableGidByTableId(
-//        tableUID: String
-//    ): String {
-//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
-//            ?: error("ApolloFailure: orders returned null.")
-//
-//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
-//        Log.d("UndoTag", tableUidProper)
-//        return tableUidProper
-//    }
-
     private suspend fun _queryOrderByForeignKeys (
         tableUID: String,
         color: String
@@ -214,12 +222,24 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
 
-        Log.d("UndoTag", orders.toString())
-        Log.d("UndoTag", tableUID + " " + color)
-
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.id == tableUID }
             ?: error("ApolloFailure: failed to get order")
+        return@withContext matchingOrder
+    }
+
+    private suspend fun _queryOrderMenuItemByForeignKeys (
+        menuItemId: String,
+        orderColor: String,
+        tableUID: String,
+    ): GetOrderMenuItemsQuery.Data1  = withContext(Dispatchers.IO) {
+        val orders = runQuerySafely<GetOrderMenuItemsQuery.Data>(GetOrdersQuery()).orderMenuItems?.data
+            ?: error("ApolloFailure: ordermenuitems returned null.")
+
+        val matchingOrder = orders.filterNotNull()
+            .find { it.menuItemId == menuItemId && it.color ==  orderColor && it.servingId == tableUID}
+            ?: error("ApolloFailure: failed to get order")
+
         return@withContext matchingOrder
     }
 }

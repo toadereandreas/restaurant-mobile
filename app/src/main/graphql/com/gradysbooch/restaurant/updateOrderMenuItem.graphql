@@ -1,5 +1,5 @@
-mutation updateOrderMenuItem($input : OrderMenuItemInput!){
-    createOrderMenuItem(input: $input){
+mutation updateOrderMenuItem($id: ID!, $order: String, $menuItem: String, $quantity: Int){
+    updateOrderMenuItem(id: $id, input: {order: $order, menuItem: $menuItem, quantity: $quantity}){
         orderMenuItem{
             id
         }
