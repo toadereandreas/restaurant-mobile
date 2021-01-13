@@ -110,4 +110,9 @@ interface OrderViewModelInterface
      * Unlocks order
      */
     fun unlockOrder(tableUID: String, color: Color)
+
+    /**
+     * Adds a Menu Item to the current order
+     */
+    fun addMenuItem(menuItemUID: String)
 }

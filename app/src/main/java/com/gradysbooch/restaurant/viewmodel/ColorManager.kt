@@ -1,6 +1,7 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import androidx.compose.ui.graphics.Color
+import java.lang.RuntimeException
 
 object ColorManager {
     private val colorMap = mapOf<String, Color>(
@@ -14,5 +15,11 @@ object ColorManager {
 
     fun convertToColor(color: String): Color = colorMap[color] ?: error("Could not convert color")
 
-    fun randomColor(currentColors: Set<String>): String = (colorMap.keys - currentColors).random()
+    fun randomColor(currentColors: Set<String>): String {
+        val remainingColors = colorMap.keys - currentColors
+        if (remainingColors.isEmpty())
+            throw RuntimeException("We ran out of colors")
+
+        return remainingColors.random()
+    }
 }

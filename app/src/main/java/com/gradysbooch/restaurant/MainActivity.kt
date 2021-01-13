@@ -12,19 +12,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
-import androidx.lifecycle.viewModelScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.ui.tooling.preview.Preview
-import com.gradysbooch.restaurant.model.Table
+import com.gradysbooch.restaurant.model.Notification
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import com.gradysbooch.restaurant.viewmodel.TableViewModel
 
 class MainActivity : AppCompatActivity()
 {
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -34,8 +36,14 @@ class MainActivity : AppCompatActivity()
                 getString(R.string.channel_description),
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
 
+        val extras = intent.extras
+
         setContent {
-            App()
+            extras?.getString("tableUID")?.let { tableUID ->
+                val orderViewModel = viewModel<OrderViewModel>()
+                orderViewModel.setTable(tableUID)
+                App(viewModel<TableViewModel>(), orderViewModel, "orders")
+            } ?: App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
         }
 
     }
@@ -50,26 +58,24 @@ class MainActivity : AppCompatActivity()
     }
 }
 
-@Preview
+// @Preview
 @Composable
-fun App() {
+fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "tables") {
     RestaurantmobileTheme {
         // A surface container using the 'background' color from the theme
         Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
         ) {
-            /**
-             *  The Selected Table ID will control what screen is displayed
-             *      main -> TablesScreen
-             *      anything else -> OrderScreen
-             * todo error -> ErrorScreen
-             */
-            val orderViewModel = viewModel<OrderViewModel>()
-            val selectedTable by orderViewModel.table
-                    .collectAsState(initial = Table("-1", "name", 0, false))
-            if (selectedTable.code != 0) TablesScreen()
-            else OrderScreen()
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = startLocation) {
+                composable("tables"){
+                    TablesScreen(navController, tableViewModel, orderViewModel).Show()
+                }
+                composable("orders") {
+                    OrderScreen(navController, orderViewModel)
+                }
+            }
         }
     }
 }
