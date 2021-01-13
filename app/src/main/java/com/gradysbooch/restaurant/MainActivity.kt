@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.ui.tooling.preview.Preview
+import com.gradysbooch.restaurant.model.Notification
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
@@ -35,8 +36,18 @@ class MainActivity : AppCompatActivity()
                 getString(R.string.channel_description),
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
 
+        val extras = intent.extras
+
         setContent {
+            if (extras != null) {
+                val tableUID = extras.getString("tableUID")
+                val orderViewModel = viewModel<OrderViewModel>()
+                orderViewModel.setTable(tableUID!!)
+                App(viewModel<TableViewModel>(), orderViewModel, "orders")
+            }
+            else {
             App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
+            }
         }
 
     }
