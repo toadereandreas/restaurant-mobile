@@ -23,9 +23,9 @@ import androidx.navigation.compose.navigate
 
 
 class TablesScreen(
-    private val navController: NavHostController,
     private val tableViewModel: TableViewModel,
     private val orderViewModel: OrderViewModel,
+    private val navController: NavHostController,
 ) {
     @Composable
     fun Show() {
@@ -63,8 +63,8 @@ class TablesScreen(
         RoundedButtonRowCard(
                 border = BorderStroke(1.dp, MaterialTheme.colors.onSurface),
                 onClick = {
-                    orderViewModel.setTable(table.id)
-                    navController.navigate("orders")
+                    // orderViewModel.setTable(table.id)
+                    navController.navigate("orders/${table.id}/#000")
                 }
         ) {
             Text(text = table.name)

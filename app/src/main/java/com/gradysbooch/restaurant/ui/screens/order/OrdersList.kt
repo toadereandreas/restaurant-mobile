@@ -1,5 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,25 +21,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
-import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.map
 
 
 class OrdersList(
         private val orderViewModel: OrderViewModel,
-        private var selectedBullet: State<Bullet?>
+        private var selectedColor: String?,
+        // selectedOrderItems
+        // selectedOrderNotes
 ) {
 
     @Composable
-    fun Show(isAllScreenSelected: State<Boolean>) {
+    fun Show(isAllScreenSelected: Boolean) {
         /*
         val isAllScreenSelected by orderViewModel.allScreen
                 .collectAsState(initial = true)
          */
 
-        if(isAllScreenSelected.value) {
+        if(isAllScreenSelected) {
             AllCustomerItemsAndNotes()
         } else OneCustomerItemsAndNote()
     }
@@ -49,6 +52,7 @@ class OrdersList(
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
                 .collectAsState(initial = emptyList())
+        Log.d("WHAT IS THIS", "All customers notes: $allOrderNotes")
 
         LazyColumn {
             items(allOrderItems) { AllCustomerItem(it) }
@@ -101,10 +105,18 @@ class OrdersList(
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
-        var selectedOrderNote = ""
-        LaunchedEffect(subject = selectedOrderNote, block = {
-            selectedOrderNote = orderViewModel.getNote()
-        })
+        val allOrderNotes by orderViewModel.allScreenNotes
+                .collectAsState(initial = emptyList())
+        Log.d("WHAT IS THIS", "One customer notes: $allOrderNotes")
+
+        val selectedOrderNote = orderViewModel.allScreenNotes
+                .map { list -> list.first {
+                    Log.d("WHAT IS THIS", "${it.first} ?? $selectedColor")
+                    it.first == selectedColor
+                } }
+                .map { it.second }
+                .collectAsState(initial = "") as MutableState
+        Log.d("WHAT IS THIS", "Selected note: $selectedOrderNote")
         /*
         val selectedBullet by orderViewModel.bulletList
                 .map { bullets -> bullets.firstOrNull { it.pressed } }
@@ -113,16 +125,16 @@ class OrdersList(
 
         LazyColumn{
             items(selectedOrderItems) {
-                OneCustomerItem(it, getColor(selectedBullet.value?.color))
+                OneCustomerItem(it, getColor(selectedColor))
             }
             item{
-                val customerNote = remember { mutableStateOf(selectedOrderNote) }
+                // val customerNote = remember { mutableStateOf(selectedOrderNote) }
                 TextField(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
-                    backgroundColor = getColor(selectedBullet.value?.color),
-                    value = customerNote.value,
+                    backgroundColor = getColor(selectedColor),
+                    value = selectedOrderNote.value,
                     onValueChange = {
-                        customerNote.value = it
+                        selectedOrderNote.value = it
                         orderViewModel.changeNote(it)
                     })
             }

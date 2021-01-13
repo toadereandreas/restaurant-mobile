@@ -7,12 +7,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
@@ -20,13 +18,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.gesture.longPressGestureFilter
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
+import com.gradysbooch.restaurant.model.Table
 
 class OrderScreenAppBar(
         private val navController: NavHostController,
         private val orderViewModel: OrderViewModel,
-        private var selectedTable: State<Table>,
-        private var selectedBullet: State<Bullet?>,
-        private var bullets: State<List<Bullet>>
+        private val selectedTable: Table,
+        private val theActualTableIdCauseTableAndTableDTOareDifferentThingsAndOneDoesntEvenHaveItsIdSoIcanReferenceIt: String,
+        private val selectedColor: String?,
+        private val bullets: List<Bullet>
 ) {
     @Composable
     fun Show() {
@@ -37,7 +37,7 @@ class OrderScreenAppBar(
          */
 
         TopAppBar(
-                backgroundColor = getColor(selectedBullet.value?.color),
+                backgroundColor = getColor(selectedColor),
                 modifier = Modifier.height(120.dp),
                 title = {
                     Column{
@@ -63,11 +63,11 @@ class OrderScreenAppBar(
                     tint = MaterialTheme.colors.secondary,
                     asset = Icons.Filled.ArrowBack,
                     onClick = {
-                        orderViewModel.setTable("-1")
+                        // orderViewModel.setTable("-1")
                         navController.navigate("tables")
                     })
 
-            Text(text = "${selectedTable.value.name} (#${selectedTable.value.code})")
+            Text(text = "${selectedTable.name} (#${selectedTable.code})")
 
             val isChecked by orderViewModel.requiresAttention
                     .collectAsState(initial = false)
@@ -106,6 +106,7 @@ class OrderScreenAppBar(
                 asset = Icons.Filled.Check,
                 onClick = {
                     orderViewModel.selectAllScreen()
+                    navController.navigate("orders/${theActualTableIdCauseTableAndTableDTOareDifferentThingsAndOneDoesntEvenHaveItsIdSoIcanReferenceIt}/#000")
                 })
     }
 
@@ -127,7 +128,7 @@ class OrderScreenAppBar(
                 .collectAsState(initial = emptyList())
          */
 
-        LazyRowFor(items = bullets.value) {
+        LazyRowFor(items = bullets) {
             CustomerNavigationButton(bullet = it)
         }
     }
@@ -142,14 +143,15 @@ class OrderScreenAppBar(
         RoundedIconButton(
                 modifier = Modifier.padding(4.dp, 0.dp)
                     .longPressGestureFilter {
-                        if (bullet.locked) { orderViewModel.unlockOrder(selectedTable.value.tableUID, bullet.color)
-                        } else { orderViewModel.lockOrder(selectedTable.value.tableUID, bullet.color) }
+                        if (bullet.locked) { orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
+                        } else { orderViewModel.lockOrder(selectedTable.tableUID, bullet.color) }
                     },
                 color = getColor(bullet.color),
                 tint = MaterialTheme.colors.primary,
                 asset = if (bullet.locked) Icons.Filled.Lock else Icons.Filled.Clear,
                 onClick = {
-                    orderViewModel.selectColor(bullet.color)
+                    navController.navigate("orders/${theActualTableIdCauseTableAndTableDTOareDifferentThingsAndOneDoesntEvenHaveItsIdSoIcanReferenceIt}/${bullet.color}")
+                    // orderViewModel.selectColor(bullet.color)
                 }
         )
     }

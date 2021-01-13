@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
 import com.gradysbooch.restaurant.ui.values.getColor
@@ -17,7 +16,8 @@ import kotlinx.coroutines.flow.map
 
 class MenuItems(
         private val orderViewModel: OrderViewModel,
-        private var selectedBullet: State<Bullet?>
+        private var selectedColor: String?
+        // allMenuItems
 ) {
     @Composable
     fun Show() {
@@ -29,11 +29,17 @@ class MenuItems(
 
     @Composable
     fun FilteredMenuItems(searchText: String) {
+        orderViewModel.search(searchText)
+        val filteredMenuItems by orderViewModel.menu
+                .collectAsState(initial = emptyList())
+        // use viewmodel search function here
+        /*
         val filteredMenuItems by orderViewModel.menu
                 .map { list -> list.filter {
                     it.name.contains(searchText)
                 } }
                 .collectAsState(initial = emptyList())
+         */
 
         LazyColumnFor(items = filteredMenuItems) {
             MenuItemEntry(it)
@@ -49,7 +55,7 @@ class MenuItems(
          */
 
         RoundedButtonRowCard(
-                color = getColor(selectedBullet.value?.color),
+                color = getColor(selectedColor),
                 onClick = {
                     orderViewModel.addMenuItem(item.id)
                 }
