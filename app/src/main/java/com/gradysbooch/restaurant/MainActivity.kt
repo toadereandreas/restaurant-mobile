@@ -39,15 +39,11 @@ class MainActivity : AppCompatActivity()
         val extras = intent.extras
 
         setContent {
-            if (extras != null) {
-                val tableUID = extras.getString("tableUID")
+            extras?.getString("tableUID")?.let { tableUID ->
                 val orderViewModel = viewModel<OrderViewModel>()
-                orderViewModel.setTable(tableUID!!)
+                orderViewModel.setTable(tableUID)
                 App(viewModel<TableViewModel>(), orderViewModel, "orders")
-            }
-            else {
-            App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
-            }
+            } ?: App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
         }
 
     }
