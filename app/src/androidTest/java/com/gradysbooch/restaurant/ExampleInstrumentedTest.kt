@@ -67,4 +67,14 @@ class ExampleInstrumentedTest
             OrderItemWithMenuItem(OrderItem("black", "2", "1", 99999), MenuItem("1", "GUCCI", 112))
         )))
     }
+
+    @Test
+    fun clearTableTest(): Unit = runBlocking{
+        networkRepo.clearTable("4120daa2-b40f-4655-a6fc-07ceef7a9cc0")
+    }
+
+    @Test
+    fun testOrderViewModelIncreaseNumber(){
+
+    }
 }

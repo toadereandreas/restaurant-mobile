@@ -191,6 +191,14 @@ type ErrorType {
     messages: [String]
 }
 
+"Generates a new code for a serving."
+type GenerateServingCodeMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Serving with generated code."
+    serving: ServingNode
+}
+
 type LanguageList {
     data: [LanguageNode]
 }
@@ -298,6 +306,11 @@ type Mutation {
         "id to delete a serving"
         id: ID!
     ): DeleteServingMutation
+    "Generates a new code for a serving."
+    generateServingCode(
+        "id of the serving"
+        id: ID!
+    ): GenerateServingCodeMutation
     """
 
     Change account password when user knows the old password.
@@ -376,16 +389,6 @@ type Mutation {
     User must be verified and confirm password.
     """
     sendSecondaryEmailActivation(email: String!, password: String!): SendSecondaryEmailActivation
-    setCalled(
-        called: Boolean!,
-        "id to delete an order"
-        id: ID!
-    ): SetCalledMutation
-    setLocked(
-        "id to delete an order"
-        id: ID!,
-        locked: Boolean!
-    ): SetLockedMutation
     """
 
     Swap between primary and secondary emails.
@@ -513,7 +516,7 @@ type OrderNode {
     "Unique global identifier"
     gid: UUID!
     id: ID
-    locked: Boolean
+    locked: Boolean!
     note: String!
     serving: ServingNode!
     servingId: ID
@@ -687,23 +690,13 @@ type ServingList {
 }
 
 type ServingNode {
-    called: Boolean
+    called: Boolean!
     code: String!
     "Unique global identifier"
     gid: UUID!
     id: ID
     name: String!
     userId: ID
-}
-
-type SetCalledMutation {
-    called: Boolean
-    id: ID
-}
-
-type SetLockedMutation {
-    id: ID
-    locked: Boolean
 }
 
 """

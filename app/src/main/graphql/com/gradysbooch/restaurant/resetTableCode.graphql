@@ -1,0 +1,9 @@
+mutation generateServingCode($id: ID!) {
+    generateServingCode(id: $id) {
+        serving {
+            name
+            code
+            gid
+        }
+    }
+}

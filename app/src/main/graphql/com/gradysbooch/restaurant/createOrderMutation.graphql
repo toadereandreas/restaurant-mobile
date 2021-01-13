@@ -1,0 +1,8 @@
+mutation createOrder($color: String, $serving : String){
+    createOrder(input: {color: $color, serving: $serving, locked: true, note: ""}){
+        order{
+            servingId,
+            color
+        }
+    }
+}

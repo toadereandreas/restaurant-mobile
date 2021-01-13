@@ -1278,6 +1278,22 @@
               "deprecationReason": null
             },
             {
+              "name": "locked",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "id",
               "description": null,
               "args": [],
@@ -1296,18 +1312,6 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "locked",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -1373,6 +1377,22 @@
               "deprecationReason": null
             },
             {
+              "name": "called",
+              "description": "",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "id",
               "description": null,
               "args": [],
@@ -1391,18 +1411,6 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "called",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -2977,47 +2985,6 @@
               "deprecationReason": null
             },
             {
-              "name": "setLocked",
-              "description": null,
-              "args": [
-                {
-                  "name": "id",
-                  "description": "id to delete an order",
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
-                    }
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "locked",
-                  "description": null,
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Boolean",
-                      "ofType": null
-                    }
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "SetLockedMutation",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "createServing",
               "description": "Creates a serving.",
               "args": [
@@ -3113,26 +3080,12 @@
               "deprecationReason": null
             },
             {
-              "name": "setCalled",
-              "description": null,
+              "name": "generateServingCode",
+              "description": "Generates a new code for a serving.",
               "args": [
                 {
-                  "name": "called",
-                  "description": null,
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Boolean",
-                      "ofType": null
-                    }
-                  },
-                  "defaultValue": null
-                },
-                {
                   "name": "id",
-                  "description": "id to delete an order",
+                  "description": "id of the serving",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -3147,7 +3100,7 @@
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "SetCalledMutation",
+                "name": "GenerateServingCodeMutation",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -4070,16 +4023,6 @@
           "fields": null,
           "inputFields": [
             {
-              "name": "locked",
-              "description": null,
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
               "name": "serving",
               "description": null,
               "type": {
@@ -4105,6 +4048,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "locked",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               },
               "defaultValue": null
@@ -4178,41 +4131,6 @@
         },
         {
           "kind": "OBJECT",
-          "name": "SetLockedMutation",
-          "description": null,
-          "fields": [
-            {
-              "name": "id",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "locked",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
           "name": "CreateServingMutation",
           "description": "Creates a serving.",
           "fields": [
@@ -4257,16 +4175,6 @@
           "fields": null,
           "inputFields": [
             {
-              "name": "called",
-              "description": null,
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
               "name": "code",
               "description": null,
               "type": {
@@ -4292,6 +4200,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "called",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               },
               "defaultValue": null
@@ -4365,29 +4283,33 @@
         },
         {
           "kind": "OBJECT",
-          "name": "SetCalledMutation",
-          "description": null,
+          "name": "GenerateServingCodeMutation",
+          "description": "Generates a new code for a serving.",
           "fields": [
             {
-              "name": "id",
-              "description": null,
+              "name": "serving",
+              "description": "Serving with generated code.",
               "args": [],
               "type": {
-                "kind": "SCALAR",
-                "name": "ID",
+                "kind": "OBJECT",
+                "name": "ServingNode",
                 "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "called",
-              "description": null,
+              "name": "errors",
+              "description": "List of errors that occurred executing the mutation.",
               "args": [],
               "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ErrorType",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null

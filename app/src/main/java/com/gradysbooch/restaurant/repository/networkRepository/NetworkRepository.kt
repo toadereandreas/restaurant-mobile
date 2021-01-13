@@ -52,46 +52,57 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         return userIdCache ?: error("Null user id")
     }
 
-    override suspend fun getMenuItems(): Set<MenuItem> {
+    override suspend fun getMenuItems(): Set<MenuItem>  = withContext(Dispatchers.IO){
         val list = runQuerySafely<GetMenuItemsQuery.Data>(GetMenuItemsQuery()).menuItems?.data
             ?: error("ApolloFailure: menu items returned null.")
 
-        return list.filterNotNull()
+        return@withContext list.filterNotNull()
             .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
-    override fun getTables(): Flow<List<Table>> = subscribe("serving", object: TypeToken<ArrayList<Table>>(){}.type)
+    override fun getTables(): Flow<List<Table>> =
+        subscribe("serving", object : TypeToken<ArrayList<Table>>() {}.type)
 
-    override fun clientOrders(): Flow<List<Order>> = subscribe<List<Order>>("order", object: TypeToken<ArrayList<Order>>(){}.type)
-        .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
+    override fun clientOrders(): Flow<List<Order>> =
+        subscribe<List<Order>>("order", object : TypeToken<ArrayList<Order>>() {}.type)
+            .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
 
-    override fun orderItems(): Flow<List<OrderItem>> = subscribe("ordermenuitem",object: TypeToken<ArrayList<OrderItem>>(){}.type)
+    override fun orderItems(): Flow<List<OrderItem>> =
+        subscribe("ordermenuitem", object : TypeToken<ArrayList<OrderItem>>() {}.type)
 
     override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
-        val matchingOrder = _queryOrderByForeignKeys(orderWithMenuItems.order.tableUID, orderWithMenuItems.order.orderColor)
+        val matchingOrder = _queryOrderByForeignKeys(
+            orderWithMenuItems.order.tableUID,
+            orderWithMenuItems.order.orderColor
+        )
 
         val id = matchingOrder.gid as String
         val locked = matchingOrder.locked
 
-        apolloClient.mutate(UpdateOrderMutation(
-            id,
-            Input.fromNullable(orderWithMenuItems.order.tableUID),
-            Input.fromNullable(orderWithMenuItems.order.orderColor),
-            Input.fromNullable(locked),
-            Input.fromNullable(orderWithMenuItems.order.note))).await()
+        apolloClient.mutate(
+            UpdateOrderMutation(
+                id,
+                Input.fromNullable(orderWithMenuItems.order.tableUID),
+                Input.fromNullable(orderWithMenuItems.order.orderColor),
+                Input.fromNullable(locked),
+                Input.fromNullable(orderWithMenuItems.order.note)
+            )
+        ).await()
     }
 
-    override suspend fun clearCall(tableUID: String) {
-        apolloClient.mutate(ClearCallMutation(tableUID)).await()
+    override suspend fun clearCall(tableUID: String) :Unit = withContext(Dispatchers.IO) {
+        val tableUidProper = tableUID//_queryTableGidByTableId(tableID)
+
+        apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
 
-    override suspend fun unlockOrder(tableUID: String, color: String) {
+    override suspend fun unlockOrder(tableUID: String, color: String) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         apolloClient.mutate(UnlockOrderMutation(id)).await()
     }
 
-    override suspend fun lockOrder(tableUID: String, color: String) {
+    override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
         Log.d("UndoTag", id)
@@ -99,8 +110,48 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
+    override suspend fun clearTable(tableUID: String) : Unit = withContext(Dispatchers.IO){
+        val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
+            ?: error("ApolloFailure: orders returned null.")
+
+        orders.forEach {
+            if (it != null && it.serving.gid == tableUID) {
+                apolloClient.mutate(DeleteOrderMutation(it.gid as String)).await()
+            }
+        }
+
+        apolloClient.mutate(GenerateServingCodeMutation(tableUID)).await()
+    }
+
+    override suspend fun createOrderItem(orderItem: OrderItem) : Unit  = withContext(Dispatchers.IO){
+        val id = _queryOrderByForeignKeys(orderItem.tableUID, orderItem.orderColor).gid as String
+
+        apolloClient.mutate(CreateOrderMenuItemMutation(
+            Input.fromNullable(id),
+            Input.fromNullable(orderItem.menuItemUID),
+            Input.fromNullable(orderItem.quantity)
+        )).await()
+    }
+
+    override suspend fun updateOrderItem(orderItem: OrderItem) : Unit = withContext(Dispatchers.IO){
+        val idOrderMenuItem= _queryOrderMenuItemByForeignKeys(orderItem.menuItemUID, orderItem.orderColor, orderItem.tableUID).gid as String
+
+        apolloClient.mutate(UpdateOrderMenuItemMutation(
+            idOrderMenuItem,
+            Input.fromNullable(orderItem.menuItemUID),
+            Input.fromNullable(orderItem.quantity.toString())
+        )).await()
+    }
+
+    override suspend fun createOrder(color: String, tableUID: String) : Unit = withContext(Dispatchers.IO){
+        apolloClient.mutate(CreateOrderMutation(
+            Input.fromNullable(color),
+            Input.fromNullable(tableUID)
+        )).await()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> subscribe(endpoint: String, type : Type): Flow<T> = callbackFlow<T> {
+    private fun <T> subscribe(endpoint: String, type: Type): Flow<T> = callbackFlow<T> {
         val listener = webSocketListener(channel, type)
 
         val userId = getUserId()
@@ -116,6 +167,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
+
+                Log.d("UndoTag", "Socket got raw $text")
 
                 val receivedValue: T = gson.fromJson(text, type)
 
@@ -135,7 +188,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             }
         }
 
-    private suspend fun login() {
+    private suspend fun login() = withContext(Dispatchers.IO){
         val login = apolloClient.mutate(LoginMutation(Input.fromNullable(EMAIL), PASSWORD))
             .await().data?.tokenAuth
 
@@ -148,13 +201,13 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         userIdCache = Regex("[0-9]+").find(userId.decodeBase64().toString())?.value?.toInt()
     }
 
-    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T {
+    private suspend inline fun <reified T : Operation.Data> runQuerySafely(GQLQuery: Query<*, *, *>): T  = withContext(Dispatchers.IO){
         try {
             val result = (apolloClient.query(GQLQuery).await().data as? T
                 ?: error("ApolloFailure: Returned null."))
 
             internalOnlineStatus.emit(true)
-            return result
+            return@withContext result
 
         } catch (e: ApolloException) {
             internalOnlineStatus.emit(false)
@@ -162,30 +215,31 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         }
     }
 
-//    private suspend fun _queryTableGidByTableId(
-//        tableUID: String
-//    ): String {
-//        val retrievedTables = runQuerySafely<GetTablesQuery.Data>(GetTablesQuery()).tables?.data
-//            ?: error("ApolloFailure: orders returned null.")
-//
-//        val tableUidProper = (retrievedTables.find { it?.id == tableUID }?.gid ?: {}).toString()
-//        Log.d("UndoTag", tableUidProper)
-//        return tableUidProper
-//    }
-
-    private suspend fun _queryOrderByForeignKeys(
+    private suspend fun _queryOrderByForeignKeys (
         tableUID: String,
         color: String
-    ): GetOrdersQuery.Data1 {
+    ): GetOrdersQuery.Data1  = withContext(Dispatchers.IO) {
         val orders = runQuerySafely<GetOrdersQuery.Data>(GetOrdersQuery()).orders?.data
             ?: error("ApolloFailure: orders returned null.")
-
-        Log.d("UndoTag", orders.toString())
-        Log.d("UndoTag", tableUID + " "+ color)
 
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.id == tableUID }
             ?: error("ApolloFailure: failed to get order")
-        return matchingOrder
+        return@withContext matchingOrder
+    }
+
+    private suspend fun _queryOrderMenuItemByForeignKeys (
+        menuItemId: String,
+        orderColor: String,
+        tableUID: String,
+    ): GetOrderMenuItemsQuery.Data1  = withContext(Dispatchers.IO) {
+        val orders = runQuerySafely<GetOrderMenuItemsQuery.Data>(GetOrdersQuery()).orderMenuItems?.data
+            ?: error("ApolloFailure: ordermenuitems returned null.")
+
+        val matchingOrder = orders.filterNotNull()
+            .find { it.menuItemId == menuItemId && it.color ==  orderColor && it.servingId == tableUID}
+            ?: error("ApolloFailure: failed to get order")
+
+        return@withContext matchingOrder
     }
 }

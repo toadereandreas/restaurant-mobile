@@ -1,0 +1,11 @@
+mutation createOrderMenuItem($order: String, $menuItem: String, $quantity: Int){
+    createOrderMenuItem(input: {order: $order, menuItem: $menuItem, quantity: $quantity}){
+        orderMenuItem{
+            gid,
+            order{
+                gid
+            }
+            servingId
+        }
+    }
+}
