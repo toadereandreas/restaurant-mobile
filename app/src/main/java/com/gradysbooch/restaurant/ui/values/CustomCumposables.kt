@@ -159,7 +159,6 @@ fun RoundedSearchBar(
     }
 }
 
-fun getColor(color: String?) : Color {
-    return try { Color(android.graphics.Color.parseColor(color ?: "#f00"))
-    } catch (e: Exception) { Color.Red }
-}
+fun getColor(color: String?) : Color =
+        runCatching { Color(android.graphics.Color.parseColor(color ?: "#f00")) }
+                .getOrDefault(Color.Red)

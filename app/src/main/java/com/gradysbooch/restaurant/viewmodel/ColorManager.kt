@@ -1,24 +1,23 @@
 package com.gradysbooch.restaurant.viewmodel
 
-import androidx.compose.ui.graphics.Color
-import java.lang.RuntimeException
-
 object ColorManager {
-    private val colorMap = mapOf<String, Color>(
-        "red" to Color.Red,
-        "green" to Color.Green,
-        "blue" to Color.Blue,
-        "yellow" to Color.Yellow,
-        "cyan" to Color.Cyan,
-        "magenta" to Color.Magenta,
+    private val colors = setOf<String>(
+            "#40C8D4",
+            "#A53860",
+            "#560B27",
+            "#A13FE8",
+            "#3772FF",
+            "#96031A",
+            "#066E8B",
+            "#7392B7",
+            "#4F5D2F",
+            "#F46036",
     )
 
-    fun convertToColor(color: String): Color = colorMap[color] ?: error("Could not convert color")
-
-    fun randomColor(currentColors: Set<String>): String {
-        val remainingColors = colorMap.keys - currentColors
+    fun randomColor(currentColors: Set<String>): String? {
+        val remainingColors = colors - currentColors
         if (remainingColors.isEmpty())
-            throw RuntimeException("We ran out of colors")
+            return null
 
         return remainingColors.random()
     }
