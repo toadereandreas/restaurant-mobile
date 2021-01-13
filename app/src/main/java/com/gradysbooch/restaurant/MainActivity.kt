@@ -12,10 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import androidx.ui.tooling.preview.Preview
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
@@ -63,10 +64,19 @@ fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLoc
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = startLocation) {
                 composable("tables"){
-                    TablesScreen(navController, tableViewModel, orderViewModel).Show()
+                    TablesScreen(tableViewModel, orderViewModel, navController).Show()
                 }
-                composable("orders") {
-                    OrderScreen(navController, orderViewModel)
+                // todo change this cause it's a mess (a working mess, mind you, but still a mess)
+                composable("orders/{tableId}/{orderColor}",
+                        arguments = listOf(
+                                navArgument("tableId") { type = NavType.StringType },
+                                navArgument("orderColor") { type = NavType.StringType }
+                        )
+                ) {
+                    OrderScreen(orderViewModel, navController,
+                            it.arguments?.getString("tableId"),
+                            it.arguments?.getString("orderColor")
+                    )
                 }
             }
         }
