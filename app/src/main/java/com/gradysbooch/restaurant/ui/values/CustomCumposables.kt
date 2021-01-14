@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
 import java.lang.Exception
+import kotlin.math.min
 
 
 @Composable
@@ -162,3 +163,10 @@ fun RoundedSearchBar(
 fun getColorOr(string: String?, replacement: Color = Color.Red) : Color =
         try { Color(android.graphics.Color.parseColor(string!!))
         } catch (e: Exception) { replacement }
+
+
+fun smartSubstring(string: String, maxLength: Int) : String {
+    val limit = min(maxLength, string.length)
+    return string.substring(0, limit) +
+            if (limit < string.length) "..." else ""
+}

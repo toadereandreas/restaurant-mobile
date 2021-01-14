@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.gesture.doubleTapGestureFilter
 import androidx.compose.ui.gesture.longPressGestureFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -63,8 +64,8 @@ class OrderScreen(
                 ) {
                     selectedColor.value = it.arguments?.getString("selectedColor")!!
                     locked.value = it.arguments?.getBoolean("locked")!!
+
                     OneOrderScreen(orderViewModel, selectedColor, locked).Show()
-                    // OneScreen()
                 }
             }
         })
@@ -156,16 +157,27 @@ class OrderScreen(
                 // Navigation Bullets
                 LazyRowFor(items = bullets) { bullet -> RoundedIconButton(
                         modifier = Modifier.padding(4.dp, 0.dp)
-                                .longPressGestureFilter {
-                                    if (bullet.locked) { orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
-                                    } else { orderViewModel.lockOrder(selectedTable.tableUID, bullet.color) }
+                                .doubleTapGestureFilter {
+                                    if (bullet.locked) {
+                                        orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
+                                    } else {
+                                        orderViewModel.lockOrder(selectedTable.tableUID, bullet.color)
+                                    }
                                 },
                         color = getColorOr(bullet.color),
                         tint = MaterialTheme.colors.primary,
                         asset = if (bullet.locked) Icons.Default.Lock else Icons.Default.Clear,
                         onClick = {
-                            // orderViewModel.selectColor(bullet.color)
-                            orderNavController.navigate("one/${bullet.color}/${bullet.locked}")
+                            if (bullet.color == selectedColor.value) {
+                                if (bullet.locked) {
+                                    orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
+                                } else {
+                                    orderViewModel.lockOrder(selectedTable.tableUID, bullet.color)
+                                }
+                            } else {
+                                // orderViewModel.selectColor(bullet.color)
+                                orderNavController.navigate("one/${bullet.color}/${bullet.locked}")
+                            }
                         })
                 }
             }

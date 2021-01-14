@@ -13,10 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
-import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
-import com.gradysbooch.restaurant.ui.values.RoundedIconButton
-import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
-import com.gradysbooch.restaurant.ui.values.getColorOr
+import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import kotlinx.coroutines.flow.map
 
@@ -63,7 +60,7 @@ class OneOrderScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                        text = item.first.name,
+                        text = smartSubstring(item.first.name, 25),
                         modifier = Modifier.padding(16.dp, 0.dp)
                 )
 
@@ -100,16 +97,16 @@ class OneOrderScreen(
     @Composable
     private fun CustomerNote() {
         val selectedOrderNote = orderViewModel.allScreenNotes
-                .map { list -> list.first {
+                .map { list -> list.firstOrNull {
                     it.first == selectedColor.value
                 } }
-                .map { it.second }
+                .map { it?.second }
                 .collectAsState(initial = "") as MutableState
 
         TextField(
                 modifier = Modifier.padding(8.dp).fillMaxWidth(),
                 backgroundColor = getColorOr(selectedColor.value),
-                value = selectedOrderNote.value,
+                value = selectedOrderNote.value ?: "",
                 onValueChange = {
                     selectedOrderNote.value = it
                     orderViewModel.changeNote(it)
@@ -126,7 +123,7 @@ class OneOrderScreen(
                     }
                 }
         ) {
-            Text(text = it.name)
+            Text(text = smartSubstring(it.name, 25))
             Text(text = "${it.price} RON")
         }
     }

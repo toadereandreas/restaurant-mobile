@@ -16,6 +16,7 @@ import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.ui.values.RoundedButtonColumnCard
 import com.gradysbooch.restaurant.ui.values.RoundedRowCard
 import com.gradysbooch.restaurant.ui.values.getColorOr
+import com.gradysbooch.restaurant.ui.values.smartSubstring
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
 class AllOrderScreen(
@@ -44,7 +45,7 @@ class AllOrderScreen(
                 onClick = { expanded.value = !expanded.value }
         ) {
             RoundedRowCard{
-                Text(text = item.menuItem.name)
+                Text(text = smartSubstring(item.menuItem.name, 30))
                 Text(text = item.number.toString())
             }
             if (expanded.value) {

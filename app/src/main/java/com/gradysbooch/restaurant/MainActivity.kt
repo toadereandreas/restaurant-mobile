@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -62,15 +63,13 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         startLocation: String = "tables") {
 
     /* fixme
-        - Add Menu Item Locally -> ApolloFailure: failed to get order (NetworkRepository.kt:224)
-            BUT Item is added
-        - Edit Menu Item Locally -> ApolloFailure: failed to get order (NetworkRepository.kt:238)
-            BUT Item is edited
-        - Select Order Remote -> NoSuchElementException: Collection contains no element matching the predicate (Collect.kt:138)
+        - No remote notes
      */
     /* todo
         - Test : Check Table (clear attention)
      */
+
+    // todo limit menu item text length
 
     RestaurantmobileTheme {
         Surface(

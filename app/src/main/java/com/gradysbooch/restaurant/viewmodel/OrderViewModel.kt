@@ -211,6 +211,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         val tableUID = tableUID.value ?: return
         viewModelScope.launch {
             repository.clearTable(tableUID)
+            repository.networkRepository.clearTable(tableUID)
         }
         Log.d(this::class.simpleName, "Cleared table")
     }

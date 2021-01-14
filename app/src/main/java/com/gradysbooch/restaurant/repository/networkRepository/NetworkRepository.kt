@@ -105,6 +105,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
+        Log.d("UndoTag", "ID: $id")
+
         apolloClient.mutate(LockOrderMutation(id)).await()
     }
 
@@ -168,6 +170,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             override fun onMessage(webSocket: WebSocket, text: String) {
 
                 val receivedValue: T = gson.fromJson(text, type)
+                Log.d("UndoTag", "ON Message: $receivedValue")
 
                 try {
                     channel.sendBlocking(receivedValue)
