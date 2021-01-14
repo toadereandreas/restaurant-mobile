@@ -118,8 +118,10 @@ class OneOrderScreen(
                 backgroundColor = getColorOr(selectedColor.value),
                 value = selectedOrderNote.value ?: "",
                 onValueChange = {
-                    selectedOrderNote.value = it
-                    orderViewModel.changeNote(it)
+                    if (locked.value) {
+                        selectedOrderNote.value = it
+                        orderViewModel.changeNote(it)
+                    }
                 })
     }
 
