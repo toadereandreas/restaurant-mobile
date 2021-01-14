@@ -9,10 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.RoundedSearchBar
-import com.gradysbooch.restaurant.ui.values.getColor
+import com.gradysbooch.restaurant.ui.values.getColorOr
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
-import kotlinx.coroutines.flow.map
 
 class MenuItems(
         private val orderViewModel: OrderViewModel,
@@ -55,7 +54,7 @@ class MenuItems(
          */
 
         RoundedButtonRowCard(
-                color = getColor(selectedColor),
+                color = getColorOr(selectedColor),
                 onClick = {
                     orderViewModel.addMenuItem(item.id)
                 }

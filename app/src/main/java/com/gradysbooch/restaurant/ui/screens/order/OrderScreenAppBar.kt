@@ -37,7 +37,7 @@ class OrderScreenAppBar(
          */
 
         TopAppBar(
-                backgroundColor = getColor(selectedColor),
+                backgroundColor = getColorOr(selectedColor),
                 modifier = Modifier.height(120.dp),
                 title = {
                     Column{
@@ -146,7 +146,7 @@ class OrderScreenAppBar(
                         if (bullet.locked) { orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
                         } else { orderViewModel.lockOrder(selectedTable.tableUID, bullet.color) }
                     },
-                color = getColor(bullet.color),
+                color = getColorOr(bullet.color),
                 tint = MaterialTheme.colors.primary,
                 asset = if (bullet.locked) Icons.Filled.Lock else Icons.Filled.Clear,
                 onClick = {

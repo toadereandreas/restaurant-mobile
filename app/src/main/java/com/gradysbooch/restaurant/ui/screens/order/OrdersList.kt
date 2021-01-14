@@ -78,7 +78,7 @@ class OrdersList(
                     LazyRowFor(items = item.orders) {quantity ->
                         Surface(
                             shape = CircleShape,
-                            color = getColor(quantity.first),
+                            color = getColorOr(quantity.first),
                             modifier = Modifier.padding(4.dp, 0.dp)
                         ) {
                             Text(   modifier = Modifier.padding(10.dp, 4.dp),
@@ -94,7 +94,7 @@ class OrdersList(
     @Composable
     fun AllCustomerNote(note: Pair<String, String>) {
         RoundedRowCard(
-                border = BorderStroke(1.dp, getColor(note.first))
+                border = BorderStroke(1.dp, getColorOr(note.first))
         ){
             Text(text = note.second)
         }
@@ -125,13 +125,13 @@ class OrdersList(
 
         LazyColumn{
             items(selectedOrderItems) {
-                OneCustomerItem(it, getColor(selectedColor))
+                OneCustomerItem(it, getColorOr(selectedColor))
             }
             item{
                 // val customerNote = remember { mutableStateOf(selectedOrderNote) }
                 TextField(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
-                    backgroundColor = getColor(selectedColor),
+                    backgroundColor = getColorOr(selectedColor),
                     value = selectedOrderNote.value,
                     onValueChange = {
                         selectedOrderNote.value = it

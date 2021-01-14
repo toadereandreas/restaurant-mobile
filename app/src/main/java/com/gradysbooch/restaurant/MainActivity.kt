@@ -17,9 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import androidx.ui.tooling.preview.Preview
-import com.gradysbooch.restaurant.model.Notification
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
+import com.gradysbooch.restaurant.ui.screens.newOrder.NewOrderScreen
 import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
@@ -47,7 +46,6 @@ class MainActivity : AppCompatActivity()
                 App(viewModel<TableViewModel>(), orderViewModel, "orders")
             } ?: App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
         }
-
     }
 
     override fun onDestroy() {
@@ -69,22 +67,28 @@ fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLoc
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
         ) {
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = startLocation) {
+            val screenNavController = rememberNavController()
+            NavHost(navController = screenNavController, startDestination = startLocation) {
                 composable("tables"){
-                    TablesScreen(tableViewModel, orderViewModel, navController).Show()
+                    TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
                 }
                 // todo change this cause it's a mess (a working mess, mind you, but still a mess)
-                composable("orders/{tableId}/{orderColor}",
+                // todo only allow editing orders when unlocked
+                composable("orders/{tableId}",
                         arguments = listOf(
                                 navArgument("tableId") { type = NavType.StringType },
-                                navArgument("orderColor") { type = NavType.StringType }
+                                // navArgument("orderColor") { type = NavType.StringType }
                         )
                 ) {
-                    OrderScreen(orderViewModel, navController,
+                    NewOrderScreen(orderViewModel, screenNavController,
+                            it.arguments?.getString("tableId"),
+                    ).Show()
+                    /*
+                    OrderScreen(orderViewModel, screenNavController,
                             it.arguments?.getString("tableId"),
                             it.arguments?.getString("orderColor")
                     )
+                     */
                 }
             }
         }
