@@ -40,11 +40,16 @@ class OneOrderScreen(
 
             item {
                 CustomerNote()
-                Spacer(modifier = Modifier.height(16.dp))
-                RoundedSearchBar(text)
             }
 
-            items(filteredMenuItems) { MenuItem(it) }
+            if (locked.value) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    RoundedSearchBar(text)
+                }
+
+                items(filteredMenuItems) { MenuItem(it) }
+            }
         }
     }
 
@@ -66,28 +71,33 @@ class OneOrderScreen(
 
                 Row {
                     val number = remember { mutableStateOf(item.second) }
-                    RoundedIconButton(
-                            modifier = Modifier.then(Modifier.preferredSize(24.dp)),
-                            asset = Icons.Default.KeyboardArrowDown,
-                            onClick = {
-                                if (locked.value && number.value > 0) {
-                                    number.value -= 1
-                                    orderViewModel.changeNumber(item.first.id, number.value)
-                                }
-                            })
+                    if (locked.value) {
+                        RoundedIconButton(
+                                modifier = Modifier.then(Modifier.preferredSize(24.dp)),
+                                asset = Icons.Default.KeyboardArrowDown,
+                                onClick = {
+                                    // if (locked.value && number.value > 0) {
+                                    if (number.value > 0) {
+                                        number.value -= 1
+                                        orderViewModel.changeNumber(item.first.id, number.value)
+                                    }
+                                })
+                    }
                     Text(
                             modifier = Modifier.padding(8.dp, 0.dp),
                             text = number.value.toString()
                     )
-                    RoundedIconButton(
-                            modifier = Modifier.then(Modifier.preferredSize(24.dp)),
-                            asset = Icons.Default.KeyboardArrowUp,
-                            onClick = {
-                                if (locked.value) {
-                                    number.value += 1
-                                    orderViewModel.changeNumber(item.first.id, number.value)
-                                }
-                            })
+                    if (locked.value) {
+                        RoundedIconButton(
+                                modifier = Modifier.then(Modifier.preferredSize(24.dp)),
+                                asset = Icons.Default.KeyboardArrowUp,
+                                onClick = {
+                                    // if (locked.value) {
+                                        number.value += 1
+                                        orderViewModel.changeNumber(item.first.id, number.value)
+                                    // }
+                                })
+                    }
                 }
             }
         }
@@ -118,9 +128,9 @@ class OneOrderScreen(
         RoundedButtonRowCard(
                 color = getColorOr(selectedColor.value),
                 onClick = {
-                    if (locked.value) {
+                    // if (locked.value) {
                         orderViewModel.addMenuItem(it.id)
-                    }
+                    // }
                 }
         ) {
             Text(text = smartSubstring(it.name, 25))
