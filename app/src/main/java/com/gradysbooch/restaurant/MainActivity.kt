@@ -39,11 +39,9 @@ class MainActivity : AppCompatActivity()
         val extras = intent.extras
 
         setContent {
-            extras?.getString("tableUID")?.let { tableUID ->
-                val orderViewModel = viewModel<OrderViewModel>()
-                orderViewModel.setTable(tableUID)
-                App(viewModel<TableViewModel>(), orderViewModel, "orders")
-            } ?: App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
+            extras?.getString("tableUID")?.let {
+                App(startLocation = "orders/$it")
+            } ?: App()
         }
     }
 
@@ -59,9 +57,17 @@ class MainActivity : AppCompatActivity()
 
 // @Preview
 @Composable
-fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "tables") {
+fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
+        orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
+        startLocation: String = "tables") {
+
+    /* fixme
+        - Add menu item (local) -> Crash
+        - Edit menu item (local) -> Crash
+        - Select order (remote) -> Crash
+     */
+
     RestaurantmobileTheme {
-        // A surface container using the 'background' color from the theme
         Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
