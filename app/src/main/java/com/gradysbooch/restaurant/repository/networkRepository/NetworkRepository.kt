@@ -91,7 +91,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun clearCall(tableUID: String) :Unit = withContext(Dispatchers.IO) {
-        val tableUidProper = tableUID//_queryTableGidByTableId(tableID)
+        val tableUidProper = tableUID
 
         apolloClient.mutate(ClearCallMutation(tableUidProper)).await()
     }
