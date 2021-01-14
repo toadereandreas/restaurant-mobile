@@ -61,6 +61,17 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
         startLocation: String = "tables") {
 
+    /* fixme
+        - Add Menu Item Locally -> ApolloFailure: failed to get order (NetworkRepository.kt:224)
+            BUT Item is added
+        - Edit Menu Item Locally -> ApolloFailure: failed to get order (NetworkRepository.kt:238)
+            BUT Item is edited
+        - Select Order Remote -> NoSuchElementException: Collection contains no element matching the predicate (Collect.kt:138)
+     */
+    /* todo
+        - Test : Check Table (clear attention)
+     */
+
     RestaurantmobileTheme {
         Surface(
                 modifier = Modifier.fillMaxSize(),
