@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.ui.screens.newOrder
+package com.gradysbooch.restaurant.ui.screens.orders
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import java.lang.Exception
 
-class NewOrderScreen(
+class OrderScreen(
         private val orderViewModel: OrderViewModel,
         private val screenNavController: NavHostController,
         private val tableId: String?,

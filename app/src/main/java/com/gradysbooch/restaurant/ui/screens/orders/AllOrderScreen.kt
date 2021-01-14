@@ -1,4 +1,4 @@
-package com.gradysbooch.restaurant.ui.screens.newOrder
+package com.gradysbooch.restaurant.ui.screens.orders
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth

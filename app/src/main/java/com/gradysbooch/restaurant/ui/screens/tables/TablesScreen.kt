@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.TableDTO
 import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
-import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.viewmodel.TableViewModel
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -21,7 +20,6 @@ import androidx.navigation.compose.navigate
 
 class TablesScreen(
         private val tableViewModel: TableViewModel,
-        private val orderViewModel: OrderViewModel,
         private val screenNavController: NavHostController,
 ) {
     @Composable
@@ -46,7 +44,6 @@ class TablesScreen(
 
     @Composable
     fun TablesList() {
-        // val tableViewModel = viewModel<TableViewModel>()
         val tables by tableViewModel.tables.collectAsState(initial = emptyList())
 
         LazyColumnFor(items = tables) {
@@ -56,11 +53,9 @@ class TablesScreen(
 
     @Composable
     fun TableEntry(table: TableDTO) {
-
         RoundedButtonRowCard(
                 border = BorderStroke(2.dp, MaterialTheme.colors.onSurface),
                 onClick = {
-                    // orderViewModel.setTable(table.id)
                     screenNavController.navigate("orders/${table.id}")
                 }
         ) {

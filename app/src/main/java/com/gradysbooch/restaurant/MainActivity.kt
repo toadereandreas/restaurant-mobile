@@ -18,8 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
-import com.gradysbooch.restaurant.ui.screens.newOrder.NewOrderScreen
-import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
+import com.gradysbooch.restaurant.ui.screens.orders.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
@@ -69,26 +68,19 @@ fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLoc
         ) {
             val screenNavController = rememberNavController()
             NavHost(navController = screenNavController, startDestination = startLocation) {
+
                 composable("tables"){
-                    TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
+                    TablesScreen(tableViewModel, screenNavController).Show()
                 }
-                // todo change this cause it's a mess (a working mess, mind you, but still a mess)
-                // todo only allow editing orders when unlocked
+
                 composable("orders/{tableId}",
                         arguments = listOf(
                                 navArgument("tableId") { type = NavType.StringType },
-                                // navArgument("orderColor") { type = NavType.StringType }
                         )
                 ) {
-                    NewOrderScreen(orderViewModel, screenNavController,
-                            it.arguments?.getString("tableId"),
-                    ).Show()
-                    /*
                     OrderScreen(orderViewModel, screenNavController,
                             it.arguments?.getString("tableId"),
-                            it.arguments?.getString("orderColor")
-                    )
-                     */
+                    ).Show()
                 }
             }
         }
