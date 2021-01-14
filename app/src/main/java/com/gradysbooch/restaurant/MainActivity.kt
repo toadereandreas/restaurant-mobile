@@ -61,15 +61,6 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
         startLocation: String = "tables") {
 
-    /* fixme
-        - Add menu item (local) -> Crash (ApolloHttpException: HTTP 400 Bad Request)
-            BUT item is added
-        - Edit menu item (local) -> Crash (ApolloHttpException: HTTP 400 Bad Request)
-            BUT item is edited
-        - Select order (remote) -> Crash
-            BUT order is selected (seen in Logs)
-     */
-
     RestaurantmobileTheme {
         Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -79,7 +70,7 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
             NavHost(navController = screenNavController, startDestination = startLocation) {
 
                 composable("tables"){
-                    TablesScreen(tableViewModel, screenNavController).Show()
+                    TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
                 }
 
                 composable("orders/{tableId}",

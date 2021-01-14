@@ -103,7 +103,7 @@ class OrderScreen(
             RoundedIconButton(
                     color = Color.Transparent,
                     tint = MaterialTheme.colors.secondary,
-                    asset = Icons.Filled.ArrowBack,
+                    asset = Icons.Default.ArrowBack,
                     onClick = {
                         // orderViewModel.setTable("-1")
                         screenNavController.navigate("tables")
@@ -117,7 +117,7 @@ class OrderScreen(
             RoundedIconButton(
                     color = Color.Transparent,
                     tint = MaterialTheme.colors.secondary,
-                    asset = if (isChecked) Icons.Filled.CheckCircle else Icons.Filled.Check,
+                    asset = if (isChecked) Icons.Default.CheckCircle else Icons.Default.Check,
                     onClick = {
                         orderViewModel.clearAttention()
                     })
@@ -140,7 +140,7 @@ class OrderScreen(
                 // Go to All Orders Screen
                 RoundedIconButton(
                         modifier = Modifier.padding(4.dp, 0.dp),
-                        asset = Icons.Filled.Check,
+                        asset = Icons.Default.Check,
                         onClick = {
                             // orderViewModel.selectAllScreen()
                             orderNavController.navigate("all")
@@ -148,7 +148,7 @@ class OrderScreen(
                 // Add new Bullet
                 RoundedIconButton(
                         modifier = Modifier.padding(4.dp, 0.dp),
-                        asset = Icons.Filled.Add,
+                        asset = Icons.Default.Add,
                         onClick = {
                             try { orderViewModel.addBullet()
                             } catch (e : Exception) { Log.d("ERROR", e.stackTraceToString()) }
@@ -162,7 +162,7 @@ class OrderScreen(
                                 },
                         color = getColorOr(bullet.color),
                         tint = MaterialTheme.colors.primary,
-                        asset = if (bullet.locked) Icons.Filled.Lock else Icons.Filled.Clear,
+                        asset = if (bullet.locked) Icons.Default.Lock else Icons.Default.Clear,
                         onClick = {
                             // orderViewModel.selectColor(bullet.color)
                             orderNavController.navigate("one/${bullet.color}/${bullet.locked}")

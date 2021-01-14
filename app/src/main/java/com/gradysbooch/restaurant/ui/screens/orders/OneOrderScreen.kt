@@ -71,7 +71,7 @@ class OneOrderScreen(
                     val number = remember { mutableStateOf(item.second) }
                     RoundedIconButton(
                             modifier = Modifier.then(Modifier.preferredSize(24.dp)),
-                            asset = Icons.Filled.KeyboardArrowDown,
+                            asset = Icons.Default.KeyboardArrowDown,
                             onClick = {
                                 if (locked.value && number.value > 0) {
                                     number.value -= 1
@@ -84,7 +84,7 @@ class OneOrderScreen(
                     )
                     RoundedIconButton(
                             modifier = Modifier.then(Modifier.preferredSize(24.dp)),
-                            asset = Icons.Filled.KeyboardArrowUp,
+                            asset = Icons.Default.KeyboardArrowUp,
                             onClick = {
                                 if (locked.value) {
                                     number.value += 1

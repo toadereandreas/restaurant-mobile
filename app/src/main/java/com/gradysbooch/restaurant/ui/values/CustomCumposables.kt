@@ -124,7 +124,7 @@ fun RoundedColumnCard(
 fun RoundedIconButton(
         border: BorderStroke? = null,
         modifier: Modifier = Modifier.padding(2.dp),
-        color: Color = MaterialTheme.colors.secondary,
+        color: Color = MaterialTheme.colors.onPrimary,
         shape: Shape = CircleShape,
         asset: VectorAsset,
         tint: Color = MaterialTheme.colors.primary,
