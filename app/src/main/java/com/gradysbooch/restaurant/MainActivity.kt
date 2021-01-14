@@ -62,9 +62,12 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         startLocation: String = "tables") {
 
     /* fixme
-        - Add menu item (local) -> Crash
-        - Edit menu item (local) -> Crash
+        - Add menu item (local) -> Crash (ApolloHttpException: HTTP 400 Bad Request)
+            BUT item is added
+        - Edit menu item (local) -> Crash (ApolloHttpException: HTTP 400 Bad Request)
+            BUT item is edited
         - Select order (remote) -> Crash
+            BUT order is selected (seen in Logs)
      */
 
     RestaurantmobileTheme {
