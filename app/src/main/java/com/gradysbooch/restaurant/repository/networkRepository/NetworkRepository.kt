@@ -1,3 +1,4 @@
+
 package com.gradysbooch.restaurant.repository.networkRepository
 
 import android.content.Context
@@ -99,7 +100,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun unlockOrder(tableUID: String, color: String) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
-        apolloClient.mutate(UnlockOrderMutation(id)).await()
+        apolloClient.mutate(UnlockOrderMutation(id, tableUID)).await()
     }
 
     override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
@@ -107,7 +108,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
         Log.d("UndoTag", "ID: $id")
 
-        apolloClient.mutate(LockOrderMutation(id)).await()
+        // apolloClient.mutate(LockOrderMutation(id)).await()
+        apolloClient.mutate(LockOrderMutation(id, tableUID)).await()
     }
 
     override suspend fun clearTable(tableUID: String) : Unit = withContext(Dispatchers.IO){
