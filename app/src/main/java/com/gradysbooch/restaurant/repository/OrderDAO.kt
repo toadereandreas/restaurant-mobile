@@ -31,7 +31,7 @@ interface OrderDAO
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID AND orderColor=:color")
     suspend fun getOrder(tableUID: String, color: String): Order?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addOrder(order: Order)
 
     @Query("UPDATE `Order` SET note=:note WHERE tableUID=:tableUID AND orderColor=:color")

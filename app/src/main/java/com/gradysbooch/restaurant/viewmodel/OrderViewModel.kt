@@ -10,7 +10,9 @@ import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -23,14 +25,14 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         repository.networkRepository.orderItems()
                 .onEach {
                     repository.orderDao().saveOrderItems(it)
-                    Log.d(this::class.simpleName, "Saved order Items $it")
+                    Log.d("OrderViewModel", "Saved order Items $it")
                 }
                 .launchIn(viewModelScope)
 
         viewModelScope.launch {
             val menuItems = repository.networkRepository.getMenuItems()
             repository.menuItemDAO().updateMenu(menuItems)
-            Log.d(this::class.simpleName, "Updated Menu Items: $menuItems")
+            Log.d("OrderViewModel", "Updated Menu Items: $menuItems")
         }
     }
 
@@ -58,7 +60,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                 Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
         }.combine(clientOrders) { lockedBullets, unlockedBullets ->
-            lockedBullets + unlockedBullets
+            (lockedBullets union unlockedBullets).sortedBy { it.color }
         }
     }
 
@@ -135,13 +137,13 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun setTable(tableId: String)
     {
         this.tableUID.value = tableId
-        Log.d(this::class.simpleName, "Changed table to id $tableId")
+        Log.d("OrderViewModel", "Changed table to id $tableId")
     }
 
     override fun selectAllScreen()
     {
         activeColor.value = null
-        Log.d(this::class.simpleName, "All screen selected")
+        Log.d("OrderViewModel", "All screen selected")
     }
 
     override fun addBullet()
@@ -158,7 +160,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                         )
                 )
                 repository.networkRepository.createOrder(tableUID, orderColor)
-                Log.d(this::class.simpleName, "Added order with color $orderColor")
+                Log.d("OrderViewModel", "Added order with color $orderColor")
             }
         }
     }
@@ -169,7 +171,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             tableUID.value?.let {
                 repository.tableDao().updateTableCall(it, false)
                 repository.networkRepository.clearCall(it)
-                Log.d(this::class.simpleName, "Cleared call for table $it")
+                Log.d("OrderViewModel", "Cleared call for table $it")
             }
         }
     }
@@ -177,7 +179,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun selectColor(color: String)
     {
         activeColor.value = color
-        Log.d(this::class.simpleName, "Selected order with color $color")
+        Log.d("OrderViewModel", "Selected order with color $color")
     }
 
     override fun search(searchString: String)
@@ -204,7 +206,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
 
             val orderItem = OrderItem(activeColor, tableUID, menuItemId, number)
             repository.networkRepository.updateOrderItem(orderItem)
-            Log.d(this::class.simpleName, "Number updated for table $tableUID - $activeColor menu item $menuItemId")
+            Log.d("OrderViewModel", "Number updated for table $tableUID - $activeColor menu item $menuItemId")
         }
     }
 
@@ -215,7 +217,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             repository.clearTable(tableUID)
             repository.networkRepository.clearTable(tableUID)
         }
-        Log.d(this::class.simpleName, "Cleared table")
+        Log.d("OrderViewModel", "Cleared table")
     }
 
     override fun lockOrder(tableUID: String, color: Color)
@@ -227,8 +229,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                 .find { it.tableUID == tableUID && it.orderColor == color }
                 ?: return@launch
             repository.networkRepository.lockOrder(tableUID, color)
-            repository.orderDao().addOrder(order)
-            Log.d(this::class.simpleName, "Locked order $tableUID - $color")
+            val newOrder = if (order.note == "_") order.copy(note = "") else order
+            repository.orderDao().addOrder(newOrder)
+            Log.d("OrderViewModel", "Locked order $tableUID - $color")
         }
     }
 
@@ -239,7 +242,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             {
                 repository.orderDao().deleteOrder(tableUID, color)
                 repository.networkRepository.unlockOrder(tableUID, color)
-                Log.d(this::class.simpleName, "Unlocked order $tableUID - $color")
+                Log.d("OrderViewModel", "Unlocked order $tableUID - $color")
             }
         }
     }
@@ -247,18 +250,18 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun addMenuItem(menuItemUID: String)
     {
         val orderColor = activeColor.value ?: run {
-            Log.e(this::class.simpleName, "No active color")
+            Log.e("OrderViewModel", "No active color")
             return
         }
         val table = tableUID.value ?: run {
-            Log.e(this::class.simpleName, "No active table")
+            Log.e("OrderViewModel", "No active table")
             return
         }
         viewModelScope.launch {
             val orderItem = OrderItem(orderColor, table, menuItemUID, 1)
             repository.orderDao().addOrderItem(orderItem)
             repository.networkRepository.createOrderItem(orderItem)
-            Log.d(this::class.simpleName, "Added menu item $menuItemUID")
+            Log.d("OrderViewModel", "Added menu item $menuItemUID")
         }
     }
 }

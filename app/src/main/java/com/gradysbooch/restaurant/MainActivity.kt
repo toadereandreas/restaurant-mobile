@@ -24,6 +24,7 @@ import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.viewmodel.TableViewModel
+import androidx.navigation.compose.*
 
 class MainActivity : AppCompatActivity()
 {
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity()
             extras?.getString("tableUID")?.let {
                 App(startLocation = "orders/$it")
             } ?: App()
+
         }
     }
 
@@ -62,16 +64,25 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
         startLocation: String = "tables") {
 
+    var newStartLocation by mutableStateOf(startLocation)
+    Log.d("Ceva", startLocation)
     RestaurantmobileTheme {
         Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
         ) {
             val screenNavController = rememberNavController()
-            NavHost(navController = screenNavController, startDestination = startLocation) {
+
+            NavHost(navController = screenNavController, startDestination = "tables") {
 
                 composable("tables"){
-                    TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
+                    if (newStartLocation != "tables")
+                    {
+                        screenNavController.navigate(startLocation)
+                        newStartLocation = "tables"
+                    }
+                    else
+                        TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
                 }
 
                 composable("orders/{tableId}",
@@ -79,8 +90,10 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
                                 navArgument("tableId") { type = NavType.StringType },
                         )
                 ) {
+                    val tableId = it.arguments?.getString("tableId")!!
+                    Log.d("Ceva", tableId)
                     OrderScreen(orderViewModel, screenNavController,
-                            it.arguments?.getString("tableId"),
+                                tableId,
                     ).Show()
                 }
             }

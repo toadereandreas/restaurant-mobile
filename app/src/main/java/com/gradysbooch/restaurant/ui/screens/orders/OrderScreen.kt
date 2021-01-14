@@ -174,6 +174,7 @@ class OrderScreen(
                                 } else {
                                     orderViewModel.lockOrder(selectedTable.tableUID, bullet.color)
                                 }
+                                locked.value = !locked.value
                             } else {
                                 // orderViewModel.selectColor(bullet.color)
                                 orderNavController.navigate("one/${bullet.color}/${bullet.locked}")
