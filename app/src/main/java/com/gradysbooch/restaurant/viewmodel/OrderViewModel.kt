@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.OrderItem
+import com.gradysbooch.restaurant.model.OrderWithMenuItems
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
@@ -51,7 +52,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             orders.filter { it.tableUID == tableUID }.map {
                 Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
-        }.onStart { emit(emptyList()) }
+        }
         return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
                 Bullet(it.orderColor, true, it.orderColor == activeColor)
@@ -90,10 +91,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
                         .orderDao()
                         .getOrderWithMenuItems(tableUID, activeColor)
                         .map { orderWithMenuItems ->
-                            orderWithMenuItems
-                                    ?.orderItems
-                                    ?.map { it.menuItem.toDTO() to it.orderItem.quantity }
-                                    ?: emptyList()
+                            val owmi = orderWithMenuItems?.orderItems
+                                    ?: repository.orderDao().getOrderItemWithMenuItems(tableUID, activeColor)
+                            owmi.map { it.menuItem.toDTO() to it.orderItem.quantity }
                         }
             }
 
@@ -148,7 +148,8 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     {
         viewModelScope.launch {
             tableUID.value?.let { tableUID ->
-                val orderColor = ColorManager.randomColor(bulletList.first().map { it.color }.toSet()) ?: return@let
+                val orderColor = ColorManager.randomColor(bulletList.first().map { it.color }.toSet())
+                        ?: return@let
                 repository.orderDao().addOrder(
                         Order(
                                 tableUID,
@@ -228,14 +229,14 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             repository.networkRepository.lockOrder(tableUID, color)
             repository.orderDao().addOrder(order)
             Log.d(this::class.simpleName, "Locked order $tableUID - $color")
-
         }
     }
 
     override fun unlockOrder(tableUID: String, color: Color)
     {
         viewModelScope.launch {
-            if (repository.orderDao().getOrder(tableUID, color) != null) {
+            if (repository.orderDao().getOrder(tableUID, color) != null)
+            {
                 repository.orderDao().deleteOrder(tableUID, color)
                 repository.networkRepository.unlockOrder(tableUID, color)
                 Log.d(this::class.simpleName, "Unlocked order $tableUID - $color")
