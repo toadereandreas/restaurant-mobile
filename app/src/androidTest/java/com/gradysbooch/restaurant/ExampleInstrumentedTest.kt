@@ -11,9 +11,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
-import org.junit.Before
-
 /**
  * Instrumented test, which will execute on an Android device.
  *
@@ -63,9 +60,9 @@ class ExampleInstrumentedTest
 
     @Test
     fun testUpdateOrder(): Unit = runBlocking{
-        networkRepo.updateOrder(OrderWithMenuItems(Order("1", "black123", "I changed this_1"), listOf(
-            OrderItemWithMenuItem(OrderItem("black", "2", "1", 99999), MenuItem("1", "GUCCI", 112))
-        )))
+//        networkRepo.updateOrder(OrderWithMenuItems(Order("1", "black123", "I changed this_1"), listOf(
+//            OrderItemWithMenuItem(OrderItem("black", "2", "1", 99999), MenuItem("1", "GUCCI", 112))
+//        )))
     }
 
     @Test
