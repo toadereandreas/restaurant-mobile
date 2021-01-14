@@ -1,5 +1,5 @@
-mutation lockOrder($id: ID!){
-    updateOrder(id: $id, input: {locked: true}){
+mutation lockOrder($id: ID!, , $serving: ID!){
+    updateOrder(id: $id, input: {locked: true, serving: $serving}){
         errors{
             messages
             field
