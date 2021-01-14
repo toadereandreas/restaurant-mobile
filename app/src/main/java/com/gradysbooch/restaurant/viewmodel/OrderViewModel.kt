@@ -190,6 +190,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             val tableUID = tableUID.value ?: return@launch
             val activeColor = activeColor.value ?: return@launch
             repository.orderDao().updateNote(tableUID, activeColor, note)
+            repository.networkRepository.updateOrder(Order(tableUID = tableUID, orderColor = activeColor, note))
         }
     }
 
@@ -219,16 +220,15 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun lockOrder(tableUID: String, color: Color)
     {
         viewModelScope.launch {
-            if (repository.orderDao().getOrder(tableUID, color) != null) {
-                val order = repository.networkRepository
-                    .clientOrders()
-                    .first()
-                    .find { it.tableUID == tableUID && it.orderColor == color }
-                    ?: return@launch
-                repository.networkRepository.lockOrder(tableUID, color)
-                repository.orderDao().addOrder(order)
-                Log.d(this::class.simpleName, "Locked order $tableUID - $color")
-            }
+            val order = repository.networkRepository
+                .clientOrders()
+                .first()
+                .find { it.tableUID == tableUID && it.orderColor == color }
+                ?: return@launch
+            repository.networkRepository.lockOrder(tableUID, color)
+            repository.orderDao().addOrder(order)
+            Log.d(this::class.simpleName, "Locked order $tableUID - $color")
+
         }
     }
 

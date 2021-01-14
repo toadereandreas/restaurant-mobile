@@ -17,8 +17,7 @@ interface NetworkRepositoryInterface
 
     suspend fun clearCall(tableUID: String)
 
-    @Deprecated("We stopped using this. When? Just now!")
-    suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems)
+    suspend fun updateOrder(order: Order)
 
     suspend fun unlockOrder(tableUID: String, color: String)
 
