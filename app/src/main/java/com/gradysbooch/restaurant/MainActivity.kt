@@ -62,15 +62,6 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
         startLocation: String = "tables") {
 
-    /* fixme
-        - No remote notes
-     */
-    /* todo
-        - Test : Check Table (clear attention)
-     */
-
-    // todo limit menu item text length
-
     RestaurantmobileTheme {
         Surface(
                 modifier = Modifier.fillMaxSize(),
