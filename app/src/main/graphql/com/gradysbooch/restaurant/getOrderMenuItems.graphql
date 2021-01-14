@@ -2,10 +2,21 @@ query getOrderMenuItems{
     orderMenuItems{
         data{
             gid
-            id
-            menuItemId
-            color
-            servingId
+            menuItem{
+                gid
+                internalName
+            }
+            order{
+                gid
+                color
+                note
+                serving{
+                    gid,
+                    code,
+                    called,
+                    name
+                }
+            }
         }
     }
 }

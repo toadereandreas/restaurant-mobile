@@ -57,7 +57,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             ?: error("ApolloFailure: menu items returned null.")
 
         return@withContext list.filterNotNull()
-            .map { MenuItem(it.id.toString(), it.internalName, it.price.roundToInt()) }.toSet()
+            .map { MenuItem(it.gid.toString(), it.internalName, it.price.roundToInt()) }.toSet()
     }
 
     override fun getTables(): Flow<List<Table>> =
@@ -82,7 +82,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(
             UpdateOrderMutation(
                 id,
-                Input.fromNullable(orderWithMenuItems.order.tableUID),
+                orderWithMenuItems.order.tableUID,
                 Input.fromNullable(orderWithMenuItems.order.orderColor),
                 Input.fromNullable(locked),
                 Input.fromNullable(orderWithMenuItems.order.note)
@@ -124,8 +124,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun createOrderItem(orderItem: OrderItem) : Unit  = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(orderItem.tableUID, orderItem.orderColor).gid as String
 
-        Log.d("UndoTag", "creating order item for orderId = $id")
-
         apolloClient.mutate(CreateOrderMenuItemMutation(
             Input.fromNullable(id),
             Input.fromNullable(orderItem.menuItemUID),
@@ -134,21 +132,20 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun updateOrderItem(orderItem: OrderItem) : Unit = withContext(Dispatchers.IO){
-        val idOrderMenuItem= _queryOrderMenuItemByForeignKeys(orderItem.menuItemUID, orderItem.orderColor, orderItem.tableUID).gid as String
+        val OrderMenuItem= _queryOrderMenuItemByForeignKeys(orderItem.menuItemUID, orderItem.orderColor, orderItem.tableUID)
 
         apolloClient.mutate(UpdateOrderMenuItemMutation(
-            idOrderMenuItem,
+            OrderMenuItem.gid.toString(),
+            Input.fromNullable(OrderMenuItem.order.gid.toString()),
             Input.fromNullable(orderItem.menuItemUID),
-            Input.fromNullable(orderItem.quantity.toString())
+            Input.fromNullable(orderItem.quantity)
         )).await()
     }
 
     override suspend fun createOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
-        Log.d("UndoTag", color + "  " + tableUID)
-
         apolloClient.mutate(CreateOrderMutation(
             Input.fromNullable(color),
-            Input.fromNullable(tableUID)
+            tableUID
         )).await()
     }
 
@@ -169,8 +166,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     private fun <T> CoroutineScope.webSocketListener(channel: SendChannel<T>, type: Type) =
         object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
-
-//                Log.d("UndoTag", "Socket got raw $text")
 
                 val receivedValue: T = gson.fromJson(text, type)
 
@@ -225,7 +220,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             ?: error("ApolloFailure: orders returned null.")
 
         val matchingOrder = orders.filterNotNull()
-            .find { it.color == color && it.id == tableUID }
+            .find { it.color == color && it.serving.gid == tableUID }
             ?: error("ApolloFailure: failed to get order")
         return@withContext matchingOrder
     }
@@ -235,11 +230,11 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         orderColor: String,
         tableUID: String,
     ): GetOrderMenuItemsQuery.Data1  = withContext(Dispatchers.IO) {
-        val orders = runQuerySafely<GetOrderMenuItemsQuery.Data>(GetOrdersQuery()).orderMenuItems?.data
+        val orders = runQuerySafely<GetOrderMenuItemsQuery.Data>(GetOrderMenuItemsQuery()).orderMenuItems?.data
             ?: error("ApolloFailure: ordermenuitems returned null.")
 
         val matchingOrder = orders.filterNotNull()
-            .find { it.menuItemId == menuItemId && it.color ==  orderColor && it.servingId == tableUID}
+            .find { it.menuItem.gid == menuItemId && it.order.color ==  orderColor && it.order.serving.gid == tableUID}
             ?: error("ApolloFailure: failed to get order")
 
         return@withContext matchingOrder

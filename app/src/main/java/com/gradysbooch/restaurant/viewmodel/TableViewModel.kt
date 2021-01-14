@@ -27,7 +27,6 @@ class TableViewModel(application: Application) : BaseViewModel(application),
         )
         repository.networkRepository.getTables()
                 .onEach { tables ->
-                    Log.d("UndoTag", "$tables")
                     repository.tableDao().updateTables(tables)
                     tables.firstOrNull { it.call }
                             ?.let {

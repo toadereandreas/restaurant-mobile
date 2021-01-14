@@ -116,6 +116,14 @@ type CreateLanguageMutation {
     language: LanguageNode
 }
 
+"Creates an order."
+type CreateOrderFrontendMutation {
+    "List of errors that occurred executing the mutation."
+    errors: [ErrorType]
+    "Created order."
+    order: OrderNode
+}
+
 "Creates a order_menu_item."
 type CreateOrderMenuItemMutation {
     "List of errors that occurred executing the mutation."
@@ -274,6 +282,11 @@ type Mutation {
         "Fields required to create an order."
         input: OrderInput!
     ): CreateOrderMutation
+    "Creates an order."
+    createOrderFrontend(
+        "Serving code"
+        servingCode: String!
+    ): CreateOrderFrontendMutation
     "Creates a order_menu_item."
     createOrderMenuItem(
         "Fields required to create a order_menu_item."
@@ -515,11 +528,9 @@ type OrderNode {
     color: String!
     "Unique global identifier"
     gid: UUID!
-    id: ID
     locked: Boolean!
     note: String!
     serving: ServingNode!
-    servingId: ID
 }
 
 "The Relay compliant `PageInfo` type, containing data necessary to paginate this connection."
@@ -694,9 +705,7 @@ type ServingNode {
     code: String!
     "Unique global identifier"
     gid: UUID!
-    id: ID
     name: String!
-    userId: ID
 }
 
 """
@@ -860,7 +869,7 @@ input OrderInput {
     color: String
     locked: Boolean
     note: String
-    serving: String
+    serving: ID
 }
 
 input OrderMenuItemInput {

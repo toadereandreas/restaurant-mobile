@@ -6,7 +6,7 @@ mutation clearCall($id : ID!){
         }
         serving{
             called
-            id
+            gid
         }
     }
 }
