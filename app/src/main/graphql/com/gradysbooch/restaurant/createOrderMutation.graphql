@@ -1,7 +1,9 @@
-mutation createOrder($color: String, $serving : String){
+mutation createOrder($color: String, $serving : ID!){
     createOrder(input: {color: $color, serving: $serving, locked: true, note: "_"}){
         order{
-            servingId,
+            serving{
+                gid
+            },
             color
         }
     }

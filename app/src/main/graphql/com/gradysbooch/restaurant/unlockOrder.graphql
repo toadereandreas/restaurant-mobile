@@ -5,7 +5,7 @@ mutation unlockOrder($id: ID!){
             field
         }
         order{
-            id
+            gid
             locked
         }
     }
