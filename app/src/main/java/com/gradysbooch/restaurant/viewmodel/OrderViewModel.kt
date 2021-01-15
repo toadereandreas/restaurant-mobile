@@ -63,7 +63,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
             }
         }
         return@forCurrentOrder combine(localOrders, clientOrders) { flows ->
-            (flows[0] union flows[1]).sortedBy { it.color }
+            (flows[0] + flows[1]).sortedBy { it.color }
+        }.distinctUntilChanged { oldList: List<Bullet>, newList: List<Bullet> ->
+            newList.size < oldList.size
         }
     }
 
