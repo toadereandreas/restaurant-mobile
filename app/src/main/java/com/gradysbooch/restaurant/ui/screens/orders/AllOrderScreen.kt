@@ -12,12 +12,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.ui.values.RoundedButtonColumnCard
 import com.gradysbooch.restaurant.ui.values.RoundedRowCard
 import com.gradysbooch.restaurant.ui.values.getColorOr
 import com.gradysbooch.restaurant.ui.values.smartSubstring
-import com.gradysbooch.restaurant.viewmodel.OrderViewModel
+import kotlinx.coroutines.flow.map
 
 class AllOrderScreen(
         private val orderViewModel: OrderViewModel,
@@ -29,6 +30,7 @@ class AllOrderScreen(
         val allOrderItems by orderViewModel.allScreenMenuItems
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
+                .map { list -> list.filter { it.second.isNotBlank() } }
                 .collectAsState(initial = emptyList())
 
         LazyColumn {
@@ -58,8 +60,10 @@ class AllOrderScreen(
                                 color = getColorOr(quantity.first),
                                 modifier = Modifier.padding(4.dp, 0.dp)
                         ) {
-                            Text(   modifier = Modifier.padding(10.dp, 4.dp),
-                                    text = quantity.second.toString()
+                            Text(
+                                    modifier = Modifier.padding(10.dp, 4.dp),
+                                    text = quantity.second.toString(),
+                                    color = MaterialTheme.colors.primary
                             )
                         }
                     }

@@ -1,6 +1,8 @@
 package com.gradysbooch.restaurant.ui.screens.tables
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.shape.CircleShape
@@ -18,10 +20,16 @@ import com.gradysbooch.restaurant.model.dto.TableDTO
 import com.gradysbooch.restaurant.ui.values.RoundedButtonRowCard
 import com.gradysbooch.restaurant.viewmodel.TableViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.navigate
+import com.gradysbooch.restaurant.R
 import com.gradysbooch.restaurant.ui.values.RoundedIconButton
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 
@@ -34,7 +42,7 @@ class TablesScreen(
     @Composable
     fun Show() {
         Column {
-            TablesScreenAppBar()
+            //TablesScreenAppBar()
             TablesList()
         }
     }
@@ -55,8 +63,15 @@ class TablesScreen(
     fun TablesList() {
         val tables by tableViewModel.tables.collectAsState(initial = emptyList())
 
-        LazyColumnFor(items = tables) {
-            TableEntry(table = it)
+        Box(Modifier.background(Color.Black).fillMaxHeight()) {
+            Image(asset = imageResource(id = R.drawable.background_image), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth())
+           Image(asset = vectorResource(id = R.drawable.tables_screen), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth())
+            Column {
+                Spacer(modifier = Modifier.height(100.dp))
+                LazyColumnFor(items = tables) {
+                    TableEntry(table = it)
+                }
+            }
         }
     }
 

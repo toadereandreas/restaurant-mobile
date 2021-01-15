@@ -1,6 +1,9 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,13 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.gesture.doubleTapGestureFilter
-import androidx.compose.ui.gesture.longPressGestureFilter
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import com.gradysbooch.restaurant.R
 import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
@@ -26,7 +30,7 @@ class OrderScreen(
         private val screenNavController: NavHostController,
         private val tableId: String?,
 ) {
-    private val backupColor : String = "#000"
+    private val backupColor : String = "black"
 
     private lateinit var selectedColor: MutableState<String>
     private lateinit var locked: MutableState<Boolean>
@@ -47,25 +51,33 @@ class OrderScreen(
 
         Scaffold(topBar = { AppBar() }, bodyContent = {
 
-            NavHost(navController = orderNavController, startDestination = "all") {
-
-                composable("all") {
-                    selectedColor.value = backupColor
-                    locked.value = false
-                    AllOrderScreen(orderViewModel).Show()
-                    // AllScreen()
+            val selectedTable by orderViewModel.table
+                    .collectAsState(initial = Table("-1", "name", 0, false))
+            Column {
+                Box(modifier = Modifier.fillMaxWidth().background(getColorOr(selectedColor.value, MaterialTheme.colors.secondary))) {
+                    Image(vectorResource(id = R.drawable.triangle), modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.Crop)
+                    CustomerNavigationRow(selectedTable)
                 }
+                NavHost(navController = orderNavController, startDestination = "all") {
 
-                composable("one/{selectedColor}/{locked}",
-                        arguments = listOf(
-                                navArgument("selectedColor") { type = NavType.StringType },
-                                navArgument("locked") { type = NavType.BoolType }
-                        )
-                ) {
-                    selectedColor.value = it.arguments?.getString("selectedColor")!!
-                    locked.value = it.arguments?.getBoolean("locked")!!
+                    composable("all") {
+                        selectedColor.value = backupColor
+                        locked.value = false
+                        AllOrderScreen(orderViewModel).Show()
+                        // AllScreen()
+                    }
 
-                    OneOrderScreen(orderViewModel, selectedColor, locked).Show()
+                    composable("one/{selectedColor}/{locked}",
+                               arguments = listOf(
+                                       navArgument("selectedColor") { type = NavType.StringType },
+                                       navArgument("locked") { type = NavType.BoolType }
+                               )
+                    ) {
+                        selectedColor.value = it.arguments?.getString("selectedColor")!!
+                        locked.value = it.arguments?.getBoolean("locked")!!
+
+                        OneOrderScreen(orderViewModel, selectedColor, locked).Show()
+                    }
                 }
             }
         })
@@ -81,12 +93,12 @@ class OrderScreen(
                 .collectAsState(initial = Table("-1", "name", 0, false))
 
         TopAppBar(
-                backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.primaryVariant),
-                modifier = Modifier.height(120.dp),
+                backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.secondary),
+                // backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.primaryVariant),
+                modifier = Modifier.height(80.dp),
                 title = {
-                    Column{
+                    Column {
                         OrderScreenTopRow(selectedTable)
-                        CustomerNavigationRow(selectedTable)
                     }
                 })
     }
@@ -103,7 +115,8 @@ class OrderScreen(
             // Go Back
             RoundedIconButton(
                     color = Color.Transparent,
-                    tint = MaterialTheme.colors.secondary,
+                    tint = MaterialTheme.colors.primary,
+                    // tint = MaterialTheme.colors.secondary,
                     asset = Icons.Default.ArrowBack,
                     onClick = {
                         // orderViewModel.setTable("-1")
@@ -112,12 +125,14 @@ class OrderScreen(
             // Table name & code
             Text(
                     modifier = Modifier.padding(0.dp, 8.dp, 0.dp, 0.dp),
-                    text = "${selectedTable.name} (#${selectedTable.code})"
+                    text = "${selectedTable.name} - ${selectedTable.code}",
+                    color = MaterialTheme.colors.primary
             )
             // Check Table
             RoundedIconButton(
                     color = Color.Transparent,
-                    tint = MaterialTheme.colors.secondary,
+                    tint = MaterialTheme.colors.primary,
+                    // tint = MaterialTheme.colors.secondary,
                     asset = if (isChecked) Icons.Default.CheckCircle else Icons.Default.Check,
                     onClick = {
                         orderViewModel.clearAttention()
@@ -132,7 +147,8 @@ class OrderScreen(
 
         Surface(
                 modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth(),
-                shape = RoundedCornerShape(20)
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, Color.Gray),
         ) {
             Row(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
@@ -156,14 +172,7 @@ class OrderScreen(
                         })
                 // Navigation Bullets
                 LazyRowFor(items = bullets) { bullet -> RoundedIconButton(
-                        modifier = Modifier.padding(4.dp, 0.dp)
-                                .doubleTapGestureFilter {
-                                    if (bullet.locked) {
-                                        orderViewModel.unlockOrder(selectedTable.tableUID, bullet.color)
-                                    } else {
-                                        orderViewModel.lockOrder(selectedTable.tableUID, bullet.color)
-                                    }
-                                },
+                        modifier = Modifier.padding(4.dp, 0.dp),
                         color = getColorOr(bullet.color),
                         tint = MaterialTheme.colors.primary,
                         asset = if (bullet.locked) Icons.Default.Lock else Icons.Default.Clear,

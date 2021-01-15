@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -92,7 +93,8 @@ fun RoundedRowCard(
     ) {
         Row(
                 modifier = Modifier.padding(2.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
         ) {
             content()
         }
@@ -146,14 +148,16 @@ fun RoundedIconButton(
 
 @Composable
 fun RoundedSearchBar(
-        text: MutableState<String>
+        text: MutableState<String>,
+        placeholder: String = "search..."
 ) {
     RoundedRowCard(
             shape = RoundedCornerShape(20)
     ) {
         TextField(
+                placeholder = { Text(text = placeholder) },
                 value = text.value,
-                onValueChange = {newText ->
+                onValueChange = { newText ->
                     text.value = newText
                 })
         Icon(asset = Icons.Filled.Search, modifier = Modifier.padding(24.dp))
