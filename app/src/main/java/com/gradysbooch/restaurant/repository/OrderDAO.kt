@@ -22,7 +22,7 @@ interface OrderDAO
     fun getOrdersWithMenuItems(tableUID: String): Flow<List<OrderWithMenuItems>>
 
     @Query("SELECT * FROM OrderItem WHERE tableUID=:tableUID AND orderColor=:color")
-    suspend fun getOrderItemWithMenuItems(tableUID: String, color: String): List<OrderItemWithMenuItem>
+    fun orderItemsWithMenuItemsFlow(tableUID: String, color: String): Flow<List<OrderItemWithMenuItem>>
 
 
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID")
