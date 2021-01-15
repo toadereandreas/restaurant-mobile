@@ -95,7 +95,7 @@ class OrderScreen(
         TopAppBar(
                 backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.secondary),
                 // backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.primaryVariant),
-                modifier = Modifier.height(120.dp),
+                modifier = Modifier.height(80.dp),
                 title = {
                     Column {
                         OrderScreenTopRow(selectedTable)
@@ -125,7 +125,7 @@ class OrderScreen(
             // Table name & code
             Text(
                     modifier = Modifier.padding(0.dp, 8.dp, 0.dp, 0.dp),
-                    text = "${selectedTable.name} (#${selectedTable.code})",
+                    text = "${selectedTable.name} - ${selectedTable.code}",
                     color = MaterialTheme.colors.primary
             )
             // Check Table
