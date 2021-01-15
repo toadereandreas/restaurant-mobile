@@ -1,8 +1,10 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.ui.values.*
@@ -30,8 +33,9 @@ class OneOrderScreen(
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
-        val text = remember { mutableStateOf("") }
-        orderViewModel.search(text.value)
+        val text = remember { mutableStateOf("search...") }
+        if (text.value == "search...") orderViewModel.search("")
+        else orderViewModel.search(text.value)
         val filteredMenuItems by orderViewModel.menu
                 .collectAsState(initial = emptyList())
 
@@ -66,7 +70,8 @@ class OneOrderScreen(
             ) {
                 Text(
                         text = smartSubstring(item.first.name, 25),
-                        modifier = Modifier.padding(16.dp, 0.dp)
+                        modifier = Modifier.padding(16.dp, 0.dp),
+                        color = MaterialTheme.colors.primary
                 )
 
                 Row {
@@ -85,7 +90,8 @@ class OneOrderScreen(
                     }
                     Text(
                             modifier = Modifier.padding(8.dp, 0.dp),
-                            text = number.value.toString()
+                            text = number.value.toString(),
+                            color = MaterialTheme.colors.primary
                     )
                     if (locked.value) {
                         RoundedIconButton(
@@ -114,6 +120,9 @@ class OneOrderScreen(
                 .collectAsState(initial = "") as MutableState
 
         TextField(
+                textStyle = TextStyle(color = MaterialTheme.colors.primary),
+                // activeColor = MaterialTheme.colors.primary,
+                // inactiveColor = MaterialTheme.colors.primaryVariant,
                 modifier = Modifier.padding(8.dp).fillMaxWidth(),
                 backgroundColor = getColorOr(selectedColor.value),
                 value = selectedOrderNote.value ?: "",
@@ -128,6 +137,7 @@ class OneOrderScreen(
     @Composable
     private fun MenuItem(it: MenuItemDTO) {
         RoundedButtonRowCard(
+                border = BorderStroke(2.dp, MaterialTheme.colors.onPrimary),
                 color = getColorOr(selectedColor.value),
                 onClick = {
                     // if (locked.value) {
