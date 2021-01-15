@@ -66,7 +66,6 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     override fun clientOrders(): Flow<List<Order>> =
         subscribe<List<Order>>("order", object : TypeToken<ArrayList<Order>>() {}.type)
-            .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
 
     override fun orderItems(): Flow<List<OrderItem>> =
         subscribe("ordermenuitem", object : TypeToken<ArrayList<OrderItem>>() {}.type)

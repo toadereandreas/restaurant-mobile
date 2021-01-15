@@ -39,6 +39,8 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     private val tableUID = MutableStateFlow<String?>(null)
     private val activeColor = MutableStateFlow<String?>(null)
     private val searchQuery = MutableStateFlow("")
+    private val clientOrderCache = repository.networkRepository.clientOrders()
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     val table = tableUID.flatMapLatest {
         it?.let { repository.tableDao().getTable(it).filterNotNull() } ?: emptyFlow()
@@ -50,17 +52,18 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val allScreen: Flow<Boolean> = _allScreen
 
     override val bulletList: Flow<List<Bullet>> = forCurrentOrder { tableUID, activeColor ->
-        val clientOrders = repository.networkRepository.clientOrders().map { orders ->
+        val clientOrders = clientOrderCache.map { orders ->
             orders.filter { it.tableUID == tableUID }.map {
                 Bullet(it.orderColor, false, it.orderColor == activeColor)
             }
         }
-        return@forCurrentOrder repository.orderDao().getOrdersForTable(tableUID).map { orders ->
+        val localOrders = repository.orderDao().getOrdersForTable(tableUID).map { orders ->
             orders.map {
                 Bullet(it.orderColor, true, it.orderColor == activeColor)
             }
-        }.combine(clientOrders) { lockedBullets, unlockedBullets ->
-            (lockedBullets union unlockedBullets).sortedBy { it.color }
+        }
+        return@forCurrentOrder combine(localOrders, clientOrders) { flows ->
+            (flows[0] union flows[1]).sortedBy { it.color }
         }
     }
 
