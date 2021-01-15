@@ -1,6 +1,9 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,10 +13,13 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import com.gradysbooch.restaurant.R
 import com.gradysbooch.restaurant.model.Table
 import com.gradysbooch.restaurant.ui.values.*
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
@@ -45,25 +51,33 @@ class OrderScreen(
 
         Scaffold(topBar = { AppBar() }, bodyContent = {
 
-            NavHost(navController = orderNavController, startDestination = "all") {
-
-                composable("all") {
-                    selectedColor.value = backupColor
-                    locked.value = false
-                    AllOrderScreen(orderViewModel).Show()
-                    // AllScreen()
+            val selectedTable by orderViewModel.table
+                    .collectAsState(initial = Table("-1", "name", 0, false))
+            Column {
+                Box(modifier = Modifier.fillMaxWidth().background(getColorOr(selectedColor.value, MaterialTheme.colors.secondary))) {
+                    Image(vectorResource(id = R.drawable.triangle), modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.Crop)
+                    CustomerNavigationRow(selectedTable)
                 }
+                NavHost(navController = orderNavController, startDestination = "all") {
 
-                composable("one/{selectedColor}/{locked}",
-                        arguments = listOf(
-                                navArgument("selectedColor") { type = NavType.StringType },
-                                navArgument("locked") { type = NavType.BoolType }
-                        )
-                ) {
-                    selectedColor.value = it.arguments?.getString("selectedColor")!!
-                    locked.value = it.arguments?.getBoolean("locked")!!
+                    composable("all") {
+                        selectedColor.value = backupColor
+                        locked.value = false
+                        AllOrderScreen(orderViewModel).Show()
+                        // AllScreen()
+                    }
 
-                    OneOrderScreen(orderViewModel, selectedColor, locked).Show()
+                    composable("one/{selectedColor}/{locked}",
+                               arguments = listOf(
+                                       navArgument("selectedColor") { type = NavType.StringType },
+                                       navArgument("locked") { type = NavType.BoolType }
+                               )
+                    ) {
+                        selectedColor.value = it.arguments?.getString("selectedColor")!!
+                        locked.value = it.arguments?.getBoolean("locked")!!
+
+                        OneOrderScreen(orderViewModel, selectedColor, locked).Show()
+                    }
                 }
             }
         })
@@ -85,7 +99,6 @@ class OrderScreen(
                 title = {
                     Column {
                         OrderScreenTopRow(selectedTable)
-                        CustomerNavigationRow(selectedTable)
                     }
                 })
     }
@@ -134,7 +147,8 @@ class OrderScreen(
 
         Surface(
                 modifier = Modifier.padding(8.dp, 0.dp).fillMaxWidth(),
-                shape = RoundedCornerShape(20)
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, Color.Gray),
         ) {
             Row(
                     modifier = Modifier.padding(8.dp).fillMaxWidth(),
