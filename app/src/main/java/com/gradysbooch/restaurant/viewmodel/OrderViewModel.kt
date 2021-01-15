@@ -127,7 +127,7 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
         return@run tableUID.flatMapLatest { tableUID ->
             tableUID ?: return@flatMapLatest emptyFlow()
 
-            repository.orderDao().getOrdersForTable(tableUID).combine(repository.networkRepository.clientOrders(), {list1, list2 -> list1.plus(list2) }
+            repository.orderDao().getOrdersForTable(tableUID).combine(repository.networkRepository.clientOrders(), {list1, list2 -> list1.plus(list2.filter { it.tableUID == tableUID }) }
             ).map { orders -> orders.map { it.orderColor to it.note } }
         }
     }
