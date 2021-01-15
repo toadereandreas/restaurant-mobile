@@ -1,7 +1,10 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
+import android.widget.Space
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRowFor
@@ -11,13 +14,11 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
-import com.gradysbooch.restaurant.ui.values.RoundedButtonColumnCard
-import com.gradysbooch.restaurant.ui.values.RoundedRowCard
-import com.gradysbooch.restaurant.ui.values.getColorOr
-import com.gradysbooch.restaurant.ui.values.smartSubstring
+import com.gradysbooch.restaurant.ui.values.*
 import kotlinx.coroutines.flow.map
 
 class AllOrderScreen(
@@ -36,6 +37,11 @@ class AllOrderScreen(
         LazyColumn {
             items(allOrderItems) { CustomerItem(it) }
             items(allOrderNotes) { CustomerNote(it) }
+            item{
+                val totalPrice = allOrderItems.sumOf { it.menuItem.price * it.number }
+                Spacer(Modifier.height(30.dp))
+                Text(text = "Total price: $totalPrice", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.h5)
+            }
         }
     }
 
