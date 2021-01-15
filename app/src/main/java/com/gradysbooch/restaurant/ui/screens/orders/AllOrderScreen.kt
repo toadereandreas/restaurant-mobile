@@ -31,7 +31,7 @@ class AllOrderScreen(
         val allOrderItems by orderViewModel.allScreenMenuItems
                 .collectAsState(initial = emptyList())
         val allOrderNotes by orderViewModel.allScreenNotes
-                .map { list -> list.filter { it.second.isNotBlank() } }
+                .map { list -> list.filter { it.second.isNotBlank() && it.second != "_"} }
                 .collectAsState(initial = emptyList())
 
         LazyColumn {

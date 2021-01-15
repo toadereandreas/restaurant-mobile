@@ -175,7 +175,7 @@ class OrderScreen(
                         modifier = Modifier.padding(4.dp, 0.dp),
                         color = getColorOr(bullet.color),
                         tint = MaterialTheme.colors.primary,
-                        asset = if (bullet.locked) Icons.Default.Lock else Icons.Default.Clear,
+                        asset = if (bullet.locked) Icons.Default.Lock else Icons.Default.Person,
                         onClick = {
                             if (bullet.color == selectedColor.value) {
                                 if (bullet.locked) {
