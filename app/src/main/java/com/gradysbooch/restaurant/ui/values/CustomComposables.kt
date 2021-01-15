@@ -10,12 +10,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
 import java.lang.Exception
+import kotlin.math.min
 
 
 @Composable
@@ -91,7 +93,8 @@ fun RoundedRowCard(
     ) {
         Row(
                 modifier = Modifier.padding(2.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
         ) {
             content()
         }
@@ -124,7 +127,7 @@ fun RoundedColumnCard(
 fun RoundedIconButton(
         border: BorderStroke? = null,
         modifier: Modifier = Modifier.padding(2.dp),
-        color: Color = MaterialTheme.colors.secondary,
+        color: Color = MaterialTheme.colors.onPrimary,
         shape: Shape = CircleShape,
         asset: VectorAsset,
         tint: Color = MaterialTheme.colors.primary,
@@ -145,20 +148,29 @@ fun RoundedIconButton(
 
 @Composable
 fun RoundedSearchBar(
-        text: MutableState<String>
+        text: MutableState<String>,
+        placeholder: String = "search..."
 ) {
     RoundedRowCard(
             shape = RoundedCornerShape(20)
     ) {
         TextField(
+                placeholder = { Text(text = placeholder) },
                 value = text.value,
-                onValueChange = {newText ->
+                onValueChange = { newText ->
                     text.value = newText
                 })
         Icon(asset = Icons.Filled.Search, modifier = Modifier.padding(24.dp))
     }
 }
 
-fun getColor(color: String?) : Color =
-        runCatching { Color(android.graphics.Color.parseColor(color ?: "#f00")) }
-                .getOrDefault(Color.Red)
+fun getColorOr(string: String?, replacement: Color = Color.Red) : Color =
+        try { Color(android.graphics.Color.parseColor(string!!))
+        } catch (e: Exception) { replacement }
+
+
+fun smartSubstring(string: String, maxLength: Int) : String {
+    val limit = min(maxLength, string.length)
+    return string.substring(0, limit) +
+            if (limit < string.length) "..." else ""
+}

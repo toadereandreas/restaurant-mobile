@@ -8,19 +8,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
-import androidx.navigation.compose.rememberNavController
-import androidx.ui.tooling.preview.Preview
-import com.gradysbooch.restaurant.model.Notification
+import androidx.navigation.compose.*
 import com.gradysbooch.restaurant.notifications.NotificationReceiver
-import com.gradysbooch.restaurant.ui.screens.order.OrderScreen
+import com.gradysbooch.restaurant.ui.screens.orders.OrderScreen
 import com.gradysbooch.restaurant.ui.screens.tables.TablesScreen
 import com.gradysbooch.restaurant.ui.values.RestaurantmobileTheme
 import com.gradysbooch.restaurant.viewmodel.OrderViewModel
@@ -41,13 +39,11 @@ class MainActivity : AppCompatActivity()
         val extras = intent.extras
 
         setContent {
-            extras?.getString("tableUID")?.let { tableUID ->
-                val orderViewModel = viewModel<OrderViewModel>()
-                orderViewModel.setTable(tableUID)
-                App(viewModel<TableViewModel>(), orderViewModel, "orders")
-            } ?: App(viewModel<TableViewModel>(), viewModel<OrderViewModel>())
-        }
+            extras?.getString("tableUID")?.let {
+                App(startLocation = "orders/$it")
+            } ?: App()
 
+        }
     }
 
     override fun onDestroy() {
@@ -62,29 +58,39 @@ class MainActivity : AppCompatActivity()
 
 // @Preview
 @Composable
-fun App(tableViewModel: TableViewModel, orderViewModel: OrderViewModel, startLocation: String = "tables") {
+fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
+        orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
+        startLocation: String = "tables") {
+
+    var newStartLocation by mutableStateOf(startLocation)
     RestaurantmobileTheme {
-        // A surface container using the 'background' color from the theme
         Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colors.background
         ) {
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = startLocation) {
+            val screenNavController = rememberNavController()
+
+            NavHost(navController = screenNavController, startDestination = "tables") {
+
                 composable("tables"){
-                    TablesScreen(tableViewModel, orderViewModel, navController).Show()
+                    if (newStartLocation != "tables")
+                    {
+                        screenNavController.navigate(startLocation)
+                        newStartLocation = "tables"
+                    }
+                    else
+                        TablesScreen(tableViewModel, orderViewModel, screenNavController).Show()
                 }
-                // todo change this cause it's a mess (a working mess, mind you, but still a mess)
-                composable("orders/{tableId}/{orderColor}",
+
+                composable("orders/{tableId}",
                         arguments = listOf(
                                 navArgument("tableId") { type = NavType.StringType },
-                                navArgument("orderColor") { type = NavType.StringType }
                         )
                 ) {
-                    OrderScreen(orderViewModel, navController,
-                            it.arguments?.getString("tableId"),
-                            it.arguments?.getString("orderColor")
-                    )
+                    val tableId = it.arguments?.getString("tableId")!!
+                    OrderScreen(orderViewModel, screenNavController,
+                                tableId,
+                    ).Show()
                 }
             }
         }

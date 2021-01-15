@@ -21,6 +21,9 @@ interface OrderDAO
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID")
     fun getOrdersWithMenuItems(tableUID: String): Flow<List<OrderWithMenuItems>>
 
+    @Query("SELECT * FROM OrderItem WHERE tableUID=:tableUID AND orderColor=:color")
+    suspend fun getOrderItemWithMenuItems(tableUID: String, color: String): List<OrderItemWithMenuItem>
+
 
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID")
     fun getOrdersForTable(tableUID: String): Flow<List<Order>>
@@ -28,7 +31,7 @@ interface OrderDAO
     @Query("SELECT * FROM `Order` WHERE tableUID=:tableUID AND orderColor=:color")
     suspend fun getOrder(tableUID: String, color: String): Order?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addOrder(order: Order)
 
     @Query("UPDATE `Order` SET note=:note WHERE tableUID=:tableUID AND orderColor=:color")

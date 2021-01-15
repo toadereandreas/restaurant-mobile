@@ -1,3 +1,4 @@
+
 package com.gradysbooch.restaurant.repository.networkRepository
 
 import android.content.Context
@@ -65,15 +66,14 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     override fun clientOrders(): Flow<List<Order>> =
         subscribe<List<Order>>("order", object : TypeToken<ArrayList<Order>>() {}.type)
-            .shareIn(CoroutineScope(SupervisorJob()), SharingStarted.Lazily, replay = 1)
 
     override fun orderItems(): Flow<List<OrderItem>> =
         subscribe("ordermenuitem", object : TypeToken<ArrayList<OrderItem>>() {}.type)
 
-    override suspend fun updateOrder(orderWithMenuItems: OrderWithMenuItems) {
+    override suspend fun updateOrder(order: Order) {
         val matchingOrder = _queryOrderByForeignKeys(
-            orderWithMenuItems.order.tableUID,
-            orderWithMenuItems.order.orderColor
+            order.tableUID,
+            order.orderColor
         )
 
         val id = matchingOrder.gid as String
@@ -82,10 +82,10 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         apolloClient.mutate(
             UpdateOrderMutation(
                 id,
-                orderWithMenuItems.order.tableUID,
-                Input.fromNullable(orderWithMenuItems.order.orderColor),
+                order.tableUID,
+                Input.fromNullable(order.orderColor),
                 Input.fromNullable(locked),
-                Input.fromNullable(orderWithMenuItems.order.note)
+                Input.fromNullable(order.note)
             )
         ).await()
     }
@@ -105,6 +105,9 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
         val id = _queryOrderByForeignKeys(tableUID, color).gid as String
 
+        Log.d("UndoTag", "ID: $id")
+
+        // apolloClient.mutate(LockOrderMutation(id)).await()
         apolloClient.mutate(LockOrderMutation(id, tableUID)).await()
     }
 
@@ -133,6 +136,8 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
 
     override suspend fun updateOrderItem(orderItem: OrderItem) : Unit = withContext(Dispatchers.IO){
         val OrderMenuItem= _queryOrderMenuItemByForeignKeys(orderItem.menuItemUID, orderItem.orderColor, orderItem.tableUID)
+
+        Log.d("F", orderItem.quantity.toString())
 
         apolloClient.mutate(UpdateOrderMenuItemMutation(
             OrderMenuItem.gid.toString(),
@@ -168,6 +173,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
             override fun onMessage(webSocket: WebSocket, text: String) {
 
                 val receivedValue: T = gson.fromJson(text, type)
+                Log.d("UndoTag", "ON Message: $receivedValue")
 
                 try {
                     channel.sendBlocking(receivedValue)
