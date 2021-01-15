@@ -33,9 +33,8 @@ class OneOrderScreen(
         val selectedOrderItems by orderViewModel.chosenItems
                 .collectAsState(initial = emptyList())
 
-        val text = remember { mutableStateOf("search...") }
-        if (text.value == "search...") orderViewModel.search("")
-        else orderViewModel.search(text.value)
+        val text = remember { mutableStateOf("") }
+        orderViewModel.search(text.value)
         val filteredMenuItems by orderViewModel.menu
                 .collectAsState(initial = emptyList())
 

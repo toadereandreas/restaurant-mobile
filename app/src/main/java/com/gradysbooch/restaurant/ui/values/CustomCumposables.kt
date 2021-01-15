@@ -146,14 +146,16 @@ fun RoundedIconButton(
 
 @Composable
 fun RoundedSearchBar(
-        text: MutableState<String>
+        text: MutableState<String>,
+        placeholder: String = "search..."
 ) {
     RoundedRowCard(
             shape = RoundedCornerShape(20)
     ) {
         TextField(
+                placeholder = { Text(text = placeholder) },
                 value = text.value,
-                onValueChange = {newText ->
+                onValueChange = { newText ->
                     text.value = newText
                 })
         Icon(asset = Icons.Filled.Search, modifier = Modifier.padding(24.dp))
