@@ -115,7 +115,7 @@ class OneOrderScreen(
                 .map { list -> list.firstOrNull {
                     it.first == selectedColor.value
                 } }
-                .map { it?.second }
+                .map { if(it?.second != "_") it?.second else "" }
                 .collectAsState(initial = "") as MutableState
 
         TextField(
