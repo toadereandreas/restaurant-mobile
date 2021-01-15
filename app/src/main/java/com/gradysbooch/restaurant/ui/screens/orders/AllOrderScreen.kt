@@ -58,8 +58,10 @@ class AllOrderScreen(
                                 color = getColorOr(quantity.first),
                                 modifier = Modifier.padding(4.dp, 0.dp)
                         ) {
-                            Text(   modifier = Modifier.padding(10.dp, 4.dp),
-                                    text = quantity.second.toString()
+                            Text(
+                                    modifier = Modifier.padding(10.dp, 4.dp),
+                                    text = quantity.second.toString(),
+                                    color = MaterialTheme.colors.primary
                             )
                         }
                     }

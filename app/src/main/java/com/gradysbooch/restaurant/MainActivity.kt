@@ -64,6 +64,10 @@ fun App(tableViewModel: TableViewModel = viewModel<TableViewModel>(),
         orderViewModel: OrderViewModel = viewModel<OrderViewModel>(),
         startLocation: String = "tables") {
 
+    // todo white top app bar text
+    // todo dark to app bar background
+    // todo white text in all menu screen number of items per customer circles
+
     var newStartLocation by mutableStateOf(startLocation)
     Log.d("Ceva", startLocation)
     RestaurantmobileTheme {

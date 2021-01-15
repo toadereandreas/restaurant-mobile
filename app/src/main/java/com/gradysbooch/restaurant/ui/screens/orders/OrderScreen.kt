@@ -26,7 +26,7 @@ class OrderScreen(
         private val screenNavController: NavHostController,
         private val tableId: String?,
 ) {
-    private val backupColor : String = "#000"
+    private val backupColor : String = "black"
 
     private lateinit var selectedColor: MutableState<String>
     private lateinit var locked: MutableState<Boolean>
@@ -81,7 +81,8 @@ class OrderScreen(
                 .collectAsState(initial = Table("-1", "name", 0, false))
 
         TopAppBar(
-                backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.primaryVariant),
+                backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.secondary),
+                // backgroundColor = getColorOr(selectedColor.value, MaterialTheme.colors.primaryVariant),
                 modifier = Modifier.height(120.dp),
                 title = {
                     Column{
@@ -103,7 +104,8 @@ class OrderScreen(
             // Go Back
             RoundedIconButton(
                     color = Color.Transparent,
-                    tint = MaterialTheme.colors.secondary,
+                    tint = MaterialTheme.colors.primary,
+                    // tint = MaterialTheme.colors.secondary,
                     asset = Icons.Default.ArrowBack,
                     onClick = {
                         // orderViewModel.setTable("-1")
@@ -112,12 +114,14 @@ class OrderScreen(
             // Table name & code
             Text(
                     modifier = Modifier.padding(0.dp, 8.dp, 0.dp, 0.dp),
-                    text = "${selectedTable.name} (#${selectedTable.code})"
+                    text = "${selectedTable.name} (#${selectedTable.code})",
+                    color = MaterialTheme.colors.primary
             )
             // Check Table
             RoundedIconButton(
                     color = Color.Transparent,
-                    tint = MaterialTheme.colors.secondary,
+                    tint = MaterialTheme.colors.primary,
+                    // tint = MaterialTheme.colors.secondary,
                     asset = if (isChecked) Icons.Default.CheckCircle else Icons.Default.Check,
                     onClick = {
                         orderViewModel.clearAttention()
