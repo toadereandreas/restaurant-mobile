@@ -126,9 +126,11 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val allScreenNotes: Flow<List<Pair<String, String>>> = run {
         return@run tableUID.flatMapLatest { tableUID ->
             tableUID ?: return@flatMapLatest emptyFlow()
-            repository.orderDao()
-                    .getOrdersForTable(tableUID)
-                    .map { orders -> orders.map { it.orderColor to it.note } }
+
+            repository.orderDao().getOrdersForTable(tableUID).combine(clientOrderCache
+            ) { localOrders, clientOrders ->
+                localOrders + clientOrders.filter { it.tableUID == tableUID }
+            }.map { orders -> orders.map { it.orderColor to it.note } }
         }
     }
 
