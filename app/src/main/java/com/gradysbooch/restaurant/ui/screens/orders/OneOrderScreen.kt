@@ -119,7 +119,9 @@ class OneOrderScreen(
                 .collectAsState(initial = "") as MutableState
 
         TextField(
-                textStyle = TextStyle(color = MaterialTheme.colors.primary),
+                placeholder = { Text(text = if (selectedOrderNote.value.isNullOrBlank()) "note..."
+                                            else selectedOrderNote.value ?: "note...") },
+                textStyle = TextStyle (color = MaterialTheme.colors.primary),
                 // activeColor = MaterialTheme.colors.primary,
                 // inactiveColor = MaterialTheme.colors.primaryVariant,
                 modifier = Modifier.padding(8.dp).fillMaxWidth(),
