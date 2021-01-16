@@ -1,6 +1,5 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
-import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +13,15 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
-import com.gradysbooch.restaurant.ui.values.*
+import com.gradysbooch.restaurant.ui.values.RoundedButtonColumnCard
+import com.gradysbooch.restaurant.ui.values.RoundedRowCard
+import com.gradysbooch.restaurant.ui.values.getColorOr
+import com.gradysbooch.restaurant.ui.values.smartSubstring
+import com.gradysbooch.restaurant.viewmodel.OrderViewModel
 import kotlinx.coroutines.flow.map
 
 class AllOrderScreen(
@@ -80,12 +83,11 @@ class AllOrderScreen(
 
     @Composable
     fun CustomerNote(note: Pair<String, String>) {
-        RoundedRowCard(
-                border = BorderStroke(2.dp, getColorOr(note.first))
-        ){
+        RoundedRowCard(color = getColorOr(note.first)){
             Text(
-                    modifier = Modifier.padding(16.dp, 8.dp),
-                    text = note.second
+                modifier = Modifier.padding(16.dp, 8.dp),
+                text = note.second,
+                color = Color.White
             )
         }
     }

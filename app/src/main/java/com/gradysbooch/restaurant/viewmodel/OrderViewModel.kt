@@ -1,7 +1,9 @@
 package com.gradysbooch.restaurant.viewmodel
 
 import android.app.Application
+import android.app.NotificationManager
 import android.util.Log
+import androidx.core.content.getSystemService
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.OrderItem
@@ -168,10 +170,12 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override fun clearAttention()
     {
         viewModelScope.launch {
-            tableUID.value?.let {
-                repository.tableDao().updateTableCall(it, false)
-                repository.networkRepository.clearCall(it)
-                Log.d("OrderViewModel", "Cleared call for table $it")
+            tableUID.value?.let { tableUID ->
+                repository.tableDao().updateTableCall(tableUID, false)
+                repository.networkRepository.clearCall(tableUID)
+                val notificationManager = getApplication<Application>().getSystemService<NotificationManager>() as NotificationManager
+                notificationManager.cancel(tableUID.hashCode())
+                Log.d("OrderViewModel", "Cleared call for table $tableUID")
             }
         }
     }

@@ -1,8 +1,6 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
-import android.util.Log
 import androidx.compose.animation.animate
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +15,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawOpacity
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
@@ -125,8 +124,8 @@ class OneOrderScreen(
                 .collectAsState(initial = "") as MutableState
 
         TextField(
-                placeholder = { Text(text = if (selectedOrderNote.value.isNullOrBlank()) "note..."
-                                            else selectedOrderNote.value ?: "note...") },
+                placeholder = { Text(text = if (selectedOrderNote.value.isNullOrBlank()) "Scrie notiță..."
+                                            else selectedOrderNote.value ?: "Scrie notiță...", color = Color.White) },
                 textStyle = TextStyle (color = MaterialTheme.colors.primary),
                 // activeColor = MaterialTheme.colors.primary,
                 // inactiveColor = MaterialTheme.colors.primaryVariant,

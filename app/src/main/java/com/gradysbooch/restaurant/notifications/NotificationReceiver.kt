@@ -3,7 +3,6 @@ package com.gradysbooch.restaurant.notifications
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -45,7 +44,7 @@ class NotificationReceiver {
 
             val builder = NotificationCompat.Builder(context, channelId)
                     .setSmallIcon(R.drawable.ic_notification)
-                    .setContentTitle("New Announcement")
+                    .setContentTitle("Clienții au nevoie de tine!")
                     .setContentText(notification.description)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)

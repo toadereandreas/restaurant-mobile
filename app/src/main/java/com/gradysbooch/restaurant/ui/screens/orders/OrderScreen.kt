@@ -125,9 +125,10 @@ class OrderScreen(
                         screenNavController.navigate("tables")
                     })
             // Table name & code
+            val codeText = if (selectedTable.code == null) "" else " - ${selectedTable.code}"
             Text(
                     modifier = Modifier.padding(0.dp, 8.dp, 0.dp, 0.dp),
-                    text = "${selectedTable.name} - ${selectedTable.code}",
+                    text = "${selectedTable.name}$codeText",
                     color = MaterialTheme.colors.primary
             )
             // Check Table

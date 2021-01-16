@@ -1,7 +1,6 @@
 package com.gradysbooch.restaurant.ui.values
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.Icon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.unit.dp
-import java.lang.Exception
 import kotlin.math.min
 
 
@@ -149,7 +147,7 @@ fun RoundedIconButton(
 @Composable
 fun RoundedSearchBar(
         text: MutableState<String>,
-        placeholder: String = "search..."
+        placeholder: String = "Caută..."
 ) {
     RoundedRowCard(
             shape = RoundedCornerShape(20)
