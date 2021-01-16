@@ -85,7 +85,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
                 order.tableUID,
                 Input.fromNullable(order.orderColor),
                 Input.fromNullable(locked),
-                Input.fromNullable(order.note)
+                if (order.note == "") Input.fromNullable("_") else Input.fromNullable(order.note)
             )
         ).await()
     }
@@ -97,18 +97,45 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
     }
 
     override suspend fun unlockOrder(tableUID: String, color: String) : Unit  = withContext(Dispatchers.IO){
-        val id = _queryOrderByForeignKeys(tableUID, color).gid as String
+        val matchingOrder = _queryOrderByForeignKeys(
+            tableUID,
+            color
+        )
 
-        apolloClient.mutate(UnlockOrderMutation(id, tableUID)).await()
+        val id = matchingOrder.gid as String
+        val locked = false
+        val note = matchingOrder.note
+
+        apolloClient.mutate(
+            UpdateOrderMutation(
+                id,
+                tableUID,
+                Input.fromNullable(color),
+                Input.fromNullable(locked),
+                if (note == "") Input.fromNullable("_") else Input.fromNullable(note)
+            )
+        ).await()
     }
 
     override suspend fun lockOrder(tableUID: String, color: String) : Unit = withContext(Dispatchers.IO){
-        val id = _queryOrderByForeignKeys(tableUID, color).gid as String
+        val matchingOrder = _queryOrderByForeignKeys(
+            tableUID,
+            color
+        )
 
-        Log.d("UndoTag", "ID: $id")
+        val id = matchingOrder.gid as String
+        val locked = true
+        val note = matchingOrder.note
 
-        // apolloClient.mutate(LockOrderMutation(id)).await()
-        apolloClient.mutate(LockOrderMutation(id, tableUID)).await()
+        Log.d("FuckYou", apolloClient.mutate(
+            UpdateOrderMutation(
+                id,
+                tableUID,
+                Input.fromNullable(color),
+                Input.fromNullable(locked),
+                if (note == "") Input.fromNullable("_") else Input.fromNullable(note)
+            )
+        ).await().toString())
     }
 
     override suspend fun clearTable(tableUID: String) : Unit = withContext(Dispatchers.IO){
@@ -228,6 +255,7 @@ class NetworkRepository(context: Context) : NetworkRepositoryInterface {
         val matchingOrder = orders.filterNotNull()
             .find { it.color == color && it.serving.gid == tableUID }
             ?: error("ApolloFailure: failed to get order")
+
         return@withContext matchingOrder
     }
 

@@ -4,6 +4,7 @@ query getOrders{
             gid
             color
             locked
+            note
             serving{
                 gid
             }
