@@ -5,14 +5,11 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.gradysbooch.restaurant.model.Order
 import com.gradysbooch.restaurant.model.OrderItem
-import com.gradysbooch.restaurant.model.OrderWithMenuItems
 import com.gradysbooch.restaurant.model.dto.AllScreenItem
 import com.gradysbooch.restaurant.model.dto.Bullet
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
 import com.gradysbooch.restaurant.model.dto.toDTO
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -94,13 +91,9 @@ class OrderViewModel(application: Application) : BaseViewModel(application),
     override val chosenItems: Flow<List<Pair<MenuItemDTO, Int>>> =
             forCurrentOrder { tableUID, activeColor ->
                 activeColor ?: return@forCurrentOrder emptyFlow()
-                repository
-                        .orderDao()
-                        .getOrderWithMenuItems(tableUID, activeColor)
-                        .map { orderWithMenuItems ->
-                            val owmi = orderWithMenuItems?.orderItems
-                                    ?: repository.orderDao().getOrderItemWithMenuItems(tableUID, activeColor)
-                            owmi.map { it.menuItem.toDTO() to it.orderItem.quantity }
+                repository.orderDao().orderItemsWithMenuItemsFlow(tableUID, activeColor)
+                        .map {orderItemWithMenuItems ->
+                            orderItemWithMenuItems.map { it.menuItem.toDTO() to it.orderItem.quantity }
                         }
             }
 

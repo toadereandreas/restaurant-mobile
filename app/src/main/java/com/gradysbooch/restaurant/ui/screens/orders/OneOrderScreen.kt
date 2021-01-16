@@ -1,5 +1,8 @@
 package com.gradysbooch.restaurant.ui.screens.orders
 
+import android.util.Log
+import androidx.compose.animation.animate
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +16,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawOpacity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.gradysbooch.restaurant.model.dto.MenuItemDTO
@@ -38,7 +42,11 @@ class OneOrderScreen(
         val filteredMenuItems by orderViewModel.menu
                 .collectAsState(initial = emptyList())
 
-        LazyColumn {
+        var target by remember(selectedColor.value) { mutableStateOf(0f)}
+        val opacity = animate(target = target)
+        if (target == 0f)
+            target = 1f
+        LazyColumn(Modifier.drawOpacity(opacity = opacity)) {
             items(selectedOrderItems) { CustomerItem(it) }
 
             item {
@@ -74,22 +82,21 @@ class OneOrderScreen(
                 )
 
                 Row {
-                    val number = remember { mutableStateOf(item.second) }
+                    val number = item.second
                     if (locked.value) {
                         RoundedIconButton(
                                 modifier = Modifier.then(Modifier.preferredSize(24.dp)),
                                 asset = Icons.Default.KeyboardArrowDown,
                                 onClick = {
                                     // if (locked.value && number.value > 0) {
-                                    if (number.value > 0) {
-                                        number.value -= 1
-                                        orderViewModel.changeNumber(item.first.id, number.value)
+                                    if (number > 0) {
+                                        orderViewModel.changeNumber(item.first.id, number - 1)
                                     }
                                 })
                     }
                     Text(
                             modifier = Modifier.padding(8.dp, 0.dp),
-                            text = number.value.toString(),
+                            text = number.toString(),
                             color = MaterialTheme.colors.primary
                     )
                     if (locked.value) {
@@ -98,8 +105,7 @@ class OneOrderScreen(
                                 asset = Icons.Default.KeyboardArrowUp,
                                 onClick = {
                                     // if (locked.value) {
-                                        number.value += 1
-                                        orderViewModel.changeNumber(item.first.id, number.value)
+                                        orderViewModel.changeNumber(item.first.id, number + 1)
                                     // }
                                 })
                     }
